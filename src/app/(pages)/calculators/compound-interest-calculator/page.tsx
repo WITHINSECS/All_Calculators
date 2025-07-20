@@ -53,7 +53,7 @@ const calculateInvestment = (input: InvestmentInput): InvestmentResult => {
     const totalMonths = input.years * 12 + input.months;
     const monthlyRate = input.interestRate / 100 / compoundPerYear;
     const depositInterval = input.additionalContributions === 'deposits' ? 1 : 0;
-    let yearlyBreakdown = [];
+    const yearlyBreakdown = [];
 
     for (let month = 0; month <= totalMonths; month++) {
         if (month > 0 && month % 12 === 0) {
@@ -99,7 +99,7 @@ export default function InvestmentCalculator() {
     };
 
     const handleSelectChange = (name: string, value: string) => {
-        setInput((prev) => ({ ...prev, [name]: value === 'monthly' ? 12 : 1, additionalContributions: value as any }));
+        setInput((prev) => ({ ...prev, [name]: value === 'monthly' ? 12 : 1, additionalContributions: value }));
     };
 
     const handleCalculate = () => {

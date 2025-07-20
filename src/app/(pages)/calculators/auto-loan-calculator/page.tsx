@@ -83,7 +83,7 @@ export default function Page() {
     };
 
     const handleSelectChange = (name: string, value: string) => {
-        setInput((prev) => ({ ...prev, [name]: value as any }));
+        setInput((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleCalculate = () => {
