@@ -1,6 +1,4 @@
-import { link } from "fs";
-
-export const DATA = [
+export const DATA__FINANCE = [
     {
         title: "Home Loan EMI Calculator",
         subTitle: "Home Loan EMI Calculator",

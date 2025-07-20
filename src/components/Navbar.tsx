@@ -78,6 +78,9 @@ const Navbar = () => {
                                 <Link href="/about">
                                     <Button variant="ghost" className="w-full justify-start">About</Button>
                                 </Link>
+                                <Link href="/calculators">
+                                    <Button variant="ghost" className="w-full justify-start">Calculators</Button>
+                                </Link>
                                 <Link href="/pricing">
                                     <Button variant="ghost" className="w-full justify-start">Pricing</Button>
                                 </Link>

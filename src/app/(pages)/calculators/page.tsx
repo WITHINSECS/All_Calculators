@@ -1,7 +1,7 @@
 import Wrapper from '@/app/Wrapper'
 import CalculatorCard from '@/components/Calculators/CalculatorCard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { DATA } from '@/mock/calculators'
+import { DATA__FINANCE } from '@/mock/calculators'
 import React from 'react'
 
 const page = () => {
@@ -32,7 +32,7 @@ const page = () => {
                     <TabsContent value="finance">
                         <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-6 grid-cols-1">
                             {
-                                DATA.map((item, index) => (
+                                DATA__FINANCE.map((item, index) => (
                                     <CalculatorCard key={index} {...item} />
                                 ))
                             }
@@ -40,29 +40,17 @@ const page = () => {
                     </TabsContent>
                     <TabsContent value="health">
                         <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-6 grid-cols-1">
-                            {
-                                DATA.map((item, index) => (
-                                    <CalculatorCard key={index} {...item} />
-                                ))
-                            }
+                           
                         </div>
                     </TabsContent>
                     <TabsContent value="lifestyle">
                         <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-6 grid-cols-1">
-                            {
-                                DATA.map((item, index) => (
-                                    <CalculatorCard key={index} {...item} />
-                                ))
-                            }
+                           
                         </div>
                     </TabsContent>
                     <TabsContent value="math">
                         <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-6 grid-cols-1">
-                            {
-                                DATA.map((item, index) => (
-                                    <CalculatorCard key={index} {...item} />
-                                ))
-                            }
+                           
                         </div>
                     </TabsContent>
                 </Tabs>
