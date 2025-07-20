@@ -59,7 +59,7 @@ const calculateInvestment = (input: InvestmentInput): InvestmentResult => {
         if (month > 0 && month % 12 === 0) {
             const year = Math.floor(month / 12);
             const interest = balance * monthlyRate * compoundPerYear;
-            const accrued: number = yearlyBreakdown[year - 1]?.accrued || 0 + interest;
+            const accrued: number = (yearlyBreakdown[year - 1]?.accrued || 0) + interest;
             balance += interest;
             if (input.additionalContributions === 'deposits') {
                 const deposit = input.depositAmount * (1 + input.annualDepositIncrease / 100) ** (year - 1);
@@ -98,8 +98,20 @@ export default function InvestmentCalculator() {
         setInput((prev) => ({ ...prev, [name]: Number(value) }));
     };
 
-    const handleSelectChange = (name: string, value: string) => {
-        setInput((prev) => ({ ...prev, [name]: value === 'monthly' ? 12 : 1, additionalContributions: value }));
+    // Handle compound frequency change
+    const handleCompoundFrequencyChange = (value: string) => {
+        setInput((prev) => ({
+            ...prev,
+            compoundFrequency: value === 'monthly' ? 12 : 1,
+        }));
+    };
+
+    // Handle additional contributions change
+    const handleContributionsChange = (value: 'none' | 'deposits' | 'withdrawals' | 'both') => {
+        setInput((prev) => ({
+            ...prev,
+            additionalContributions: value,
+        }));
     };
 
     const handleCalculate = () => {
@@ -109,8 +121,7 @@ export default function InvestmentCalculator() {
 
     return (
         <Wrapper>
-            <div className="container  mx-auto p-5 lg:px-12 md:my-14 my-8">
-
+            <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8">
                 <div className="mx-auto max-w-3xl text-center mb-8">
                     <h1 className="text-2xl font-semibold lg:text-4xl">
                         Compound Interest Calculator
@@ -138,7 +149,7 @@ export default function InvestmentCalculator() {
                                     </div>
                                     <div>
                                         <label className='mb-1 block'>Compound frequency</label>
-                                        <Select onValueChange={(value) => handleSelectChange('compoundFrequency', value)} defaultValue="monthly">
+                                        <Select onValueChange={handleCompoundFrequencyChange} defaultValue="monthly">
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select frequency" />
                                             </SelectTrigger>
@@ -165,7 +176,7 @@ export default function InvestmentCalculator() {
                                 <div className="space-y-2">
                                     <div>
                                         <label className='mb-1 block'>Additional contributions</label>
-                                        <Select onValueChange={(value) => handleSelectChange('additionalContributions', value)} defaultValue="none">
+                                        <Select onValueChange={handleContributionsChange} defaultValue="none">
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select option" />
                                             </SelectTrigger>
@@ -214,13 +225,13 @@ export default function InvestmentCalculator() {
                                 <TableRow>
                                     <TableCell>Future investment value</TableCell>
                                     <TableCell className="text-right">
-                                        ${result?.futureValue.toFixed(2)}
+                                        ${result?.futureValue.toFixed(2) ?? '0.00'}
                                     </TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>Total interest earned</TableCell>
                                     <TableCell className="text-right">
-                                        ${result?.totalInterest.toFixed(2)}
+                                        ${result?.totalInterest.toFixed(2) ?? '0.00'}
                                     </TableCell>
                                 </TableRow>
                                 <TableRow>
@@ -279,7 +290,6 @@ export default function InvestmentCalculator() {
                         </div>
                     </CardContent>
                 </Card>
-
             </div>
         </Wrapper>
     );
