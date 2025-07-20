@@ -58,7 +58,7 @@ export default function InvestmentCalculator() {
                     <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label className="mb-1.5 block font-semibold">Frequency of Investment:</label>
-                            <Select value={frequency} onValueChange={(val) => setFrequency(val as any)}>
+                            <Select value={frequency} onValueChange={(val: "monthly" | "weekly" | "daily") => setFrequency(val)}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select frequency" />
                                 </SelectTrigger>

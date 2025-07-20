@@ -45,7 +45,7 @@ export default function GratuityCalculator() {
                 <div className="max-w-4xl mx-auto">
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="salary">Final month's salary + D.A.</Label>
+                            <Label htmlFor="salary">Final months salary + D.A.</Label>
                             <Input
                                 id="salary"
                                 type="number"
