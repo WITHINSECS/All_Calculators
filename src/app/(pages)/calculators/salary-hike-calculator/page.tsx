@@ -21,7 +21,7 @@ export default function SalaryCalculator() {
   const [hikePercentage, setHikePercentage] = useState(10);
   const [newSalary, setNewSalary] = useState("");
   const [result, setResult] = useState("");
-  const [salaryData, setSalaryData] = useState<any[]>([]);
+  const [salaryData, setSalaryData] = useState<{ year: number, salary: number }[]>([]);
 
   // Pie chart data
   const [pieDataSalaryHike, setPieDataSalaryHike] = useState<{ name: string, value: number }[]>([]);
