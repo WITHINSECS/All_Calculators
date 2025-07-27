@@ -32,7 +32,7 @@ const DebtCalculator = () => {
 
         // While the balance is still above 0
         while (balanceRemaining > 0) {
-            let interestForThisMonth = balanceRemaining * (interestRate / 100) / 12;
+            const interestForThisMonth = balanceRemaining * (interestRate / 100) / 12;
             let principalForThisMonth = adjustedMonthlyPayment - interestForThisMonth;
 
             if (principalForThisMonth > balanceRemaining) {
