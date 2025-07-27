@@ -30,7 +30,7 @@ export const DATA__FINANCE = [
         link: "/emi-calculator",
     },
     {
-        title: "401K Calculator",
+        title: "*401K Calculator",
         subTitle: "401K Calculator",
         description: "Estimate your 401K savings with our 401K Calculator.",
         link: "/401k-calculator",
