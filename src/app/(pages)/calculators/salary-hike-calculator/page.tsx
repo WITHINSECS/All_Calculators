@@ -60,7 +60,7 @@ export default function SalaryCalculator() {
   };
 
   const generateSalaryChart = () => {
-    let tempSalaryData = [];
+    const tempSalaryData = [];
     let tempSalary = currentSalary;
     for (let year = 1; year <= 10; year++) {
       const salaryWithHike = tempSalary + (tempSalary * hikePercentage) / 100;
