@@ -6,13 +6,13 @@ export const DATA__FINANCE = [
         link: "/home-loan-emi-calculator",
     },
     {
-        title: "Credit Card Payoff Calculator",
+        title: "*Credit Card Payoff Calculator",
         subTitle: "Credit Card Payoff Calculator",
         description: "Estimate how long it will take to pay off your credit card debt with our Credit Card Payoff Calculator.",
         link: "/credit-card-payoff-calculator",
     },
     {
-        title: "Mortgage Calculator",
+        title: "*Mortgage Calculator",
         subTitle: "Mortgage Calculator",
         description: "Calculate your mortgage payments easily with our Mortgage Calculator.",
         link: "/mortgage-calculator",

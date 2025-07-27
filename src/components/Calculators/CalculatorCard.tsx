@@ -25,8 +25,8 @@ const CalculatorCard: React.FC<CalculatorCardProps> = ({ title, subTitle, descri
                         <Calculator className='text-zinc-800' />
                     </div>
                     <div className="">
-                        <CardTitle className='line-clamp-1'>{title}</CardTitle>
-                        <CardDescription className='line-clamp-1 mt-1'>
+                        <CardTitle className='line-clamp-1 leading-6'>{title}</CardTitle>
+                        <CardDescription className='line-clamp-1'>
                             {subTitle}
                         </CardDescription>
                     </div>

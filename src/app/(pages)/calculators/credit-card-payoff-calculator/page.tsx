@@ -1,143 +1,194 @@
-"use client"
-import Wrapper from '@/app/Wrapper'
-import React, { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
+"use client";
+import Wrapper from '@/app/Wrapper';
+import React, { useState, useEffect } from "react";
+import { PieChart, Pie, Cell, Tooltip, Label as RechartsLabel } from "recharts";
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-const COLORS = ["#000", "#808080"];
+// Colors for the Pie chart
+const COLORS = ["#0D74FF", "#FF5733"];
 
-const Page = () => {
+const DebtCalculator = () => {
+    // States to hold user input
+    const [balance, setBalance] = useState(2000);
+    const [interestRate, setInterestRate] = useState(15);
+    const [monthlyPayment, setMonthlyPayment] = useState(45);
 
-    const [loanAmount, setLoanAmount] = useState(500);
-    const [monthlyPayment, setMonthlyPayment] = useState(100);
-    const [interestRate, setInterestRate] = useState(1.8);
-    const [months, setMonths] = useState<number | null>(null);
-    const [totalPayment, setTotalPayment] = useState<number | null>(null);
-    const [interestAmount, setInterestAmount] = useState<number>(0);
+    // Calculated states
+    const [numPayments, setNumPayments] = useState(0);
+    const [totalInterest, setTotalInterest] = useState(0);
+    const [totalPayment, setTotalPayment] = useState(0);
+    const [principalPaid, setPrincipalPaid] = useState(0);
+    const [interestPaid, setInterestPaid] = useState(0);
 
-    const handleCalculate = () => {
-        let balance = loanAmount;
-        let totalPaid = 0;
-        let month = 0;
+    // Function to calculate debt repayment plan
+    const calculateDebt = () => {
+        let balanceRemaining = balance;
+        let totalInterestPaid = 0;
+        let totalPrincipalPaid = 0;
+        let numPaymentsCount = 0;
+        let adjustedMonthlyPayment = monthlyPayment;
 
-        while (balance > 0) {
-            const interest = (balance * interestRate) / 100;
-            balance = balance + interest - monthlyPayment;
-            totalPaid += monthlyPayment;
-            month++;
-            if (month > 1000) break; // prevent infinite loop
+        // While the balance is still above 0
+        while (balanceRemaining > 0) {
+            let interestForThisMonth = balanceRemaining * (interestRate / 100) / 12;
+            let principalForThisMonth = adjustedMonthlyPayment - interestForThisMonth;
+
+            if (principalForThisMonth > balanceRemaining) {
+                principalForThisMonth = balanceRemaining;
+                adjustedMonthlyPayment = principalForThisMonth + interestForThisMonth; // Adjust final payment
+            }
+
+            balanceRemaining -= principalForThisMonth;
+            totalPrincipalPaid += principalForThisMonth;
+            totalInterestPaid += interestForThisMonth;
+            numPaymentsCount++;
+
+            // Break if the payment period exceeds an unreasonable number of months
+            if (numPaymentsCount > 1200) break; // Avoid infinite loops in edge cases
         }
 
-        const finalInterest = totalPaid - loanAmount;
-        setMonths(month);
-        setTotalPayment(totalPaid);
-        setInterestAmount(finalInterest);
+        setNumPayments(numPaymentsCount);
+        setTotalInterest(totalInterestPaid);
+        setTotalPayment(totalPrincipalPaid + totalInterestPaid);
+        setPrincipalPaid(totalPrincipalPaid);
+        setInterestPaid(totalInterestPaid);
     };
 
-    const handleReset = () => {
-        setLoanAmount(500);
-        setMonthlyPayment(100);
-        setInterestRate(1.8);
-        setMonths(null);
-        setTotalPayment(null);
-        setInterestAmount(0);
-    };
+    useEffect(() => {
+        calculateDebt();
+    }, [balance, interestRate, monthlyPayment]);
 
-    const data = [
-        { name: "Principal", value: loanAmount },
-        { name: "Interest & Charges", value: interestAmount },
+    // Calculate percentages for principal and interest
+    const principalPercentage = (principalPaid / totalPayment) * 100;
+    const interestPercentage = (interestPaid / totalPayment) * 100;
+
+    // Pie chart data
+    const pieData = [
+        { name: "Principal Paid", value: principalPaid, percentage: principalPercentage },
+        { name: "Interest Paid", value: interestPaid, percentage: interestPercentage },
     ];
 
     return (
         <Wrapper>
-
             <div className="mx-auto md:mt-16 p-5 mt-8 max-w-3xl text-center">
                 <h1 className="text-2xl font-semibold lg:text-4xl">
-                    Monthly Home Loan EMI Calculators
+                    Debt Repayment Calculator
                 </h1>
                 <p className="text-muted-foreground mt-4 text-xl">
-                    Explore our comprehensive range of calculators designed to assist you with various financial, health, lifestyle, and mathematical needs.
+                    This tool helps you calculate the total time and amount it will take to pay off your debt based on your balance, interest rate, and monthly payments.
                 </p>
             </div>
 
-            <div className="">
-                <div className="max-w-5xl mx-auto p-4 md:mb-16 my-6  space-y-6">
-                    <Card>
-                        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
-                            <div>
-                                <Label>Outstanding Loan Amount</Label>
-                                <Input
-                                    type="number"
-                                    value={loanAmount}
-                                    className='mt-2'
-                                    onChange={(e) => setLoanAmount(Number(e.target.value))}
-                                />
-                            </div>
-                            <div>
-                                <Label>Monthly Payment</Label>
-                                <Input
-                                    type="number"
-                                    value={monthlyPayment}
-                                    className='mt-2'
-                                    onChange={(e) => setMonthlyPayment(Number(e.target.value))}
-                                />
-                            </div>
-                            <div>
-                                <Label>Monthly Interest Rate (%)</Label>
-                                <Input
-                                    type="number"
-                                    value={interestRate}
-                                    className='mt-2'
-                                    onChange={(e) => setInterestRate(Number(e.target.value))}
-                                />
-                            </div>
-                            <div className="md:col-span-3 flex gap-4">
-                                <Button onClick={handleCalculate}>Submit</Button>
-                                <Button variant="outline" onClick={handleReset}>Reset</Button>
-                            </div>
-                        </CardContent>
-                    </Card>
+            <div className="max-w-6xl lg:px-12 w-full mx-auto p-4">
+                {/* Inputs for user to change values */}
+                <div className="flex items-center justify-center gap-6 md:flex-row flex-col w-full mb-6">
+                    <div className="md:w-[60%] space-y-6 w-full">
+                        <div>
+                            <Label className='black mb-1.5' htmlFor="balance">Credit Card Balance</Label>
+                            <Input
+                                type="number"
+                                id="balance"
+                                value={balance}
+                                onChange={(e) => setBalance(Number(e.target.value))}
+                                className="w-full"
+                            />
+                        </div>
 
-                    <Card>
-                        <CardContent className="p-6">
-                            <div className="flex flex-col md:flex-row justify-between items-center">
-                                <div className="text-lg space-y-2">
-                                    <div>
-                                        <strong>No of months required to Payoff Loan:</strong> {months} months
-                                    </div>
-                                    <div>
-                                        <strong>Total Payment:</strong> ₹{totalPayment?.toFixed(2)}
-                                    </div>
-                                </div>
-                                <PieChart width={250} height={250}>
-                                    <Pie
-                                        data={data}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={95}
-                                        fill="#8884d8"
-                                        paddingAngle={2}
-                                        dataKey="value"
-                                        label
-                                    >
-                                        {data.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                    <Legend />
-                                </PieChart>
-                            </div>
-                        </CardContent>
-                    </Card>
+                        <div>
+                            <Label className='black mb-1.5' htmlFor="interest">Interest Rate (APR)</Label>
+                            <Input
+                                type="number"
+                                id="interest"
+                                value={interestRate}
+                                onChange={(e) => setInterestRate(Number(e.target.value))}
+                                className="w-full"
+                            />
+                        </div>
+
+                        <div>
+                            <Label className='black mb-1.5' htmlFor="payment">Monthly Payment</Label>
+                            <Input
+                                type="number"
+                                id="payment"
+                                value={monthlyPayment}
+                                onChange={(e) => setMonthlyPayment(Number(e.target.value))}
+                                className="w-full"
+                            />
+                        </div>
+                    </div>
+                    <div className="md:w-[40%] flex justify-center items-center">
+                        <PieChart width={200} height={200}>
+                            <Pie
+                                data={pieData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={90}
+                                fill="#8884d8"
+                                paddingAngle={5}
+                                dataKey="value"
+                            >
+                                {pieData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            {/* Displaying percentages in the center of the pie chart */}
+                            <RechartsLabel value={`${principalPercentage.toFixed(1)}%`} position="center" fontSize={16} fill="#0D74FF" />
+                        </PieChart>
+                    </div>
+                </div>
+
+                {/* Results - Table */}
+                <div className="text-center mb-6 md:mt-20 mt-10">
+                    <h3 className="font-semibold text-2xl mb-4">Repayment Details</h3>
+
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="text-left">Detail</TableHead>
+                                    <TableHead className="">Value</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody className='text-start'>
+                                <TableRow>
+                                    <TableCell className="font-medium">You will pay off your debt by</TableCell>
+                                    <TableCell>January {new Date().getFullYear() + 6}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell className="font-medium">Number of payments</TableCell>
+                                    <TableCell>{numPayments}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell className="font-medium">Estimated monthly payment</TableCell>
+                                    <TableCell>${monthlyPayment.toFixed(2)}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell className="font-medium">Total interest paid</TableCell>
+                                    <TableCell>${totalInterest.toFixed(2)}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell className="font-medium">Total payments</TableCell>
+                                    <TableCell>${totalPayment.toFixed(2)}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell className="font-medium">Principal paid (%)</TableCell>
+                                    <TableCell>{principalPercentage.toFixed(1)}%</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell className="font-medium">Interest paid (%)</TableCell>
+                                    <TableCell>{interestPercentage.toFixed(1)}%</TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </div>
                 </div>
             </div>
         </Wrapper>
-    )
-}
+    );
+};
 
-export default Page
+export default DebtCalculator;
