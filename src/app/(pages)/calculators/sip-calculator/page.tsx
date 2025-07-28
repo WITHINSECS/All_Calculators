@@ -34,7 +34,7 @@ export default function InvestmentCalculator() {
       return;
     }
 
-    let n = frequencies[frequency]; // Get frequency value
+    const n = frequencies[frequency]; // Get frequency value
     const totalInstallments = n * T;
     const i = R / n;
 

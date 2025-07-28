@@ -9,6 +9,14 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import Wrapper from '@/app/Wrapper';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
+// Define the colors for the pie chart
+const COLORS = ["#0D74FF", "#FF5733"]; // Blue for net salary, Green for tax deducted
+
+interface PieData {
+  name: string;
+  value: number;
+}
+
 const SalaryToHourlyCalculator = () => {
   const [currency, setCurrency] = useState("$");
   const [annualSalary, setAnnualSalary] = useState(1664000);
@@ -21,7 +29,7 @@ const SalaryToHourlyCalculator = () => {
   const [grossMonthly, setGrossMonthly] = useState(0);
   const [netMonthly, setNetMonthly] = useState(0);
 
-  const [pieData, setPieData] = useState<any[]>([]);
+  const [pieData, setPieData] = useState<PieData[]>([]);
 
   useEffect(() => {
     const totalHours = weeksPerYear * hoursPerWeek;

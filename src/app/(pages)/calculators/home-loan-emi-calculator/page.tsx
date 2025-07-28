@@ -4,7 +4,6 @@ import { useState, useMemo } from "react"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
-import Link from 'next/link'
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts'
 
 const Page = () => {
@@ -14,7 +13,7 @@ const Page = () => {
     const [calculate, setCalculate] = useState(false)  // State to trigger calculation
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<number>>) => {
-        let value = e.target.value.replace(/,/g, '')  // Remove commas for input
+        const value = e.target.value.replace(/,/g, '')  // Remove commas for input
         if (value === '' || !isNaN(Number(value))) {
             setter(Number(value))
         }

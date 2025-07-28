@@ -131,7 +131,7 @@ export default function RetirementIncomeCalculator() {
           </div>
 
           <div>
-            <Label className="black mb-1.5" htmlFor="annualContribution">What's your annual savings contribution?</Label>
+            <Label className="black mb-1.5" htmlFor="annualContribution">Whats your annual savings contribution?</Label>
             <Input
               id="annualContribution"
               type="number"
@@ -141,7 +141,7 @@ export default function RetirementIncomeCalculator() {
           </div>
 
           <div>
-            <Label className="black mb-1.5" htmlFor="currentAge">What's your current age?</Label>
+            <Label className="black mb-1.5" htmlFor="currentAge">Whats your current age?</Label>
             <Input
               id="currentAge"
               type="number"

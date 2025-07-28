@@ -6,15 +6,24 @@ import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Wrapper from "@/app/Wrapper";
 
+// Frequency options for investment
 const frequencies = {
   monthly: 12,
   weekly: 52,
   daily: 365,
 };
+
+// Define the type for the chart data
+interface ChartData {
+  month: string;
+  deposits: number;
+  interest: number;
+  balance: number;
+}
 
 export default function SavingsCalculator() {
   const [currency, setCurrency] = useState("$");
@@ -25,7 +34,7 @@ export default function SavingsCalculator() {
   const [interest, setInterest] = useState("");
   const [result, setResult] = useState<string | null>(null);
 
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartData[]>([]); // Use the defined ChartData type
 
   const [yearsToGoal, setYearsToGoal] = useState<number | null>(null);
   const [monthsToGoal, setMonthsToGoal] = useState<number | null>(null);
@@ -50,11 +59,10 @@ export default function SavingsCalculator() {
     let months = 0;
     let total = current;
     const r = annualRate / compounding;
-    let totalContributions = current; // Starting balance
     let totalInterest = 0;
     let depositAccumulated = 0;
 
-    const tempChartData: any[] = [];
+    const tempChartData: ChartData[] = []; // Use the defined ChartData type
 
     while (total < target && months < 1000 * compounding) {
       const interestEarned = total * r;

@@ -1,20 +1,19 @@
 "use client";
 
-import { Label } from "@/components/ui/label";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Wrapper from "@/app/Wrapper";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+
+// Define the type for chart data
+interface ChartData {
+  month: string;
+  amount: number;
+}
 
 export default function VATCalculator() {
   const [amount, setAmount] = useState(200);
@@ -23,7 +22,9 @@ export default function VATCalculator() {
   const [vatExcluded, setVatExcluded] = useState<number>(0);
   const [netAmount, setNetAmount] = useState<number>(0);
   const [grossAmount, setGrossAmount] = useState<number>(0);
-  const [chartData, setChartData] = useState<any[]>([]);
+
+  // Change chartData to a specific type
+  const [chartData, setChartData] = useState<ChartData[]>([]);
 
   // Handle calculation for VAT excluding or adding
   const calculateVAT = () => {
@@ -32,7 +33,7 @@ export default function VATCalculator() {
       return;
     }
 
-    let tempChartData: any[] = [];
+    const tempChartData: ChartData[] = [];
     if (operation === "exclude") {
       const vatAmount = (amount * vatPercentage) / 100;
       setVatExcluded(vatAmount);

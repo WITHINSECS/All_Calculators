@@ -62,7 +62,7 @@ export default function Page() {
                         Free GST Calculator
                     </h1>
                     <p className="text-muted-foreground mt-4 md:text-lg">
-                        Introduces a free GST calculator made just for small businesses! With this tool, you'll be able to calculate GST in minutes without any complex math.
+                        Introduces a free GST calculator made just for small businesses! With this tool, youll be able to calculate GST in minutes without any complex math.
                     </p>
                 </div>
                 <div className="max-w-4xl mx-auto">
