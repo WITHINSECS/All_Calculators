@@ -23,10 +23,10 @@ const page = () => {
                 <Tabs defaultValue="finance" className="max-w-7xl w-full mx-auto">
                     <div className="flex mb-8 items-center justify-center">
                         <TabsList className=''>
-                            <TabsTrigger value="finance">Finance Calculator</TabsTrigger>
-                            <TabsTrigger value="health">Health Calculator</TabsTrigger>
-                            <TabsTrigger value="lifestyle">Lifestyle Calculator</TabsTrigger>
-                            <TabsTrigger value="math">Math Calculator</TabsTrigger>
+                            <TabsTrigger value="finance">Finance <span className='md:inline-block hidden'>Calculator</span></TabsTrigger>
+                            <TabsTrigger value="health">Health <span className='md:inline-block hidden'>Calculator</span></TabsTrigger>
+                            <TabsTrigger value="lifestyle">Lifestyle <span className='md:inline-block hidden'>Calculator</span></TabsTrigger>
+                            <TabsTrigger value="math">Math <span className='md:inline-block hidden'>Calculator</span></TabsTrigger>
                         </TabsList>
                     </div>
                     <TabsContent value="finance">

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 import {
     Card,
     CardContent,
@@ -30,6 +30,13 @@ import {
 } from "recharts";
 import { Label } from "@/components/ui/label";
 import Wrapper from '@/app/Wrapper';
+import {
+    PieChart,
+    Pie,
+    Cell,
+    Tooltip as PieTooltip,
+    ResponsiveContainer as PieResponsiveContainer,
+} from "recharts";
 
 interface LoanInput {
     loanAmount: number;
@@ -93,8 +100,7 @@ export default function Page() {
 
     return (
         <Wrapper>
-            <div className="container  mx-auto p-5 lg:px-12 md:my-14 my-8">
-
+            <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8">
                 <div className="mx-auto max-w-3xl text-center mb-8">
                     <h1 className="text-2xl font-semibold lg:text-4xl">
                         Auto Loan Calculator
@@ -103,58 +109,52 @@ export default function Page() {
                         Explore our comprehensive range of calculators designed to assist you with various financial, health, lifestyle, and mathematical needs.
                     </p>
                 </div>
+
                 <Card>
                     <CardHeader>
                         <CardTitle>Loan Calculator</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
-                            <div>
-                                <Label>How much are you looking to borrow?</Label>
-                                <Input className='mt-2 mb-3' name="loanAmount" value={input.loanAmount} onChange={handleChange} />
-                            </div>
-                            <div>
-                                <Label className='block mb-2'>For how long?</Label>
-                                <Select onValueChange={(value) => handleSelectChange('loanTerm', value)} defaultValue="60">
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select term" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="60">60 Months</SelectItem>
-                                        <SelectItem value="48">48 Months</SelectItem>
-                                        <SelectItem value="36">36 Months</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div>
-                                <Label className='block mb-2'>Is your vehicle new or used?</Label>
-                                <Select onValueChange={(value) => handleSelectChange('vehicleType', value)} defaultValue="used">
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="new">New</SelectItem>
-                                        <SelectItem value="used">Used</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div>
-                                <Label>Interest rate</Label>
-                                <div className="flex mt-2 mb-3 space-x-2">
-                                    <Input className='' name="interestRate" value={input.interestRate} onChange={handleChange} />
-                                    <Select onValueChange={() => { }} defaultValue="manual">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label>Loan Amount</Label>
+                                    <Input className="mt-2 mb-3" name="loanAmount" value={input.loanAmount} onChange={handleChange} />
+                                </div>
+                                <div>
+                                    <Label className="block mb-2">Loan Term</Label>
+                                    <Select onValueChange={(value) => handleSelectChange('loanTerm', value)} defaultValue="60">
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Find A Rate" />
+                                            <SelectValue placeholder="Select term" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="manual">Manual</SelectItem>
-                                            <SelectItem value="find">Find A Rate</SelectItem>
+                                            <SelectItem value="60">60 Months</SelectItem>
+                                            <SelectItem value="48">48 Months</SelectItem>
+                                            <SelectItem value="36">36 Months</SelectItem>
+                                            <SelectItem value="72">72 Months</SelectItem>
+                                            <SelectItem value="84">84 Months</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
+                                <div>
+                                    <Label className="block mb-2">Is your vehicle new or used?</Label>
+                                    <Select onValueChange={(value) => handleSelectChange('vehicleType', value)} defaultValue="used">
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="new">New</SelectItem>
+                                            <SelectItem value="used">Used</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Label>Interest rate</Label>
+                                    <Input className="mt-2 mb-3" name="interestRate" value={input.interestRate} onChange={handleChange} />
+                                </div>
                             </div>
                             <div className="flex justify-end space-x-2">
-                                <Button className='w-full p-5' onClick={handleCalculate}>Calculate</Button>
+                                <Button className="w-full p-5" onClick={handleCalculate}>Calculate</Button>
                             </div>
                         </div>
                     </CardContent>
@@ -181,6 +181,32 @@ export default function Page() {
                             <Button variant="link">Compare Loan Rates</Button>
                             <Button variant="link">See amortization schedule</Button>
                         </div>
+
+                        {/* Pie Chart for Principal vs Interest */}
+                        <div className="mt-4 flex justify-center">
+                            <PieResponsiveContainer width="100%" height={300}>
+                                <PieChart>
+                                    <Pie
+                                        data={[
+                                            { name: "Principal", value: input.loanAmount },
+                                            { name: "Interest", value: result?.totalInterest || 0 },
+                                        ]}
+                                        dataKey="value"
+                                        nameKey="name"
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={100}
+                                        label
+                                    >
+                                        <Cell fill="#3498db" />
+                                        <Cell fill="#e74c3c" />
+                                    </Pie>
+                                    <PieTooltip />
+                                </PieChart>
+                            </PieResponsiveContainer>
+                        </div>
+
+                        {/* Line Chart */}
                         <ResponsiveContainer width="100%" height={300}>
                             <LineChart data={result?.amortizationSchedule}>
                                 <CartesianGrid strokeDasharray="3 3" />
@@ -193,6 +219,8 @@ export default function Page() {
                                 <Line type="monotone" dataKey="principal" stroke="#e74c3c" name="Principal" />
                             </LineChart>
                         </ResponsiveContainer>
+
+                        {/* Amortization Schedule Table */}
                         <div className="mt-4">
                             <h4>Amortization Schedule</h4>
                             <Table>
@@ -218,7 +246,6 @@ export default function Page() {
                         </div>
                     </CardContent>
                 </Card>
-
             </div>
         </Wrapper>
     );

@@ -5,30 +5,99 @@ import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
 import Link from 'next/link'
+import {
+    PieChart,
+    Pie,
+    Cell,
+    ResponsiveContainer,
+    Legend,
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ReferenceLine,
+} from "recharts"
+
+// Define the type for line chart data
+interface LineChartData {
+    month: number;
+    principalPaid: number;
+    interestPaid: number;
+}
+
+const COLORS = ["#0D74FF", "#FF5733"]
 
 const Page = () => {
-
     const [amount, setAmount] = useState(2500000)
     const [tenure, setTenure] = useState(30)
     const [rate, setRate] = useState(7.9)
+    const [emi, setEmi] = useState(0)
+    const [totalPayment, setTotalPayment] = useState(0)
+    const [interestPayable, setInterestPayable] = useState(0)
+    const [lineChartData, setLineChartData] = useState<LineChartData[]>([]) // Define state type
 
-    const EMI = useMemo(() => {
-        const principal = amount
+    // Function to calculate EMI, total interest, total amount payable, and line chart data
+    const calculateLoan = () => {
         const r = rate / (12 * 100)
         const n = tenure * 12
-        const emi = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
-        return Math.round(emi)
-    }, [amount, rate, tenure])
+        const emiValue = (amount * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
+        setEmi(Math.round(emiValue))
 
-    const totalPayment = EMI * tenure * 12
-    const interestPayable = totalPayment - amount
+        const totalPaymentValue = emiValue * tenure * 12
+        setTotalPayment(totalPaymentValue)
+
+        const interestPayableValue = totalPaymentValue - amount
+        setInterestPayable(interestPayableValue)
+
+        // Generate data for Line Chart: Cumulative principal and interest paid over time
+        let principalPaid = 0
+        let interestPaid = 0
+        const chartData: LineChartData[] = [] // Create a new array for chart data
+        for (let i = 1; i <= n; i++) {
+            const interestForThisMonth = amount * r
+            const principalForThisMonth = emiValue - interestForThisMonth
+            principalPaid += principalForThisMonth
+            interestPaid += interestForThisMonth
+            chartData.push({
+                month: i,
+                principalPaid: principalPaid,
+                interestPaid: interestPaid,
+            })
+        }
+        setLineChartData(chartData) // Set the line chart data
+    }
+
+    // Pie chart data
+    const data = [
+        { name: "Principal amount", value: amount },
+        { name: "Interest amount", value: interestPayable },
+    ]
+
+    // Handle Loan Amount input change
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseInt(e.target.value.replace(/[^0-9]/g, ''))
+        if (!isNaN(value)) setAmount(value)
+    }
+
+    // Handle Tenure input change
+    const handleTenureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseInt(e.target.value)
+        if (!isNaN(value)) setTenure(value)
+    }
+
+    // Handle Interest Rate input change
+    const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseFloat(e.target.value)
+        if (!isNaN(value)) setRate(value)
+    }
 
     return (
         <Wrapper>
-
             <div className="mx-auto md:mt-16 p-5 mt-8 max-w-3xl text-center">
                 <h1 className="text-2xl font-semibold lg:text-4xl">
-                    Monthly Home Loan EMI Calculators
+                    Monthly Home Loan EMI Calculator
                 </h1>
                 <p className="text-muted-foreground mt-4 text-xl">
                     Explore our comprehensive range of calculators designed to assist you with various financial, health, lifestyle, and mathematical needs.
@@ -55,7 +124,7 @@ const Page = () => {
                         <Input
                             type="text"
                             value={`₹ ${amount.toLocaleString()}`}
-                            readOnly
+                            onChange={handleAmountChange}
                             className="mt-2"
                         />
                     </div>
@@ -74,7 +143,12 @@ const Page = () => {
                             <span>1</span>
                             <span>30</span>
                         </div>
-                        <Input type="text" value={tenure} readOnly className="mt-2 w-24" />
+                        <Input
+                            type="text"
+                            value={tenure}
+                            onChange={handleTenureChange}
+                            className="mt-2 w-24"
+                        />
                     </div>
 
                     {/* Interest Rate */}
@@ -91,16 +165,22 @@ const Page = () => {
                             <span>0.5</span>
                             <span>15</span>
                         </div>
-                        <Input type="text" value={`${rate}%`} readOnly className="mt-2 w-24" />
+                        <Input
+                            type="text"
+                            value={`${rate}%`}
+                            onChange={handleRateChange}
+                            className="mt-2 w-24"
+                        />
                     </div>
+
+                    <Button onClick={calculateLoan} className="w-full mt-4">Calculate</Button>
                 </div>
 
                 {/* Right Side */}
                 <div className="space-y-6">
                     <div>
                         <p className="text-muted-foreground text-sm">Monthly Home Loan EMI</p>
-                        <h2 className="text-3xl font-bold text-primary">₹{EMI.toLocaleString()}</h2>
-                        <Button variant="link" className="text-sm p-0">View Details</Button>
+                        <h2 className="text-3xl font-bold text-primary">₹{emi.toLocaleString()}</h2>
                     </div>
 
                     <div className="space-y-2 text-sm">
@@ -118,11 +198,52 @@ const Page = () => {
                         </div>
                     </div>
 
-                    <div className="pt-4">
-                        <p className="text-sm text-muted-foreground mb-2">Need more information?</p>
-                        <Link href={"/contact"}>
-                            <Button>Talk To Our Loan Expert</Button>
-                        </Link>
+                    {/* Pie Chart */}
+                    <div className="h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={data}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={90}
+                                    fill="#8884d8"
+                                    dataKey="value"
+                                    labelLine={true}
+                                >
+                                    {data.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Legend />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+
+                    {/* Line Chart */}
+                    <div className="h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={lineChartData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="month" />
+                                <YAxis />
+                                <Tooltip />
+                                <Line
+                                    type="monotone"
+                                    dataKey="principalPaid"
+                                    stroke="#0D74FF"
+                                    activeDot={{ r: 8 }}
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="interestPaid"
+                                    stroke="#FF5733"
+                                    activeDot={{ r: 8 }}
+                                />
+                                <ReferenceLine y={0} stroke="#000" />
+                            </LineChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
             </div>

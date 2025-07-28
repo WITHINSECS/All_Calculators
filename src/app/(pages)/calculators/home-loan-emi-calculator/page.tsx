@@ -5,27 +5,40 @@ import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
 import Link from 'next/link'
+import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts'
 
 const Page = () => {
-
     const [amount, setAmount] = useState(2500000)
     const [tenure, setTenure] = useState(30)
     const [rate, setRate] = useState(7.9)
+    const [calculate, setCalculate] = useState(false)  // State to trigger calculation
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<number>>) => {
+        let value = e.target.value.replace(/,/g, '')  // Remove commas for input
+        if (value === '' || !isNaN(Number(value))) {
+            setter(Number(value))
+        }
+    }
 
     const EMI = useMemo(() => {
+        if (!calculate) return 0
         const principal = amount
         const r = rate / (12 * 100)
         const n = tenure * 12
         const emi = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
         return Math.round(emi)
-    }, [amount, rate, tenure])
+    }, [amount, rate, tenure, calculate])
 
     const totalPayment = EMI * tenure * 12
     const interestPayable = totalPayment - amount
 
+    const chartData = [
+        { name: 'Principal Amount', value: amount },
+        { name: 'Interest Payable', value: interestPayable }
+    ]
+
     return (
         <Wrapper>
-
             <div className="mx-auto md:mt-16 p-5 mt-8 max-w-3xl text-center">
                 <h1 className="text-2xl font-semibold lg:text-4xl">
                     Monthly Home Loan EMI Calculators
@@ -54,8 +67,8 @@ const Page = () => {
                         </div>
                         <Input
                             type="text"
-                            value={`₹ ${amount.toLocaleString()}`}
-                            readOnly
+                            value={amount.toLocaleString()} // Format value with commas
+                            onChange={(e) => handleInputChange(e, setAmount)}  // Allow editing the number
                             className="mt-2"
                         />
                     </div>
@@ -74,7 +87,12 @@ const Page = () => {
                             <span>1</span>
                             <span>30</span>
                         </div>
-                        <Input type="text" value={tenure} readOnly className="mt-2 w-24" />
+                        <Input
+                            type="number"
+                            value={tenure}
+                            onChange={(e) => handleInputChange(e, setTenure)}
+                            className="mt-2 w-24"
+                        />
                     </div>
 
                     {/* Interest Rate */}
@@ -91,7 +109,19 @@ const Page = () => {
                             <span>0.5</span>
                             <span>15</span>
                         </div>
-                        <Input type="text" value={`${rate}%`} readOnly className="mt-2 w-24" />
+                        <Input
+                            type="number"
+                            value={rate}
+                            onChange={(e) => handleInputChange(e, setRate)}
+                            className="mt-2 w-24"
+                        />
+                    </div>
+
+                    {/* Calculate Button */}
+                    <div>
+                        <Button onClick={() => setCalculate(true)} className="w-full mt-4">
+                            Calculate
+                        </Button>
                     </div>
                 </div>
 
@@ -118,11 +148,24 @@ const Page = () => {
                         </div>
                     </div>
 
-                    <div className="pt-4">
-                        <p className="text-sm text-muted-foreground mb-2">Need more information?</p>
-                        <Link href={"/contact"}>
-                            <Button>Talk To Our Loan Expert</Button>
-                        </Link>
+                    {/* Pie Chart */}
+                    <div>
+                        <PieChart width={400} height={400}>
+                            <Pie
+                                data={chartData}
+                                dataKey="value"
+                                nameKey="name"
+                                outerRadius={120}
+                                fill="#8884d8"
+                                label
+                            >
+                                {chartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={index === 0 ? "#82ca9d" : "#ff7300"} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend />
+                        </PieChart>
                     </div>
                 </div>
             </div>

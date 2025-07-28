@@ -1,16 +1,27 @@
 "use client";
-import { Label } from "@/components/ui/label";
+
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Wrapper from "@/app/Wrapper";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import { PieChart, Pie, Cell, Tooltip as PieTooltip } from "recharts";
 
 // Colors for the Pie chart
@@ -22,12 +33,15 @@ export default function SalaryCalculator() {
   const [newSalary, setNewSalary] = useState("");
   const [result, setResult] = useState("");
   const [salaryData, setSalaryData] = useState<{ year: number, salary: number }[]>([]);
-  // Pie chart data
 
   // Pie chart data
   const [pieDataSalaryHike, setPieDataSalaryHike] = useState<{ name: string, value: number }[]>([]);
   const [pieDataHikePercentage, setPieDataHikePercentage] = useState<{ name: string, value: number }[]>([]);
 
+  // Error message state
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Function to calculate salary with hike
   const calculateSalaryByHike = () => {
     const hikeAmount = (currentSalary * hikePercentage) / 100;
     setResult(`Your new salary after the hike is: ${Math.round(currentSalary + hikeAmount)}`);
@@ -35,16 +49,32 @@ export default function SalaryCalculator() {
     generatePieChartSalaryHike(hikeAmount);
   };
 
+  // Function to calculate hike percentage from salary
   const calculateHikeBySalary = () => {
-    const percentage = ((Number(newSalary) - currentSalary) / currentSalary) * 100;
+    const percentage = ((parseFloat(newSalary) - currentSalary) / currentSalary) * 100;
     setResult(`Your hike percentage is: ${percentage.toFixed(2)}%`);
     generatePieChartHikePercentage();
   };
 
+  // Handle calculation based on input
   const handleCalculate = () => {
-    if (currentSalary && hikePercentage && !newSalary) {
+    // Check for empty fields and display alert if any field is empty
+    if (currentSalary < 1) {
+      setErrorMessage("Please enter a valid current salary.");
+      return;
+    } else if (hikePercentage < 1 && !newSalary) {
+      setErrorMessage("Please enter a valid hike percentage or new salary.");
+      return;
+    } else if (newSalary && parseFloat(newSalary) <= 0) {
+      setErrorMessage("Please enter a valid new salary.");
+      return;
+    } else {
+      setErrorMessage(""); // Clear error message
+    }
+
+    if (currentSalary >= 1 && hikePercentage >= 1 && !newSalary) {
       calculateSalaryByHike();
-    } else if (currentSalary && newSalary) {
+    } else if (currentSalary >= 1 && newSalary) {
       calculateHikeBySalary();
     }
   };
@@ -57,8 +87,10 @@ export default function SalaryCalculator() {
     setSalaryData([]);
     setPieDataSalaryHike([]);
     setPieDataHikePercentage([]);
+    setErrorMessage(""); // Clear error message
   };
 
+  // Generate salary data for the chart
   const generateSalaryChart = () => {
     const tempSalaryData = [];
     let tempSalary = currentSalary;
@@ -82,7 +114,7 @@ export default function SalaryCalculator() {
 
   const generatePieChartHikePercentage = () => {
     const oldSalary = currentSalary;
-    const newSalaryVal = Number(newSalary);
+    const newSalaryVal = parseFloat(newSalary); // Ensure we compare numbers
     const hikeAmount = newSalaryVal - oldSalary;
 
     setPieDataHikePercentage([
@@ -90,6 +122,40 @@ export default function SalaryCalculator() {
       { name: "Hike", value: hikeAmount },
     ]);
   };
+
+  // Prevent entering less than 1 for salary or hike percentage
+  const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Math.max(1, parseFloat(e.target.value)); // Ensuring no less than 1
+    setCurrentSalary(value);
+  };
+
+  const handleHikePercentageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Math.max(1, parseFloat(e.target.value)); // Ensuring no less than 1
+    setHikePercentage(value);
+  };
+
+  const handleNewSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Ensure valid number or empty string
+    if (value === "" || !isNaN(parseFloat(value))) {
+      setNewSalary(value);
+    }
+  };
+
+  // Disable calculate button if fields are empty or invalid
+  const isCalculateDisabled =
+    currentSalary < 1 ||
+    hikePercentage < 1 ||
+    (newSalary === "" && !hikePercentage);
+
+  // useEffect hook to re-calculate when any relevant input changes
+  useEffect(() => {
+    if (currentSalary >= 1 && hikePercentage >= 1 && !newSalary) {
+      calculateSalaryByHike();
+    } else if (currentSalary >= 1 && newSalary) {
+      calculateHikeBySalary();
+    }
+  }, [currentSalary, hikePercentage, newSalary]);
 
   return (
     <Wrapper>
@@ -115,7 +181,7 @@ export default function SalaryCalculator() {
                       id="currentSalary"
                       type="number"
                       value={currentSalary}
-                      onChange={(e) => setCurrentSalary(Number(e.target.value))}
+                      onChange={handleSalaryChange}
                     />
                   </div>
                   <div className="space-y-2">
@@ -124,14 +190,20 @@ export default function SalaryCalculator() {
                       id="hikePercentage"
                       type="number"
                       value={hikePercentage}
-                      onChange={(e) => setHikePercentage(Number(e.target.value))}
+                      onChange={handleHikePercentageChange}
                     />
                   </div>
                 </div>
                 <div className="flex space-x-4">
-                  <Button onClick={handleCalculate}>Calculate</Button>
+                  <Button onClick={handleCalculate} disabled={isCalculateDisabled}>Calculate</Button>
                   <Button variant="outline" onClick={handleClear}>Clear</Button>
                 </div>
+
+                {/* Display error message if any field is empty */}
+                {errorMessage && (
+                  <div className="mt-4 p-4 bg-red-300 text-white rounded">{errorMessage}</div>
+                )}
+
                 {result && <div className="mt-4 p-4 bg-gray-200 rounded">{result}</div>}
 
                 {salaryData.length > 0 && (
@@ -184,7 +256,7 @@ export default function SalaryCalculator() {
                       id="currentSalary2"
                       type="number"
                       value={currentSalary}
-                      onChange={(e) => setCurrentSalary(Number(e.target.value))}
+                      onChange={handleSalaryChange}
                     />
                   </div>
                   <div className="space-y-2">
@@ -193,14 +265,20 @@ export default function SalaryCalculator() {
                       id="newSalary"
                       type="number"
                       value={newSalary}
-                      onChange={(e) => setNewSalary(e.target.value)}
+                      onChange={handleNewSalaryChange}
                     />
                   </div>
                 </div>
                 <div className="flex space-x-4">
-                  <Button onClick={handleCalculate}>Calculate</Button>
+                  <Button onClick={handleCalculate} disabled={isCalculateDisabled}>Calculate</Button>
                   <Button variant="outline" onClick={handleClear}>Clear</Button>
                 </div>
+
+                {/* Display error message if any field is empty */}
+                {errorMessage && (
+                  <div className="mt-4 p-4 bg-red-300 text-white rounded">{errorMessage}</div>
+                )}
+
                 {result && <div className="mt-4 p-4 bg-gray-200 rounded">{result}</div>}
 
                 {/* Pie Chart for Hike Percentage */}

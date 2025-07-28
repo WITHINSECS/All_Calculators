@@ -1,73 +1,94 @@
-"use client";
-import Wrapper from '@/app/Wrapper';
-import { useState } from 'react';
-import { Slider } from "@/components/ui/slider";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Button } from '@/components/ui/button';
+"use client"
+import Wrapper from '@/app/Wrapper'
+import { useState } from 'react'
+import { Slider } from "@/components/ui/slider"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { Button } from '@/components/ui/button'
+import {
+    PieChart,
+    Pie,
+    Cell,
+    Legend as PieLegend,
+    ResponsiveContainer as PieResponsiveContainer,
+} from "recharts"
 
 // Define the colors for the lines and pie chart
-const COLORS = ["#0D74FF", "#FF5733"]; // Blue for with employer match, Green for without employer match
+const COLORS = ["#0D74FF", "#FF5733"] // Blue for employee contribution, Green for employer contribution
 
 const RetirementCalculator = () => {
     // States to hold user input and calculated values
-    const [salary, setSalary] = useState(40000);
-    const [monthlyContribution, setMonthlyContribution] = useState(10); // Percentage of salary
-    const [salaryIncrease, setSalaryIncrease] = useState(0);
-    const [currentAge, setCurrentAge] = useState(30);
-    const [retirementAge, setRetirementAge] = useState(65);
-    const [rateOfReturn, setRateOfReturn] = useState(7);
-    const [current401k, setCurrent401k] = useState(0);
-    const [employerMatch, setEmployerMatch] = useState(50);
-    const [salaryLimit, setSalaryLimit] = useState(6);
+    const [salary, setSalary] = useState(40000)
+    const [monthlyContribution, setMonthlyContribution] = useState(10) // Percentage of salary
+    const [salaryIncrease, setSalaryIncrease] = useState(0)
+    const [currentAge, setCurrentAge] = useState(30)
+    const [retirementAge, setRetirementAge] = useState(65)
+    const [rateOfReturn, setRateOfReturn] = useState(7)
+    const [current401k, setCurrent401k] = useState(0)
+    const [employerMatch, setEmployerMatch] = useState(50)
+    const [salaryLimit, setSalaryLimit] = useState(6)
 
-    const [estimatedRetirement, setEstimatedRetirement] = useState(0);
-    const [employeeContributions, setEmployeeContributions] = useState(0);
-    const [employerContributions, setEmployerContributions] = useState(0);
+    const [estimatedRetirement, setEstimatedRetirement] = useState(0)
+    const [employeeContributions, setEmployeeContributions] = useState(0)
+    const [employerContributions, setEmployerContributions] = useState(0)
 
     // Explicitly define the type of the employeeData and employerData state
-    const [employeeData, setEmployeeData] = useState<{ age: number; savings: number }[]>([]);
-    const [employerData, setEmployerData] = useState<{ age: number; savings: number }[]>([]);
+    const [employeeData, setEmployeeData] = useState<{ age: number; savings: number }[]>([])
+    const [employerData, setEmployerData] = useState<{ age: number; savings: number }[]>([])
 
     // Function to calculate retirement value with and without employer match
     const calculateRetirement = () => {
-        const yearsToRetirement = retirementAge - currentAge;
-        let employeeBalance = current401k;
-        let employerBalance = current401k;
-        let employeeContributionTotal = 0;
-        let employerContributionTotal = 0;
+        const yearsToRetirement = retirementAge - currentAge
+        let employeeBalance = current401k
+        let employerBalance = current401k
+        let employeeContributionTotal = 0
+        let employerContributionTotal = 0
 
-        let salaryAtStart = salary;
+        let salaryAtStart = salary
 
-        const employeeDataArray: { age: number; savings: number }[] = [];
-        const employerDataArray: { age: number; savings: number }[] = [];
+        const employeeDataArray: { age: number; savings: number }[] = []
+        const employerDataArray: { age: number; savings: number }[] = []
 
         for (let age = currentAge; age <= retirementAge; age++) {
-            const employeeContribution = (salaryAtStart * (monthlyContribution / 100)) * 12; // Annual employee contribution
-            const employerContribution = (salaryAtStart * (Math.min(salaryLimit, employerMatch) / 100)) * 12; // Annual employer contribution
+            const employeeContribution = (salaryAtStart * (monthlyContribution / 100)) * 12 // Annual employee contribution
+            const employerContribution = (salaryAtStart * (Math.min(salaryLimit, employerMatch) / 100)) * 12 // Annual employer contribution
 
-            employeeBalance += employeeContribution + (employeeBalance * rateOfReturn / 100);
-            employerBalance += employerContribution + (employerBalance * rateOfReturn / 100);
+            employeeBalance += employeeContribution + (employeeBalance * rateOfReturn / 100)
+            employerBalance += employerContribution + (employerBalance * rateOfReturn / 100)
 
             // Accumulate total contributions
-            employeeContributionTotal += employeeContribution;
-            employerContributionTotal += employerContribution;
+            employeeContributionTotal += employeeContribution
+            employerContributionTotal += employerContribution
 
-            employeeDataArray.push({ age, savings: employeeBalance });
-            employerDataArray.push({ age, savings: employerBalance });
+            employeeDataArray.push({ age, savings: employeeBalance })
+            employerDataArray.push({ age, savings: employerBalance })
 
-            salaryAtStart += salaryAtStart * (salaryIncrease / 100); // Increase salary each year
+            salaryAtStart += salaryAtStart * (salaryIncrease / 100) // Increase salary each year
         }
 
-        setEstimatedRetirement(employeeBalance);
-        setEmployeeContributions(employeeContributionTotal);
-        setEmployerContributions(employerContributionTotal);
+        setEstimatedRetirement(employeeBalance)
+        setEmployeeContributions(employeeContributionTotal)
+        setEmployerContributions(employerContributionTotal)
 
         // Set the data for the graph
-        setEmployeeData(employeeDataArray);
-        setEmployerData(employerDataArray);
-    };
+        setEmployeeData(employeeDataArray)
+        setEmployerData(employerDataArray)
+    }
+
+    // Pie chart data for employee and employer contributions
+    const pieData = [
+        { name: "Employee Contribution", value: employeeContributions },
+        { name: "Employer Contribution", value: employerContributions },
+    ]
+
+    // Handle input changes and strip any leading zeros or invalid characters
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<any>>) => {
+        const value = e.target.value.replace(/[^0-9.]/g, '') // Only allow numbers and decimal points
+        if (value !== '') {
+            setter(parseFloat(value))
+        }
+    }
 
     return (
         <Wrapper>
@@ -91,7 +112,7 @@ const RetirementCalculator = () => {
                                 type="number"
                                 id="salary"
                                 value={salary}
-                                onChange={(e) => setSalary(Number(e.target.value))}
+                                onChange={(e) => handleInputChange(e, setSalary)}
                                 className="w-full"
                             />
                         </div>
@@ -113,7 +134,7 @@ const RetirementCalculator = () => {
                                 type="number"
                                 id="salaryIncrease"
                                 value={salaryIncrease}
-                                onChange={(e) => setSalaryIncrease(Number(e.target.value))}
+                                onChange={(e) => handleInputChange(e, setSalaryIncrease)}
                                 className="w-full"
                             />
                         </div>
@@ -124,7 +145,7 @@ const RetirementCalculator = () => {
                                 type="number"
                                 id="currentAge"
                                 value={currentAge}
-                                onChange={(e) => setCurrentAge(Number(e.target.value))}
+                                onChange={(e) => handleInputChange(e, setCurrentAge)}
                                 className="w-full"
                             />
                         </div>
@@ -135,7 +156,7 @@ const RetirementCalculator = () => {
                                 type="number"
                                 id="retirementAge"
                                 value={retirementAge}
-                                onChange={(e) => setRetirementAge(Number(e.target.value))}
+                                onChange={(e) => handleInputChange(e, setRetirementAge)}
                                 className="w-full"
                             />
                         </div>
@@ -146,7 +167,7 @@ const RetirementCalculator = () => {
                                 type="number"
                                 id="rateOfReturn"
                                 value={rateOfReturn}
-                                onChange={(e) => setRateOfReturn(Number(e.target.value))}
+                                onChange={(e) => handleInputChange(e, setRateOfReturn)}
                                 className="w-full"
                             />
                         </div>
@@ -157,7 +178,7 @@ const RetirementCalculator = () => {
                                 type="number"
                                 id="current401k"
                                 value={current401k}
-                                onChange={(e) => setCurrent401k(Number(e.target.value))}
+                                onChange={(e) => handleInputChange(e, setCurrent401k)}
                                 className="w-full"
                             />
                         </div>
@@ -214,11 +235,32 @@ const RetirementCalculator = () => {
                                 <Line type="monotone" dataKey="savings" stroke={COLORS[1]} />
                             </LineChart>
                         </ResponsiveContainer>
+
+                        {/* Pie Chart showing breakdown of contributions */}
+                        <ResponsiveContainer width="100%" height={300}>
+                            <PieChart>
+                                <Pie
+                                    data={pieData}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={90}
+                                    fill="#8884d8"
+                                    dataKey="value"
+                                    labelLine={true}
+                                >
+                                    {pieData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <PieLegend />
+                            </PieChart>
+                        </ResponsiveContainer>
                     </div>
                 </div>
             </div>
         </Wrapper>
-    );
-};
+    )
+}
 
-export default RetirementCalculator;
+export default RetirementCalculator

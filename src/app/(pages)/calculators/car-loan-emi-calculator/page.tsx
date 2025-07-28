@@ -1,41 +1,58 @@
 "use client"
 import Wrapper from '@/app/Wrapper'
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Slider } from "@/components/ui/slider"
 import {
     PieChart,
     Pie,
     Cell,
     ResponsiveContainer,
     Legend,
-} from "recharts";
+} from "recharts"
 
-const COLORS = ["#000", "#808080"];
+const COLORS = ["#000", "#808080"]
 
 const Page = () => {
-    const [loanAmount, setLoanAmount] = useState(1000000);
-    const [interestRate, setInterestRate] = useState(6.5);
-    const [loanTenure, setLoanTenure] = useState(5);
+    const [loanAmount, setLoanAmount] = useState(1000000)
+    const [interestRate, setInterestRate] = useState(6.5)
+    const [loanTenure, setLoanTenure] = useState(5)
 
     // Calculate EMI, total interest, and total amount
-    const monthlyInterestRate = interestRate / 100 / 12;
-    const numberOfPayments = loanTenure * 12;
+    const monthlyInterestRate = interestRate / 100 / 12
+    const numberOfPayments = loanTenure * 12
     const monthlyEMI =
         (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) /
-        (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
-    const totalAmountPayable = monthlyEMI * numberOfPayments;
-    const totalInterest = totalAmountPayable - loanAmount;
+        (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1)
+    const totalAmountPayable = monthlyEMI * numberOfPayments
+    const totalInterest = totalAmountPayable - loanAmount
 
     const data = [
         { name: "Principal amount", value: loanAmount },
         { name: "Interest amount", value: totalInterest },
-    ];
+    ]
+
+    // Handle manual input for Loan Amount
+    const handleLoanAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseInt(e.target.value)
+        if (!isNaN(value)) setLoanAmount(value)
+    }
+
+    // Handle manual input for Interest Rate
+    const handleInterestRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseFloat(e.target.value)
+        if (!isNaN(value)) setInterestRate(value)
+    }
+
+    // Handle manual input for Loan Tenure
+    const handleLoanTenureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseInt(e.target.value)
+        if (!isNaN(value)) setLoanTenure(value)
+    }
 
     return (
         <Wrapper>
-
             <div className="mx-auto md:mt-16 p-5 mt-8 max-w-3xl text-center">
                 <h1 className="text-2xl font-semibold lg:text-4xl">
                     Car Loan EMI Calculator
@@ -53,7 +70,15 @@ const Page = () => {
                     <CardContent className="space-y-6">
                         <div className="space-y-2">
                             <Label>Loan amount</Label>
-                            <p className="text-lg font-semibold">₹ {loanAmount.toLocaleString()}</p>
+                            <div className="flex items-center gap-4">
+                                <p className="text-lg font-semibold">₹ {loanAmount.toLocaleString()}</p>
+                                <input
+                                    type="number"
+                                    value={loanAmount}
+                                    onChange={handleLoanAmountChange}
+                                    className="w-1/3 border p-2 rounded-md"
+                                />
+                            </div>
                             <Slider
                                 value={[loanAmount]}
                                 onValueChange={(value) => setLoanAmount(value[0])}
@@ -64,7 +89,15 @@ const Page = () => {
                         </div>
                         <div className="space-y-2">
                             <Label>Rate of interest (p.a)</Label>
-                            <p className="text-lg font-semibold">{interestRate}%</p>
+                            <div className="flex items-center gap-4">
+                                <p className="text-lg font-semibold">{interestRate}%</p>
+                                <input
+                                    type="number"
+                                    value={interestRate}
+                                    onChange={handleInterestRateChange}
+                                    className="w-1/3 border p-2 rounded-md"
+                                />
+                            </div>
                             <Slider
                                 value={[interestRate]}
                                 onValueChange={(value) => setInterestRate(value[0])}
@@ -75,7 +108,15 @@ const Page = () => {
                         </div>
                         <div className="space-y-2">
                             <Label>Loan tenure (years)</Label>
-                            <p className="text-lg font-semibold">{loanTenure} Yr</p>
+                            <div className="flex items-center gap-4">
+                                <p className="text-lg font-semibold">{loanTenure} Yr</p>
+                                <input
+                                    type="number"
+                                    value={loanTenure}
+                                    onChange={handleLoanTenureChange}
+                                    className="w-1/3 border p-2 rounded-md"
+                                />
+                            </div>
                             <Slider
                                 value={[loanTenure]}
                                 onValueChange={(value) => setLoanTenure(value[0])}
@@ -93,12 +134,12 @@ const Page = () => {
                         </p>
                     </CardContent>
                 </Card>
+
                 <Card className="w-full">
                     <CardHeader>
                         <CardTitle>Loan Calculator</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
-
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
@@ -120,6 +161,7 @@ const Page = () => {
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
+
                         <div className="space-y-4 grid grid-cols-2 gap-5 mt-10">
                             <div className="space-y-2">
                                 <Label>Monthly EMI</Label>

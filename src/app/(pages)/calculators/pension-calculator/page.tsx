@@ -1,268 +1,248 @@
-"use client"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
-import { useState } from "react"
+"use client";
+
+import { useState, useEffect } from "react";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import Wrapper from "@/app/Wrapper"
-export default function PensionCalculator() {
-    const [currentAge, setCurrentAge] = useState(30)
-    const [currentPensionValue, setCurrentPensionValue] = useState(50000)
-    const [oneOffContribution, setOneOffContribution] = useState(0)
-    const [personalContribution, setPersonalContribution] = useState(100)
-    const [employerContribution, setEmployerContribution] = useState(100)
-    const [retireAge, setRetireAge] = useState(66)
-    const [targetIncome, setTargetIncome] = useState(50000)
-    const [includeStatePension, setIncludeStatePension] = useState(true)
-    const [result, setResult] = useState({ retirementIncome: 0, retirementPot: 0 })
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import { PieChart, Pie, Cell, Tooltip as PieTooltip } from "recharts";
+import Wrapper from "@/app/Wrapper";
 
-    const yearsToRetire = retireAge - currentAge
-    const calculateRetirement = () => {
-        const monthlyContribution = personalContribution + employerContribution
-        const totalMonthlyContributions = monthlyContribution * 12 * yearsToRetire
-        const totalOneOff = oneOffContribution
-        const growthRate = 0.05 // Assuming 5% annual growth rate
-        const futureValue = currentPensionValue * Math.pow(1 + growthRate, yearsToRetire) + totalMonthlyContributions * ((Math.pow(1 + growthRate, yearsToRetire) - 1) / growthRate) + totalOneOff
-        const statePension = includeStatePension ? 10000 : 0 // Assuming £10,000 state pension
-        const annualIncome = (futureValue * 0.04) + statePension // 4% withdrawal rate
-        setResult({
-            retirementIncome: annualIncome,
-            retirementPot: futureValue
-        })
+// Colors for Pie chart
+const PIE_COLORS = ["#0D74FF", "#FF5733"];
+
+export default function RetirementIncomeCalculator() {
+  // States for user input
+  const [currentSavings, setCurrentSavings] = useState(10000);
+  const [annualContribution, setAnnualContribution] = useState(20000);
+  const [currentAge, setCurrentAge] = useState(30);
+  const [retirementAge, setRetirementAge] = useState(68);
+  const [inflation, setInflation] = useState(3.22);
+  const [taxRate, setTaxRate] = useState(15); // Assume 15% tax rate
+  const [increaseInflation, setIncreaseInflation] = useState(false);
+  const [taxDeferred, setTaxDeferred] = useState(false);
+
+  // Results and chart data
+  const [resultIncome, setResultIncome] = useState(0);
+  const [salaryData, setSalaryData] = useState<{ year: number, salary: number }[]>([]);
+  const [pieData, setPieData] = useState<{ name: string, value: number }[]>([]);
+
+  // Calculate monthly income
+  const calculateRetirementIncome = () => {
+    const yearsToRetire = retirementAge - currentAge;
+    let totalSavings = currentSavings;
+    let monthlyIncomeBeforeTax = 0;
+    let monthlyIncomeAfterTax = 0;
+
+    // Simulate growth in savings
+    for (let i = 0; i < yearsToRetire; i++) {
+      totalSavings += annualContribution;
+      totalSavings *= 1 + inflation / 100; // Apply inflation to savings
     }
 
-    const handleCalculate = () => {
-        calculateRetirement()
+    // Monthly income before and after tax
+    monthlyIncomeBeforeTax = totalSavings / (12 * (retirementAge - currentAge));
+    monthlyIncomeAfterTax = monthlyIncomeBeforeTax * (1 - taxRate / 100);
+
+    setResultIncome(monthlyIncomeAfterTax);
+
+    // Bar chart data (Income before tax vs. after tax)
+    setSalaryData([
+      { year: retirementAge, salary: monthlyIncomeBeforeTax },
+      { year: retirementAge, salary: monthlyIncomeAfterTax },
+    ]);
+
+    // Pie chart data (Before and after taxes)
+    setPieData([
+      { name: "Before taxes", value: monthlyIncomeBeforeTax },
+      { name: "After taxes", value: monthlyIncomeAfterTax },
+    ]);
+  };
+
+  // Handle calculations and prevent empty fields
+  const handleCalculate = () => {
+    if (!currentSavings || !annualContribution || !currentAge || !retirementAge) {
+      alert("Please fill all the required fields");
+      return;
     }
 
-    const handleClear = () => {
-        setCurrentAge(30)
-        setCurrentPensionValue(50000)
-        setOneOffContribution(0)
-        setPersonalContribution(100)
-        setEmployerContribution(100)
-        setRetireAge(66)
-        setTargetIncome(50000)
-        setIncludeStatePension(true)
-        setResult({ retirementIncome: 0, retirementPot: 0 })
-    }
+    calculateRetirementIncome();
+  };
 
-    return (
-        <Wrapper>
-            <div className="container max-w-7xl mx-auto p-5 lg:px-12 md:my-14 my-8">
-                <div className="mx-auto max-w-3xl text-center mb-8">
-                    <h1 className="text-2xl font-semibold lg:text-4xl">
-                        Pension Calculator
-                    </h1>
-                    <p className="text-muted-foreground mt-4 text-xl">
-                        Explore our comprehensive range of calculators designed to assist you with various financial, health, lifestyle, and mathematical needs.
-                    </p>
-                </div>
-                <div className="p-6 max-w-7xl mx-auto">
-                    <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">Your current situation</h3>
-                            <div className="space-y-2">
-                                <Label htmlFor="currentAge">Current age</Label>
-                                <Input
-                                    id="currentAge"
-                                    type="number"
-                                    value={currentAge}
-                                    onChange={(e) => setCurrentAge(Number(e.target.value))}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="currentPensionValue">Current pension value</Label>
-                                <Input
-                                    id="currentPensionValue"
-                                    type="number"
-                                    value={currentPensionValue}
-                                    onChange={(e) => setCurrentPensionValue(Number(e.target.value))}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="oneOffContribution">One-off contribution</Label>
-                                <Input
-                                    id="oneOffContribution"
-                                    type="number"
-                                    value={oneOffContribution}
-                                    onChange={(e) => setOneOffContribution(Number(e.target.value))}
-                                />
-                            </div>
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">Personal monthly contribution</h3>
-                            <div className="space-y-2">
-                                <Label htmlFor="personalContribution">Employer monthly contribution</Label>
-                                <Input
-                                    id="personalContribution"
-                                    type="number"
-                                    value={personalContribution}
-                                    onChange={(e) => setPersonalContribution(Number(e.target.value))}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="employerContribution">Employer monthly contribution</Label>
-                                <Input
-                                    id="employerContribution"
-                                    type="number"
-                                    value={employerContribution}
-                                    onChange={(e) => setEmployerContribution(Number(e.target.value))}
-                                />
-                            </div>
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">Your goal</h3>
-                            <div className="space-y-2">
-                                <Label htmlFor="retireAge">I want to retire at</Label>
-                                <Input
-                                    id="retireAge"
-                                    type="number"
-                                    value={retireAge}
-                                    onChange={(e) => setRetireAge(Number(e.target.value))}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="targetIncome">With an annual gross of income</Label>
-                                <Input
-                                    id="targetIncome"
-                                    type="number"
-                                    value={targetIncome}
-                                    onChange={(e) => setTargetIncome(Number(e.target.value))}
-                                />
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Label htmlFor="includeStatePension">Include state pension</Label>
-                                <Switch
-                                    id="includeStatePension"
-                                    checked={includeStatePension}
-                                    onCheckedChange={setIncludeStatePension}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="grid lg:grid-cols-3 grid-cols-1 gap-6 mt-6">
+  // Handle reset
+  const handleClear = () => {
+    setCurrentSavings(10000);
+    setAnnualContribution(20000);
+    setCurrentAge(30);
+    setRetirementAge(68);
+    setInflation(3.22);
+    setTaxRate(15);
+    setIncreaseInflation(false);
+    setTaxDeferred(false);
+    setResultIncome(0);
+    setSalaryData([]);
+    setPieData([]);
+  };
 
-                        {/* Your Pension */}
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">Your pension</h3>
-                            <p>
-                                Retiring at {retireAge} with your current monthly contribution of £{personalContribution + employerContribution}, your annual income will be {Math.round(result.retirementIncome / 1000)}% off your target
-                            </p>
+  return (
+    <Wrapper>
+      <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8">
+        <div className="mx-auto max-w-3xl text-center mb-8">
+          <h1 className="text-2xl font-semibold lg:text-4xl">Pension Calculator</h1>
+          <p className="text-muted-foreground mt-4 text-xl">
+            Calculate your projected retirement income based on your current savings and contributions.
+          </p>
+        </div>
 
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead colSpan={2}><Label>Retirement income (annual):</Label></TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell>Current</TableCell>
-                                        <TableCell>£{Math.round(result.retirementIncome)}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Target</TableCell>
-                                        <TableCell>£{targetIncome}</TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
+        <div className="max-w-2xl mx-auto space-y-6">
+          {/* Inputs for user */}
+          <div>
+            <Label className="black mb-1.5" htmlFor="currentSavings">How much have you saved for retirement so far?</Label>
+            <Input
+              id="currentSavings"
+              type="number"
+              value={currentSavings}
+              onChange={(e) => setCurrentSavings(Number(e.target.value))}
+            />
+          </div>
 
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead colSpan={2}><Label>Retirement pot:</Label></TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell>Current</TableCell>
-                                        <TableCell>£{Math.round(result.retirementPot)}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Target</TableCell>
-                                        <TableCell>£{Math.round(targetIncome / 0.04)}</TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </div>
+          <div>
+            <Label className="black mb-1.5" htmlFor="annualContribution">What's your annual savings contribution?</Label>
+            <Input
+              id="annualContribution"
+              type="number"
+              value={annualContribution}
+              onChange={(e) => setAnnualContribution(Number(e.target.value))}
+            />
+          </div>
 
-                        {/* Your Contribution */}
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">Your contribution</h3>
-                            <p>
-                                By increasing your current monthly contribution and transferring your pension, youll be able to achieve your target retirement income.
-                            </p>
+          <div>
+            <Label className="black mb-1.5" htmlFor="currentAge">What's your current age?</Label>
+            <Input
+              id="currentAge"
+              type="number"
+              value={currentAge}
+              onChange={(e) => setCurrentAge(Number(e.target.value))}
+            />
+          </div>
 
-                            <Table>
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell><Label>Current monthly contribution of</Label></TableCell>
-                                        <TableCell>£{personalContribution + employerContribution}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell><Label>A new monthly contribution of</Label></TableCell>
-                                        <TableCell>
-                                            £{(((targetIncome / 0.04) / (yearsToRetire * 12)) - (currentPensionValue / (yearsToRetire * 12))).toFixed(2)}
-                                        </TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
+          <div>
+            <Label className="black mb-1.5" htmlFor="retirementAge">What age do you plan to retire?</Label>
+            <Input
+              id="retirementAge"
+              type="number"
+              value={retirementAge}
+              onChange={(e) => setRetirementAge(Number(e.target.value))}
+            />
+          </div>
 
-                            <div className="p-4 bg-gray-200 rounded mt-4">
-                                <Label>Ideal monthly contribution of</Label>
-                                <div className="text-lg font-bold">
-                                    £{Math.round((targetIncome / 0.04 - result.retirementPot) / (yearsToRetire * 12))}
-                                </div>
-                            </div>
-                        </div>
+          <div>
+            <Label className="black mb-1.5" htmlFor="inflation">Inflation rate (%):</Label>
+            <Input
+              id="inflation"
+              type="number"
+              value={inflation}
+              onChange={(e) => setInflation(Number(e.target.value))}
+            />
+          </div>
 
-                        {/* Your Options */}
-                        <div className="space-y-4">
-                            <h3 className="font-semibold">Your options</h3>
+          <div>
+            <Label className="black mb-1.5">Increase deposits with inflation</Label>
+            <input
+              type="checkbox"
+              checked={increaseInflation}
+              onChange={() => setIncreaseInflation(!increaseInflation)}
+            />
+          </div>
 
-                            <Table>
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell><input type="checkbox" /></TableCell>
-                                        <TableCell>Lower your target income</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell><input type="checkbox" /></TableCell>
-                                        <TableCell>Delay your retirement</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell><input type="checkbox" /></TableCell>
-                                        <TableCell>
-                                            Open a pension plan of £{(targetIncome / 0.04 - result.retirementPot) / (yearsToRetire * 12)} to increase your contribution
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell><input type="checkbox" /></TableCell>
-                                        <TableCell>
-                                            Transfer your current pension to Moneyfarm and increase your contribution by £{(targetIncome / 0.04 - result.retirementPot) / (yearsToRetire * 12)}
-                                        </TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
+          <div>
+            <Label className="black mb-1.5">Calculate savings to be tax-deferred</Label>
+            <input
+              type="checkbox"
+              checked={taxDeferred}
+              onChange={() => setTaxDeferred(!taxDeferred)}
+            />
+          </div>
 
-                            <Button className="w-full mt-4">Reach your target with us</Button>
-                        </div>
-                    </div>
-                    <div className="flex space-x-4 mt-6">
-                        <Button onClick={handleCalculate}>Calculate</Button>
-                        <Button variant="outline" onClick={handleClear}>Clear</Button>
-                    </div>
-                </div>
+          <div className="flex space-x-4">
+            <Button onClick={handleCalculate}>Calculate</Button>
+            <Button variant="outline" onClick={handleClear}>Clear</Button>
+          </div>
+
+          {/* Results */}
+          {resultIncome > 0 && (
+            <div className="mt-4 p-4 bg-gray-200 text-center rounded">
+              <h2>Your Monthly Retirement Income</h2>
+              <p className="mt-2 font-bold text-3xl">${resultIncome.toFixed(2)}</p>
             </div>
-        </Wrapper>
-    )
+          )}
+
+          {/* Bar Chart */}
+          {salaryData.length > 0 && (
+            <div className="mt-6">
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={salaryData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="year" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="salary" stroke="#3498db" name="Salary" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Pie Chart */}
+          {pieData.length > 0 && (
+            <div className="mt-6">
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    fill="#8884d8"
+                    paddingAngle={5}
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <PieTooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+      </div>
+    </Wrapper>
+  );
 }

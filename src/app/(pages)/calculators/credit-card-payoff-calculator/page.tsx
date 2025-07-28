@@ -61,14 +61,30 @@ const DebtCalculator = () => {
     }, [balance, interestRate, monthlyPayment]);
 
     // Calculate percentages for principal and interest
-    const principalPercentage = (principalPaid / totalPayment) * 100;
-    const interestPercentage = (interestPaid / totalPayment) * 100;
+    const principalPercentage = totalPayment > 0 ? (principalPaid / totalPayment) * 100 : 0;
+    const interestPercentage = totalPayment > 0 ? (interestPaid / totalPayment) * 100 : 0;
 
     // Pie chart data
     const pieData = [
         { name: "Principal Paid", value: principalPaid, percentage: principalPercentage },
         { name: "Interest Paid", value: interestPaid, percentage: interestPercentage },
     ];
+
+    // Remove leading zeros from input value and handle empty string
+    const handleBalanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let value = e.target.value;
+        // Remove non-numeric characters except the decimal point
+        value = value.replace(/[^0-9]/g, '');
+
+        // If the value is empty, set it to 0
+        if (value === '') {
+            setBalance(0);
+        } else {
+            // Ensure no leading zeros unless it's just "0"
+            value = parseInt(value, 10).toString(); // Convert to number to remove leading zeros
+            setBalance(Number(value)); // Set the balance
+        }
+    };
 
     return (
         <Wrapper>
@@ -88,10 +104,10 @@ const DebtCalculator = () => {
                         <div>
                             <Label className='black mb-1.5' htmlFor="balance">Credit Card Balance</Label>
                             <Input
-                                type="number"
+                                type="text"  // Change type to text for handling input more flexibly
                                 id="balance"
-                                value={balance}
-                                onChange={(e) => setBalance(Number(e.target.value))}
+                                value={balance.toLocaleString()}  // Format value with commas
+                                onChange={handleBalanceChange}  // Use the custom handleBalanceChange function
                                 className="w-full"
                             />
                         </div>

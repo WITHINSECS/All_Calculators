@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 import {
     Card,
     CardContent,
@@ -16,7 +16,7 @@ import {
     ResponsiveContainer,
     Tooltip,
 } from "recharts";
-import Wrapper from '@/app/Wrapper';
+import Wrapper from "@/app/Wrapper";
 
 interface MortgageInput {
     annualIncome: number;
@@ -39,21 +39,26 @@ interface MortgageResult {
 }
 
 const calculateMortgage = (input: MortgageInput): MortgageResult => {
-    const maxLoan = input.annualIncome * 0.28 / 12; // 28% of monthly income rule
+    const maxLoan = (input.annualIncome * 0.28) / 12; // 28% of monthly income rule
     const totalDebts = input.monthlyDebts;
     const affordablePayment = maxLoan - totalDebts;
-    const maxHomePrice = (affordablePayment * (input.loanTerm * 12) * (1 + input.interestRate / 100)) / (input.loanTerm * 12);
 
+    // Calculate the maximum home price based on the affordable payment
+    const maxHomePrice = affordablePayment * (input.loanTerm * 12) * (1 + input.interestRate / 100) / (input.loanTerm * 12);
+
+    // Monthly payment breakdown (principal & interest)
     const principalAndInterest = (maxHomePrice - input.downPayment) * (input.interestRate / 100) / 12 * (1 + input.interestRate / 100) ** input.loanTerm / ((1 + input.interestRate / 100) ** input.loanTerm - 1);
     let monthlyPayment = principalAndInterest;
     const breakdown: { name: string; value: number }[] = [{ name: "Principal & Interest", value: principalAndInterest }];
 
+    // PMI calculation (only if down payment is less than 20%)
     if (input.includePMI && input.downPayment / maxHomePrice < 0.2) {
         const pmi = principalAndInterest * 0.01; // 1% PMI estimate
         monthlyPayment += pmi;
         breakdown.push({ name: "PMI", value: pmi });
     }
 
+    // Include taxes and insurance if checked
     if (input.includeTaxesInsurance) {
         const propertyTax = maxHomePrice * (input.propertyTax / 100) / 12;
         const insurance = input.homeInsurance / 12;
@@ -83,7 +88,7 @@ export default function Page() {
         interestRate: 7,
         loanTerm: 360,
         includePMI: true,
-        includeTaxesInsurance: true,
+        includeTaxesInsurance: false,
         propertyTax: 1.2,
         homeInsurance: 945,
         hoaDues: 0,
@@ -108,7 +113,6 @@ export default function Page() {
     return (
         <Wrapper>
             <div className="container  mx-auto p-5 lg:px-12 md:my-14 my-8">
-
                 <div className="mx-auto max-w-3xl text-center mb-8">
                     <h1 className="text-2xl font-semibold lg:text-4xl">
                         Mortgage House Affordability Calculator
@@ -119,7 +123,7 @@ export default function Page() {
                 </div>
                 <Card>
                     <CardHeader>
-                        <CardTitle className='text-xl'>Mortgage Calculator</CardTitle>
+                        <CardTitle className="text-xl">Mortgage Calculator</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid md:grid-cols-2 grid-cols-1 gap-8">
@@ -128,27 +132,57 @@ export default function Page() {
                                 <div className="space-y-2">
                                     <div>
                                         <label>Annual income</label>
-                                        <Input className='mt-1 mb-3' name="annualIncome" value={input.annualIncome} onChange={handleChange} />
+                                        <Input
+                                            className="mt-1 mb-3"
+                                            name="annualIncome"
+                                            value={input.annualIncome}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                     <div>
                                         <label>Monthly debts</label>
-                                        <Input className='mt-1 mb-3' name="monthlyDebts" value={input.monthlyDebts} onChange={handleChange} />
+                                        <Input
+                                            className="mt-1 mb-3"
+                                            name="monthlyDebts"
+                                            value={input.monthlyDebts}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                     <div>
                                         <label>Down payment</label>
-                                        <Input className='mt-1 mb-3' name="downPayment" value={input.downPayment} onChange={handleChange} />
+                                        <Input
+                                            className="mt-1 mb-3"
+                                            name="downPayment"
+                                            value={input.downPayment}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                     <div>
                                         <label>Debt-to-income</label>
-                                        <Input className='mt-1 mb-3' name="debtToIncome" value={input.debtToIncome} onChange={handleChange} />
+                                        <Input
+                                            className="mt-1 mb-3"
+                                            name="debtToIncome"
+                                            value={input.debtToIncome}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                     <div>
                                         <label>Interest rate</label>
-                                        <Input className='mt-1 mb-3' name="interestRate" value={input.interestRate} onChange={handleChange} />
+                                        <Input
+                                            className="mt-1 mb-3"
+                                            name="interestRate"
+                                            value={input.interestRate}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                     <div>
                                         <label>Loan term</label>
-                                        <Input className='mt-1 mb-3' name="loanTerm" value={input.loanTerm} onChange={handleChange} />
+                                        <Input
+                                            className="mt-1 mb-3"
+                                            name="loanTerm"
+                                            value={input.loanTerm}
+                                            onChange={handleChange}
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -162,7 +196,8 @@ export default function Page() {
                                                 name="includePMI"
                                                 checked={input.includePMI}
                                                 onChange={handleCheckbox}
-                                            /> Include PMI
+                                            />{" "}
+                                            Include PMI
                                         </label>
                                     </div>
                                     <div>
@@ -172,63 +207,121 @@ export default function Page() {
                                                 name="includeTaxesInsurance"
                                                 checked={input.includeTaxesInsurance}
                                                 onChange={handleCheckbox}
-                                            /> Include taxes/insurance
+                                            />{" "}
+                                            Include taxes/insurance
                                         </label>
                                     </div>
-                                    <div>
-                                        <label>Property tax</label>
-                                        <Input className='mt-1 mb-3' name="propertyTax" value={input.propertyTax} onChange={handleChange} />
-                                    </div>
-                                    <div>
-                                        <label>Home insurance</label>
-                                        <Input className='mt-1 mb-3' name="homeInsurance" value={input.homeInsurance} onChange={handleChange} />
-                                    </div>
-                                    <div>
-                                        <label>HOA dues</label>
-                                        <Input className='mt-1 mb-3' name="hoaDues" value={input.hoaDues} onChange={handleChange} />
-                                    </div>
+                                    {input.includeTaxesInsurance && (
+                                        <>
+                                            <div>
+                                                <label>Property tax</label>
+                                                <Input
+                                                    className="mt-1 mb-3"
+                                                    name="propertyTax"
+                                                    value={input.propertyTax}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label>Home insurance</label>
+                                                <Input
+                                                    className="mt-1 mb-3"
+                                                    name="homeInsurance"
+                                                    value={input.homeInsurance}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label>HOA dues</label>
+                                                <Input
+                                                    className="mt-1 mb-3"
+                                                    name="hoaDues"
+                                                    value={input.hoaDues}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>
                         <div className="flex justify-end space-x-2">
-                            <Button className='w-full p-5' onClick={handleCalculate}>Calculate</Button>
+                            <Button className="w-full p-5" onClick={handleCalculate}>
+                                Calculate
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className='mt-5'>
-                    <CardHeader>
-                        <CardTitle className='text-xl'>Results</CardTitle>
-                    </CardHeader>
-                    <CardContent className='overflow-x-hidden'>
-                        <p>You can afford a house up to ${result?.maxHomePrice.toFixed(0)} based on your income, a house at this price should fit comfortably within your budget.</p>
-                        <p>Payment: ${result?.monthlyPayment.toFixed(0)}/mo</p>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <PieChart>
-                                <Pie
-                                    data={result?.paymentBreakdown}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={100}
-                                    label
-                                >
-                                    {result?.paymentBreakdown.map((entry, index) => (
-                                        <Cell
-                                            key={`cell-${index}`}
-                                            fill={['#1f1f1f', '#2c2c2c', '#3a3a3a', '#4d4d4d', '#5a5a5a'][index % 5]}
-                                        />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
+                {/* Display Results in Table */}
+                {result && (
+                    <Card className="mt-5">
+                        <CardHeader>
+                            <CardTitle className="text-xl">Results</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full table-auto">
+                                    <thead>
+                                        <tr>
+                                            <th className="px-4 py-2 text-left">Description</th>
+                                            <th className="px-4 py-2 text-left">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td className="px-4 py-2">Max Home Price</td>
+                                            <td className="px-4 py-2">${result.maxHomePrice.toFixed(0)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="px-4 py-2">Monthly Payment</td>
+                                            <td className="px-4 py-2">${result.monthlyPayment.toFixed(0)}</td>
+                                        </tr>
+                                        {result.paymentBreakdown.map((item, index) => (
+                                            <tr key={index}>
+                                                <td className="px-4 py-2">{item.name}</td>
+                                                <td className="px-4 py-2">${item.value.toFixed(0)}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
 
+                {/* Pie Chart */}
+                {result && (
+                    <Card className="mt-5">
+                        <CardHeader>
+                            <CardTitle className="text-xl">Payment Breakdown</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <PieChart>
+                                    <Pie
+                                        data={result.paymentBreakdown}
+                                        dataKey="value"
+                                        nameKey="name"
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={100}
+                                        label
+                                    >
+                                        {result.paymentBreakdown.map((entry, index) => (
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={['#1f1f1f', '#2c2c2c', '#3a3a3a', '#4d4d4d', '#5a5a5a'][index % 5]}
+                                            />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
         </Wrapper>
-
     );
 }

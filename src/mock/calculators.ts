@@ -32,7 +32,7 @@ export const DATA__FINANCE = [
     {
         title: "*401K Calculator",
         subTitle: "401K Calculator",
-        description: "Estimate your 401K savings with our 401K Calculator.",
+        description: "Estimate your 401K savings with our best 401K Calculator.",
         link: "/401k-calculator",
     },
     {
@@ -48,9 +48,9 @@ export const DATA__FINANCE = [
         link: "/compound-interest-calculator",
     },
     {
-        title: "Payment Calculator",
-        subTitle: "Payment Calculator",
-        description: "The Payment Calculator can determine the monthly payment amount or loan term for a fixed interest loan. Use the Fixed Term tab to calculate the monthly payment of a fixed-term loan.",
+        title: "Amortization Calculator",
+        subTitle: "Amortization Calculator",
+        description: "The Amortization Calculator can determine the monthly payment amount or loan term for a fixed interest loan. Use the Fixed Term tab to calculate the monthly payment of a fixed-term loan.",
         link: "/payment-calculator",
     },
     {
@@ -60,7 +60,7 @@ export const DATA__FINANCE = [
         link: "/auto-loan-calculator",
     },
     {
-        title: "TVM Calculator",
+        title: "*TVM Calculator",
         subTitle: "TVM Calculator",
         description: "With the following pieces of information, our TVM calculator can help you estimate the future value of your investments.",
         link: "/tvm-calculator",
@@ -78,7 +78,7 @@ export const DATA__FINANCE = [
         link: "/salary-hike-calculator",
     },
     {
-        title: "Pension Calculator",
+        title: "*Pension Calculator",
         subTitle: "Pension Calculator",
         description: "Use our pension calculator to estimate your retirement savings and monthly pension payouts.",
         link: "/pension-calculator",
