@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import Wrapper from '@/app/Wrapper';
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import Wrapper from "@/app/Wrapper";
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
+
+// Define the type for Pie data
+interface PieData {
+  name: string;
+  value: number;
+}
 
 const SalaryCalculator = () => {
   const [hoursPerWeek, setHoursPerWeek] = useState(40);
@@ -18,7 +24,8 @@ const SalaryCalculator = () => {
   const [netHourlyWage, setNetHourlyWage] = useState(0);
   const [netAnnualIncome, setNetAnnualIncome] = useState(0);
 
-  const [pieData, setPieData] = useState<any[]>([]);
+  // Update pieData to a specific type
+  const [pieData, setPieData] = useState<PieData[]>([]);
 
   useEffect(() => {
     const grossAnnual = hoursPerWeek * weeksPerYear * hourlyWage;
@@ -34,8 +41,8 @@ const SalaryCalculator = () => {
 
     // Pie chart data
     setPieData([
-      { name: 'Net Salary', value: netAnnual },
-      { name: 'Tax Deducted', value: taxAmount },
+      { name: "Net Salary", value: netAnnual },
+      { name: "Tax Deducted", value: taxAmount },
     ]);
   }, [hoursPerWeek, weeksPerYear, hourlyWage, tax]);
 
@@ -50,9 +57,7 @@ const SalaryCalculator = () => {
     <Wrapper>
       <div className="container max-w-7xl mx-auto p-5 lg:px-12 md:my-14 my-8">
         <div className="mx-auto max-w-3xl text-center mb-8">
-          <h1 className="text-2xl font-semibold lg:text-4xl">
-            Salary Calculator
-          </h1>
+          <h1 className="text-2xl font-semibold lg:text-4xl">Salary Calculator</h1>
           <p className="text-muted-foreground mt-4 text-xl">
             Calculate your gross and net salary, tax deductions, and other related metrics.
           </p>

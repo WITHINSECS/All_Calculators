@@ -1,5 +1,5 @@
 import Wrapper from '@/app/Wrapper'
-import { Check, Contact, FileWarning } from 'lucide-react'
+import { Check, Contact } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 
