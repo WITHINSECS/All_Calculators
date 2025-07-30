@@ -128,7 +128,7 @@ export default function PregnancyDueDateCalculator() {
                                     {dueDate}
                                 </div>
                                 <div className="text-green-500 text-lg mt-4">
-                                    🎉 You're on your way to a new adventure! 🎉
+                                    🎉 Youre on your way to a new adventure! 🎉
                                 </div>
                             </CardContent>
                         </Card>

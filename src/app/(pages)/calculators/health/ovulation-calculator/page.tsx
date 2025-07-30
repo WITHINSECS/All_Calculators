@@ -15,10 +15,31 @@ import { toast } from "react-toastify";
 import { addDays, format } from "date-fns"; // For date manipulation
 import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 
+// Define types
+type OvulationResults = {
+    ovulationWindow: string;
+    mostProbableOvulationDate: string;
+    intercourseWindow: string;
+    pregnancyTestDate: string;
+    nextPeriodStart: string;
+    dueDateIfPregnant: string;
+    cycleDates: {
+        periodStart: string;
+        ovulationWindow: string;
+        dueDate: string;
+    }[];
+};
+
+type Cycle = {
+    periodStart: string;
+    ovulationWindow: string;
+    dueDate: string;
+};
+
 export default function OvulationCalculator() {
     const [lastPeriodDate, setLastPeriodDate] = useState<string | null>(null);
     const [cycleLength, setCycleLength] = useState(28);
-    const [results, setResults] = useState<any>(null);
+    const [results, setResults] = useState<OvulationResults | null>(null);
 
     const calculateOvulation = () => {
         if (!lastPeriodDate) {
@@ -39,30 +60,30 @@ export default function OvulationCalculator() {
         const dueDateIfPregnant = addDays(lastPeriod, 280); // 280 days from the last period (due date)
 
         // Calculate formatted results
-        const formattedResults = {
+        const formattedResults: OvulationResults = {
             ovulationWindow: `${format(ovulationStart, "MMM dd")} - ${format(ovulationEnd, "MMM dd")}`,
             mostProbableOvulationDate: format(ovulationDate, "MMM dd, yyyy"),
             intercourseWindow: `${format(ovulationStart, "MMM dd")} - ${format(ovulationEnd, "MMM dd")}`,
             pregnancyTestDate: format(pregnancyTestDate, "MMM dd, yyyy"),
             nextPeriodStart: format(nextPeriodStart, "MMM dd, yyyy"),
             dueDateIfPregnant: format(dueDateIfPregnant, "MMM dd, yyyy"),
+            cycleDates: [],
         };
 
         // Important dates for the next 6 cycles
-        const cycleDates = [];
         for (let i = 1; i <= 6; i++) {
             const cycleStart = addDays(lastPeriod, cycleLength * i);
             const ovulationStartCycle = addDays(cycleStart, cycleLength - 14);
             const ovulationEndCycle = addDays(ovulationStartCycle, 1);
             const dueDateCycle = addDays(cycleStart, 280);
-            cycleDates.push({
+            formattedResults.cycleDates.push({
                 periodStart: format(cycleStart, "MMM dd, yyyy"),
                 ovulationWindow: `${format(ovulationStartCycle, "MMM dd")} - ${format(ovulationEndCycle, "MMM dd")}`,
                 dueDate: format(dueDateCycle, "MMM dd, yyyy"),
             });
         }
 
-        setResults({ ...formattedResults, cycleDates });
+        setResults(formattedResults);
     };
 
     const resetForm = () => {
@@ -78,7 +99,7 @@ export default function OvulationCalculator() {
     ];
 
     // Line chart data for next 6 cycles
-    const lineChartData = results ? results.cycleDates.map((cycle: any, index: number) => ({
+    const lineChartData = results ? results.cycleDates.map((cycle: Cycle, index: number) => ({
         cycle: index + 1,
         periodStart: cycle.periodStart,
         ovulationStart: cycle.ovulationWindow.split(" - ")[0],
@@ -219,7 +240,6 @@ export default function OvulationCalculator() {
                         </div>
 
                         {/* Pie Chart */}
-
                     </div>
                 )}
             </div>

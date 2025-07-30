@@ -72,9 +72,9 @@ export default function MacroCalculator() {
         const caloricNeed = tdee + goalFactors[goal];
 
         // Calculate macros (30% protein, 40% carbs, 30% fats)
-        let protein = (caloricNeed * 0.3) / 4; // Protein: 30% of calories, 4 calories per gram
-        let carbs = (caloricNeed * 0.4) / 4; // Carbs: 40% of calories, 4 calories per gram
-        let fats = (caloricNeed * 0.3) / 9; // Fats: 30% of calories, 9 calories per gram
+        const protein = (caloricNeed * 0.3) / 4; // Protein: 30% of calories, 4 calories per gram
+        const carbs = (caloricNeed * 0.4) / 4; // Carbs: 40% of calories, 4 calories per gram
+        const fats = (caloricNeed * 0.3) / 9; // Fats: 30% of calories, 9 calories per gram
 
         setMacroResult({
             bmr: bmr,

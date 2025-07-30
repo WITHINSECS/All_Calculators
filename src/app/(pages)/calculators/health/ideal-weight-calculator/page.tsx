@@ -40,7 +40,7 @@ export default function IdealWeightCalculator() {
             return;
         }
 
-        let heightInCm = unit === "Metric" ? heightCm : (heightFeet * 30.48 + heightInches * 2.54); // Convert height to cm
+        const heightInCm = unit === "Metric" ? heightCm : (heightFeet * 30.48 + heightInches * 2.54); // Convert height to cm
 
         // Apply formulas for Ideal Weight
         let petersonWeight = 0;
