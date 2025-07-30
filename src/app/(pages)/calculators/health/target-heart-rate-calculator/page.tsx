@@ -15,13 +15,21 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"; // Recharts for pie chart
 import { toast } from "react-toastify"; // Import toast for error handling
 
+// Define type for the target heart rate ranges
+interface TargetHeartRateRanges {
+    [key: string]: {
+        min: number;
+        max: number;
+    };
+}
+
 // Helper Function to Calculate Target Heart Rate
 const calculateTargetHeartRate = (age: number, restingHeartRate: number) => {
     const maxHeartRate = 220 - age; // Max heart rate formula
     const heartRateReserve = maxHeartRate - restingHeartRate;
 
     // Calculate target heart rates for different exercise intensities
-    const targetRates = {
+    const targetRates: TargetHeartRateRanges = {
         "Very Light": { min: restingHeartRate + 0.5 * heartRateReserve, max: restingHeartRate + 0.6 * heartRateReserve },
         Light: { min: restingHeartRate + 0.6 * heartRateReserve, max: restingHeartRate + 0.7 * heartRateReserve },
         Moderate: { min: restingHeartRate + 0.7 * heartRateReserve, max: restingHeartRate + 0.8 * heartRateReserve },
@@ -35,7 +43,7 @@ const calculateTargetHeartRate = (age: number, restingHeartRate: number) => {
 const TargetHeartRateCalculator = () => {
     const [age, setAge] = useState<number>(30); // Default age
     const [restingHeartRate, setRestingHeartRate] = useState<number>(70); // Default resting heart rate
-    const [targetRates, setTargetRates] = useState<any | null>(null);
+    const [targetRates, setTargetRates] = useState<TargetHeartRateRanges | null>(null); // Updated state type
 
     const handleCalculate = () => {
         if (!age || !restingHeartRate) {
@@ -74,7 +82,7 @@ const TargetHeartRateCalculator = () => {
                     <CardContent>
                         <div className="grid grid-cols-1 md:gap-10 md:grid-cols-2 gap-4">
                             <div>
-                                <Label className="black mb-1.5" htmlFor="age">Age (years)</Label>
+                                <Label className="block mb-1.5" htmlFor="age">Age (years)</Label>
                                 <Input
                                     type="number"
                                     id="age"
@@ -85,7 +93,7 @@ const TargetHeartRateCalculator = () => {
                             </div>
 
                             <div>
-                                <Label className="black mb-1.5" htmlFor="restingHeartRate">Resting Heart Rate (bpm)</Label>
+                                <Label className="block mb-1.5" htmlFor="restingHeartRate">Resting Heart Rate (bpm)</Label>
                                 <Input
                                     type="number"
                                     id="restingHeartRate"

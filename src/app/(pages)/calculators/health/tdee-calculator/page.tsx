@@ -15,6 +15,16 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components
 import { toast } from "react-toastify"; // Import toast for error handling
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"; // Recharts for pie chart
 
+// Define result type
+interface TDEEResult {
+  bmr: number;
+  tdee: number;
+  weightLoss: number;
+  mildWeightLoss: number;
+  weightGain: number;
+  mildWeightGain: number;
+}
+
 // Helper Function to Calculate TDEE and BMR
 const calculateTDEE = (age: number, gender: string, weight: number, height: number, activityLevel: string) => {
   // BMR calculation based on the Mifflin-St Jeor Equation
@@ -62,7 +72,7 @@ const TDEECalculator = () => {
   const [weight, setWeight] = useState<number>(70); // Default weight in kg
   const [height, setHeight] = useState<number>(175); // Default height in cm
   const [activityLevel, setActivityLevel] = useState<string>("Sedentary"); // Default activity level
-  const [result, setResult] = useState<any | null>(null);
+  const [result, setResult] = useState<TDEEResult | null>(null); // Updated state type
 
   // Handle Calculate Button Click
   const handleCalculate = () => {
