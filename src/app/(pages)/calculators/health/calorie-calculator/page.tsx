@@ -1,0 +1,232 @@
+"use client";
+
+import { useState } from "react";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import Wrapper from '@/app/Wrapper';
+import { toast } from "react-toastify";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer as LineContainer } from "recharts";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+export default function CalorieCalculator() {
+    const [gender, setGender] = useState("Male");
+    const [age, setAge] = useState(20);
+    const [heightFeet, setHeightFeet] = useState(4);
+    const [heightInches, setHeightInches] = useState(9);
+    const [weight, setWeight] = useState(73);
+    const [activityType, setActivityType] = useState("Sedentary");
+    const [calorieResult, setCalorieResult] = useState({ bmr: 0, totalCalories: 0 });
+
+    // Defining the activity factors object with correct type
+    const activityFactors = {
+        Sedentary: 1.2,
+        Light: 1.375,
+        Moderate: 1.55,
+        Active: 1.725,
+        VeryActive: 1.9,
+    };
+
+    // Ensuring that activityType is treated as a key of activityFactors
+    const calculateCalories = () => {
+        if (weight === 0 || heightFeet === 0 || heightInches === 0 || age === 0) {
+            toast.error("All fields are required and cannot be zero.");
+            return;
+        }
+
+        // Convert height to cm
+        const heightInCm = (heightFeet * 12 + heightInches) * 2.54;
+
+        // Calculate BMR based on gender and Mifflin-St Jeor equation
+        let bmr = 0;
+        if (gender === "Male") {
+            bmr = 10 * weight + 6.25 * heightInCm - 5 * age + 5;
+        } else {
+            bmr = 10 * weight + 6.25 * heightInCm - 5 * age - 161;
+        }
+
+        // Adjust BMR based on activity level, ensure activityType is valid
+        const totalCalories = bmr * activityFactors[activityType as keyof typeof activityFactors];
+
+        setCalorieResult({
+            bmr: parseFloat(bmr.toFixed(2)),
+            totalCalories: parseFloat(totalCalories.toFixed(2)),
+        });
+    };
+
+    return (
+        <Wrapper>
+            <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8">
+                <div className="mx-auto max-w-3xl text-center mb-8">
+                    <h1 className="text-2xl font-semibold lg:text-4xl">Calorie Calculator</h1>
+                    <p className="text-muted-foreground mt-4 text-xl">
+                        Calculate your daily caloric needs based on your activity level.
+                    </p>
+                </div>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Enter Details</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid gap-4">
+                            <div className="flex flex-col">
+                                <Label className="block mb-1.5" htmlFor="gender">Gender</Label>
+                                <select
+                                    id="gender"
+                                    value={gender}
+                                    onChange={(e) => setGender(e.target.value)}
+                                    className="p-2 border border-gray-300 rounded-md"
+                                >
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div className="flex flex-col">
+                                <Label className="block mb-1.5" htmlFor="age">Age</Label>
+                                <Input
+                                    id="age"
+                                    type="number"
+                                    value={age}
+                                    onChange={(e) => setAge(Number(e.target.value))}
+                                    placeholder="Enter your age"
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <Label className="block mb-1.5" htmlFor="height">Height</Label>
+                                <div className="flex gap-4">
+                                    <Input
+                                        id="heightFeet"
+                                        type="number"
+                                        value={heightFeet}
+                                        onChange={(e) => setHeightFeet(Number(e.target.value))}
+                                        placeholder="Feet"
+                                    />
+                                    <Input
+                                        id="heightInches"
+                                        type="number"
+                                        value={heightInches}
+                                        onChange={(e) => setHeightInches(Number(e.target.value))}
+                                        placeholder="Inches"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-col">
+                                <Label className="block mb-1.5" htmlFor="weight">Weight (kg)</Label>
+                                <Input
+                                    id="weight"
+                                    type="number"
+                                    value={weight}
+                                    onChange={(e) => setWeight(Number(e.target.value))}
+                                    placeholder="Enter your weight"
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <Label className="block mb-1.5" htmlFor="activityType">Activity Type</Label>
+                                <select
+                                    id="activityType"
+                                    value={activityType}
+                                    onChange={(e) => setActivityType(e.target.value)}
+                                    className="p-2 border border-gray-300 rounded-md"
+                                >
+                                    <option value="Sedentary">Sedentary</option>
+                                    <option value="Light">Light Activity</option>
+                                    <option value="Moderate">Moderate Activity</option>
+                                    <option value="Active">Active</option>
+                                    <option value="VeryActive">Very Active</option>
+                                </select>
+                            </div>
+                            <div className="flex justify-center mt-4">
+                                <Button className="w-full" onClick={calculateCalories}>Calculate</Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Results */}
+                {calorieResult.totalCalories > 0 && (
+                    <div className="mt-8">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Results</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Details</TableHead>
+                                            <TableHead>Amount</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell>BMR</TableCell>
+                                            <TableCell>{calorieResult.bmr} kcal</TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell>Total Calories</TableCell>
+                                            <TableCell>{calorieResult.totalCalories} kcal</TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+
+                                {/* Pie Chart */}
+                                <div className="mt-6">
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <PieChart>
+                                            <Pie
+                                                data={[
+                                                    { name: "BMR", value: calorieResult.bmr },
+                                                    { name: "Calories", value: calorieResult.totalCalories - calorieResult.bmr }
+                                                ]}
+                                                dataKey="value"
+                                                nameKey="name"
+                                                cx="50%"
+                                                cy="50%"
+                                                outerRadius={80}
+                                                fill="#8884d8" // Add different colors if necessary
+                                                label
+                                            >
+                                                <Cell fill="#82ca9d" />
+                                                <Cell fill="#ff7300" />
+                                            </Pie>
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+
+                                {/* Line Chart */}
+                                <div className="mt-6">
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <LineChart
+                                            data={[{ name: "Week 1", calories: calorieResult.totalCalories }]}
+                                            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                                        >
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey="name" />
+                                            <YAxis />
+                                            <Tooltip />
+                                            <Legend />
+                                            <Line
+                                                type="monotone"
+                                                dataKey="calories"
+                                                stroke="#82ca9d"
+                                                activeDot={{ r: 8 }}
+                                            />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
+            </div>
+        </Wrapper>
+    );
+}
