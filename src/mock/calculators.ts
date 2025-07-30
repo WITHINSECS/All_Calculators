@@ -233,4 +233,53 @@ export const DATA__HEALTH = [
         link: "/health/ovulation-calculator",
         category: "health"
     },
+    {
+        title: "Daily Water Intake Calculator",
+        subTitle: "Daily Water Intake Calculator",
+        description: "Calculate the optimal daily water intake based on your personal details.",
+        link: "/health/daily-water-intake-calculator",
+        category: "health"
+    },
+    {
+        title: "Target Heart Rate Calculator",
+        subTitle: "Target Heart Rate Calculator",
+        description: "Calculate your target heart rate based on your age and resting heart rate.",
+        link: "/health/target-heart-rate-calculator",
+        category: "health"
+    },
+    {
+        title: "TDEE Calculator",
+        subTitle: "TDEE Calculator",
+        description: "Calculate your daily calorie requirements based on your activity level.",
+        link: "/health/tdee-calculator",
+        category: "health"
+    },
+    {
+        title: "Steps to Calories Calculator",
+        subTitle: "Steps to Calories Calculator",
+        description: "Calculate your daily calorie requirements based on your activity level.",
+        link: "/health/steps-to-calories-calculator",
+        category: "health"
+    },
+    {
+        title: "Blood Alcohol Concentration Calculator",
+        subTitle: "Blood Alcohol Concentration Calculator",
+        description: "Calculate your BAC and see the change over time based on your alcohol consumption.",
+        link: "/health/blood-alcohol-calculator",
+        category: "health"
+    },
+    {
+        title: "VO2 Max Calculator",
+        subTitle: "VO2 Max Calculator",
+        description: "Calculate your VO2 Max based on your 1-mile walk performance.",
+        link: "/health/vo2-max-calculator",
+        category: "health"
+    },
+    {
+        title: "Period calculator",
+        subTitle: "Period calculator",
+        description: "Calculate your estimated ovulation date and period dates based on your cycle.",
+        link: "/health/period-calculator",
+        category: "health"
+    },
 ]
