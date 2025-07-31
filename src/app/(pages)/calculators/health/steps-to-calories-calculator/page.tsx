@@ -15,6 +15,12 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as LineTooltip, Legend as LineLegend, ResponsiveContainer as LineResponsiveContainer } from "recharts"; // Recharts for line chart
 import { toast } from "react-toastify"; // Import toast for error handling
 
+// Define a type for the result state
+interface CaloriesResult {
+    caloriesBurned: number;
+    caloriesPerStep: number;
+}
+
 // Helper Function to Calculate Calories burned based on input parameters
 const calculateCalories = (weight: number, steps: number, speed: string) => {
     let caloriesPerStep;
@@ -35,7 +41,7 @@ const StepsToCaloriesCalculator = () => {
     const [height, setHeight] = useState<number>(5.5); // Default height in feet
     const [steps, setSteps] = useState<number>(1000); // Default number of steps
     const [speed, setSpeed] = useState<string>("Average"); // Default speed
-    const [result, setResult] = useState<any | null>(null);
+    const [result, setResult] = useState<CaloriesResult | null>(null); // Specify the type for result
 
     // Handle Calculate Button Click
     const handleCalculate = () => {

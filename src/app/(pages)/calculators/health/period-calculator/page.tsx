@@ -12,9 +12,16 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import Wrapper from '@/app/Wrapper'; // Ensure this wrapper component exists
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"; // Recharts for pie chart
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as LineTooltip, Legend as LineLegend, ResponsiveContainer as LineResponsiveContainer } from "recharts"; // Recharts for line chart
+import { LineChart, Line, XAxis, YAxis, Tooltip as LineTooltip, Legend as LineLegend, ResponsiveContainer as LineResponsiveContainer } from "recharts"; // Recharts for line chart
 import { toast } from "react-toastify"; // Import toast for error handling
 import { format, addDays } from "date-fns"; // For date manipulation
+
+// Define a type for the result state
+interface PeriodResult {
+    ovulationDate: Date;
+    nextPeriodStart: Date;
+    nextPeriodEnd: Date;
+}
 
 // Function to calculate the next period and ovulation dates
 const calculatePeriodDates = (startDate: string, periodDuration: number, cycleLength: number) => {
@@ -30,7 +37,7 @@ const PeriodCalculator = () => {
     const [startDate, setStartDate] = useState<string>("");
     const [periodDuration, setPeriodDuration] = useState<number>(5); // Default period duration in days
     const [cycleLength, setCycleLength] = useState<number>(28); // Default cycle length in days
-    const [result, setResult] = useState<any | null>(null);
+    const [result, setResult] = useState<PeriodResult | null>(null); // Specify the type for result
 
     // Handle Calculate Button Click
     const handleCalculate = () => {

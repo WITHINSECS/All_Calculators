@@ -11,8 +11,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import Wrapper from '@/app/Wrapper'; // Ensure this wrapper component exists
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"; // Recharts for line chart
+import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts"; // Recharts for line chart
 import { toast } from "react-toastify"; // Import toast for error handling
+
+// Define a type for the result state
+interface BACResult {
+    bac: number;
+    hoursToZeroBAC: number;
+}
 
 // Helper function to calculate BAC
 const calculateBAC = (weight: number, gender: string, time: number, beerAmount: number, wineAmount: number, liquorAmount: number, otherAmount: number) => {
@@ -38,7 +44,7 @@ const BACCalculator = () => {
     const [wineAmount, setWineAmount] = useState<number>(1); // Default wine amount
     const [liquorAmount, setLiquorAmount] = useState<number>(1.5); // Default liquor amount
     const [otherAmount, setOtherAmount] = useState<number>(250); // Default other alcohol amount (ml)
-    const [result, setResult] = useState<any | null>(null);
+    const [result, setResult] = useState<BACResult | null>(null); // Specify the type for result
 
     // Handle Calculate Button Click
     const handleCalculate = () => {
