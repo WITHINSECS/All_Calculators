@@ -13,9 +13,11 @@ const Page = () => {
     const [calculate, setCalculate] = useState(false)  // State to trigger calculation
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<number>>) => {
-        const value = e.target.value.replace(/,/g, '')  // Remove commas for input
-        if (value === '' || !isNaN(Number(value))) {
-            setter(Number(value))
+        const value = e.target.value.replace(/,/g, '').replace(/^0+/, ''); // Strip leading zeros
+        if (value === '') {
+            setter(0);  // When cleared, set to 0
+        } else if (!isNaN(Number(value))) {
+            setter(Number(value));
         }
     }
 
@@ -25,7 +27,7 @@ const Page = () => {
         const r = rate / (12 * 100)
         const n = tenure * 12
         const emi = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
-        return Math.round(emi)
+        return emi // Avoid rounding here
     }, [amount, rate, tenure, calculate])
 
     const totalPayment = EMI * tenure * 12
@@ -66,7 +68,7 @@ const Page = () => {
                         </div>
                         <Input
                             type="text"
-                            value={amount.toLocaleString()} // Format value with commas
+                            value={amount === 0 ? '' : amount.toLocaleString()} // Show empty if 0
                             onChange={(e) => handleInputChange(e, setAmount)}  // Allow editing the number
                             className="mt-2"
                         />
@@ -88,7 +90,7 @@ const Page = () => {
                         </div>
                         <Input
                             type="number"
-                            value={tenure}
+                            value={tenure === 0 ? '' : tenure} // Show empty if 0
                             onChange={(e) => handleInputChange(e, setTenure)}
                             className="mt-2 w-24"
                         />
@@ -110,7 +112,7 @@ const Page = () => {
                         </div>
                         <Input
                             type="number"
-                            value={rate}
+                            value={rate === 0 ? '' : rate} // Show empty if 0
                             onChange={(e) => handleInputChange(e, setRate)}
                             className="mt-2 w-24"
                         />
@@ -128,7 +130,7 @@ const Page = () => {
                 <div className="space-y-6">
                     <div>
                         <p className="text-muted-foreground text-sm">Monthly Home Loan EMI</p>
-                        <h2 className="text-3xl font-bold text-primary">₹{EMI.toLocaleString()}</h2>
+                        <h2 className="text-3xl font-bold text-primary">₹{Math.round(EMI).toLocaleString()}</h2>
                         <Button variant="link" className="text-sm p-0">View Details</Button>
                     </div>
 

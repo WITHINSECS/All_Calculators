@@ -101,6 +101,18 @@ const Page = () => {
     setLoanAmount(0);
   };
 
+  // Handle Down Payment change to ensure 0 disappears
+  const handleDownPaymentChange = (value: number | string) => {
+    if (value === "") {
+      // If cleared, set to 0
+      setDownPaymentPercent(0);
+    } else {
+      // Otherwise, update to the valid number
+      setDownPaymentPercent(Number(value));
+    }
+  };
+
+
   return (
     <Wrapper>
       <div className="mx-auto md:mt-16 p-5 mt-8 max-w-3xl text-center">
@@ -129,18 +141,32 @@ const Page = () => {
             </div>
 
             {/* Down Payment */}
+            {/* Down Payment */}
             <div>
               <Label className="block mb-1.5" htmlFor="downPayment">
                 Down Payment (%)
               </Label>
-              <Slider
-                value={[downPaymentPercent]} // Wrap the value in an array
-                onValueChange={(val) => setDownPaymentPercent(val[0])} // Handle array value
-                min={0}
-                max={100}
-                step={1}
-              />
+              <div className="flex items-center">
+                <Slider
+                  value={[downPaymentPercent || 0]} // Ensure it doesn't show "0"
+                  onValueChange={(val) => handleDownPaymentChange(val[0])} // Handle array value
+                  min={0}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                />
+                <Input
+                  type="number"
+                  id="downPayment"
+                  value={downPaymentPercent || ""}
+                  onChange={(e) => handleDownPaymentChange(e.target.value)}
+                  className="w-20 ml-4"
+                  placeholder="Enter %"
+                />
+                <span className="ml-2">%</span> {/* Add a percentage symbol */}
+              </div>
             </div>
+
 
             {/* Loan Term */}
             <div>

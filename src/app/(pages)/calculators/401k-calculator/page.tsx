@@ -5,8 +5,8 @@ import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { PieChart, Pie, Cell, Tooltip as PieTooltip, ResponsiveContainer as PieResponsiveContainer } from "recharts";
 
 // Define the colors for the lines and pie chart
@@ -82,6 +82,8 @@ const RetirementCalculator = () => {
     const value = e.target.value.replace(/[^0-9.]/g, ""); // Only allow numbers and decimal points
     if (value !== "") {
       setter(parseFloat(value));
+    } else {
+      setter(0); // Set to 0 when input is cleared
     }
   };
 
@@ -105,7 +107,7 @@ const RetirementCalculator = () => {
               <Input
                 type="number"
                 id="salary"
-                value={salary}
+                value={salary || ""}
                 onChange={(e) => handleInputChange(e, setSalary)}
                 className="w-full"
               />
@@ -115,13 +117,22 @@ const RetirementCalculator = () => {
               <Label className="black mb-2" htmlFor="monthlyContribution">
                 How much do you contribute each month?
               </Label>
-              <Slider
-                value={[monthlyContribution]} // Use an array for Slider
-                onValueChange={(val) => setMonthlyContribution(val[0])} // Handle array value
-                min={0}
-                max={100}
-                step={1}
-              />
+              <div className="flex items-center">
+                <Slider
+                  value={[monthlyContribution]} // Use an array for Slider
+                  onValueChange={(val) => setMonthlyContribution(val[0])} // Handle array value
+                  min={0}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                />
+                <Input
+                  type="number"
+                  value={monthlyContribution || ""}
+                  onChange={(e) => handleInputChange(e, setMonthlyContribution)}
+                  className="w-24 ml-4"
+                />
+              </div>
             </div>
 
             <div>
@@ -131,7 +142,7 @@ const RetirementCalculator = () => {
               <Input
                 type="number"
                 id="salaryIncrease"
-                value={salaryIncrease}
+                value={salaryIncrease || ""}
                 onChange={(e) => handleInputChange(e, setSalaryIncrease)}
                 className="w-full"
               />
@@ -144,7 +155,7 @@ const RetirementCalculator = () => {
               <Input
                 type="number"
                 id="currentAge"
-                value={currentAge}
+                value={currentAge || ""}
                 onChange={(e) => handleInputChange(e, setCurrentAge)}
                 className="w-full"
               />
@@ -157,7 +168,7 @@ const RetirementCalculator = () => {
               <Input
                 type="number"
                 id="retirementAge"
-                value={retirementAge}
+                value={retirementAge || ""}
                 onChange={(e) => handleInputChange(e, setRetirementAge)}
                 className="w-full"
               />
@@ -170,7 +181,7 @@ const RetirementCalculator = () => {
               <Input
                 type="number"
                 id="rateOfReturn"
-                value={rateOfReturn}
+                value={rateOfReturn || ""}
                 onChange={(e) => handleInputChange(e, setRateOfReturn)}
                 className="w-full"
               />
@@ -183,7 +194,7 @@ const RetirementCalculator = () => {
               <Input
                 type="number"
                 id="current401k"
-                value={current401k}
+                value={current401k || ""}
                 onChange={(e) => handleInputChange(e, setCurrent401k)}
                 className="w-full"
               />
@@ -193,26 +204,44 @@ const RetirementCalculator = () => {
               <Label className="black mb-2" htmlFor="employerMatch">
                 Employer match
               </Label>
-              <Slider
-                value={[employerMatch]} // Wrap the value in an array
-                onValueChange={(val) => setEmployerMatch(val[0])}
-                min={0}
-                max={100}
-                step={1}
-              />
+              <div className="flex items-center">
+                <Slider
+                  value={[employerMatch]} // Wrap the value in an array
+                  onValueChange={(val) => setEmployerMatch(val[0])}
+                  min={0}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                />
+                <Input
+                  type="number"
+                  value={employerMatch || ""}
+                  onChange={(e) => handleInputChange(e, setEmployerMatch)}
+                  className="w-24 ml-4"
+                />
+              </div>
             </div>
 
             <div>
               <Label className="black mb-2" htmlFor="salaryLimit">
                 Salary limit for employer match
               </Label>
-              <Slider
-                value={[salaryLimit]} // Wrap the value in an array
-                onValueChange={(val) => setSalaryLimit(val[0])}
-                min={0}
-                max={100}
-                step={1}
-              />
+              <div className="flex items-center">
+                <Slider
+                  value={[salaryLimit]} // Wrap the value in an array
+                  onValueChange={(val) => setSalaryLimit(val[0])}
+                  min={0}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                />
+                <Input
+                  type="number"
+                  value={salaryLimit || ""}
+                  onChange={(e) => handleInputChange(e, setSalaryLimit)}
+                  className="w-24 ml-4"
+                />
+              </div>
             </div>
 
             <div className="text-xl">

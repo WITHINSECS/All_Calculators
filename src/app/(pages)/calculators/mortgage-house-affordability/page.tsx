@@ -39,43 +39,49 @@ interface MortgageResult {
 }
 
 const calculateMortgage = (input: MortgageInput): MortgageResult => {
-    const maxLoan = (input.annualIncome * 0.28) / 12; // 28% of monthly income rule
-    const totalDebts = input.monthlyDebts;
-    const affordablePayment = maxLoan - totalDebts;
+    const monthlyIncome = input.annualIncome / 12;
+    const maxLoanAmount = (monthlyIncome * 0.28) - input.monthlyDebts; // 28% of monthly income minus debts
 
-    // Calculate the maximum home price based on the affordable payment
-    const maxHomePrice = affordablePayment * (input.loanTerm * 12) * (1 + input.interestRate / 100) / (input.loanTerm * 12);
+    // Using the mortgage formula to calculate monthly payment
+    const loanAmount = maxLoanAmount - input.downPayment;
+    const monthlyInterestRate = input.interestRate / 100 / 12;
+    const numPayments = input.loanTerm * 12;
 
-    // Monthly payment breakdown (principal & interest)
-    const principalAndInterest = (maxHomePrice - input.downPayment) * (input.interestRate / 100) / 12 * (1 + input.interestRate / 100) ** input.loanTerm / ((1 + input.interestRate / 100) ** input.loanTerm - 1);
+    // Monthly mortgage payment calculation (Principal & Interest)
+    const principalAndInterest = (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numPayments)) /
+        (Math.pow(1 + monthlyInterestRate, numPayments) - 1);
+
     let monthlyPayment = principalAndInterest;
-    const breakdown: { name: string; value: number }[] = [{ name: "Principal & Interest", value: principalAndInterest }];
+    const paymentBreakdown: { name: string; value: number }[] = [
+        { name: "Principal & Interest", value: principalAndInterest }
+    ];
 
     // PMI calculation (only if down payment is less than 20%)
-    if (input.includePMI && input.downPayment / maxHomePrice < 0.2) {
-        const pmi = principalAndInterest * 0.01; // 1% PMI estimate
+    if (input.includePMI && (input.downPayment / maxLoanAmount) < 0.2) {
+        const pmi = loanAmount * 0.01 / 12; // PMI is generally 1% of the loan amount per year, divided by 12
         monthlyPayment += pmi;
-        breakdown.push({ name: "PMI", value: pmi });
+        paymentBreakdown.push({ name: "PMI", value: pmi });
     }
 
-    // Include taxes and insurance if checked
+    // Include property taxes and insurance
     if (input.includeTaxesInsurance) {
-        const propertyTax = maxHomePrice * (input.propertyTax / 100) / 12;
-        const insurance = input.homeInsurance / 12;
-        monthlyPayment += propertyTax + insurance;
-        breakdown.push({ name: "Taxes", value: propertyTax });
-        breakdown.push({ name: "Insurance", value: insurance });
+        const propertyTax = (maxLoanAmount * (input.propertyTax / 100)) / 12;
+        const homeInsurance = input.homeInsurance / 12;
+        monthlyPayment += propertyTax + homeInsurance;
+        paymentBreakdown.push({ name: "Taxes", value: propertyTax });
+        paymentBreakdown.push({ name: "Home Insurance", value: homeInsurance });
     }
 
-    monthlyPayment += input.hoaDues;
+    // HOA dues
     if (input.hoaDues > 0) {
-        breakdown.push({ name: "HOA Dues", value: input.hoaDues });
+        monthlyPayment += input.hoaDues;
+        paymentBreakdown.push({ name: "HOA Dues", value: input.hoaDues });
     }
 
     return {
-        maxHomePrice,
+        maxHomePrice: maxLoanAmount,
         monthlyPayment,
-        paymentBreakdown: breakdown,
+        paymentBreakdown,
     };
 };
 

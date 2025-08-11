@@ -76,7 +76,7 @@ const DebtCalculator = () => {
         // Remove non-numeric characters except the decimal point
         value = value.replace(/[^0-9]/g, '');
 
-        // If the value is empty, set it to 0
+        // If the value is empty, set it to 0 but show an empty string
         if (value === '') {
             setBalance(0);
         } else {
@@ -106,7 +106,7 @@ const DebtCalculator = () => {
                             <Input
                                 type="text"  // Change type to text for handling input more flexibly
                                 id="balance"
-                                value={balance.toLocaleString()}  // Format value with commas
+                                value={balance === 0 ? '' : balance.toLocaleString()}  // Show empty if balance is 0
                                 onChange={handleBalanceChange}  // Use the custom handleBalanceChange function
                                 className="w-full"
                             />
