@@ -95,6 +95,15 @@ export default function SavingsCalculator() {
 
     // Setting the chart data
     setChartData(tempChartData);
+
+    // Updating the result table
+    const totalDeposits = depositAccumulated;
+    const totalInterestEarned = totalInterest;
+    const totalSavings = totalDeposits + totalInterestEarned;
+    
+    setResult(
+      `Deposits made: ${totalDeposits.toFixed(2)}\nInterest earned: ${totalInterestEarned.toFixed(2)}\nTotal savings: ${totalSavings.toFixed(2)}`
+    );
   };
 
   return (

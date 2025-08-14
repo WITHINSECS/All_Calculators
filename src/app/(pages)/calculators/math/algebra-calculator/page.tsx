@@ -27,7 +27,7 @@ const AlgebraCalculator = () => {
                 const expr = parts[0].trim();
                 const values = parts[1].trim();
                 // Parse values like x=5, y=3
-                const vars = values.split(",").reduce((acc: any, pair) => {
+                const vars: { [key: string]: number } = values.split(",").reduce((acc: { [key: string]: number }, pair) => {
                     const [key, val] = pair.split("=");
                     acc[key.trim()] = parseFloat(val.trim());
                     return acc;
