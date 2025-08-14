@@ -1,12 +1,5 @@
 "use client";
-
 import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -90,16 +83,16 @@ export default function SalaryCalculator() {
     setErrorMessage(""); // Clear error message
   };
 
-  // Generate salary data for the chart
+  // Generate salary data for the chart (with yearly data)
   const generateSalaryChart = () => {
     const tempSalaryData = [];
     let tempSalary = currentSalary;
     for (let year = 1; year <= 10; year++) {
       const salaryWithHike = tempSalary + (tempSalary * hikePercentage) / 100;
       tempSalaryData.push({ year, salary: Math.round(salaryWithHike) });
-      tempSalary = salaryWithHike;
+      tempSalary = salaryWithHike; // Update salary for the next year
     }
-    setSalaryData(tempSalaryData);
+    setSalaryData(tempSalaryData); // Update the state with the generated data
   };
 
   const generatePieChartSalaryHike = (hikeAmount: number) => {

@@ -188,7 +188,7 @@ export default function Page() {
                                 <PieChart>
                                     <Pie
                                         data={[
-                                            { name: "Principal", value: input.loanAmount },
+                                            { name: "Principal", value: result?.totalPrincipal },
                                             { name: "Interest", value: result?.totalInterest || 0 },
                                         ]}
                                         dataKey="value"

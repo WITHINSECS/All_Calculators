@@ -1,12 +1,5 @@
-"use client";
-
+"use client"
 import { useState } from "react";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
     Table,
@@ -31,9 +24,9 @@ import Wrapper from "@/app/Wrapper";
 import { Label } from "@/components/ui/label";
 
 export default function Calculator() {
-    const [initialDeposit, setInitialDeposit] = useState(10000);
-    const [period, setPeriod] = useState(5);
-    const [apy, setApy] = useState(3.15);
+    const [initialDeposit, setInitialDeposit] = useState<number | "">(10000); // Allow empty string or number
+    const [period, setPeriod] = useState<number | "">(5); // Allow empty string or number
+    const [apy, setApy] = useState<number | "">(3.15); // Allow empty string or number
     const [timeUnit, setTimeUnit] = useState("Years");
 
     // Function to calculate compound interest based on the time period
@@ -43,22 +36,37 @@ export default function Calculator() {
         return principal * Math.pow(1 + annualRate, years);
     };
 
-    // Calculate the total balance based on the APY
-    const totalBalance = calculateCompoundInterest(initialDeposit, apy, period);
-    const totalInterest = totalBalance - initialDeposit;
+    // Handle changes for Initial Deposit
+    const handleInitialDepositChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setInitialDeposit(value === "" ? "" : Number(value)); // Handle empty input
+    };
 
-    // Create an array for the chart data, showing the balance growth each year
-    const data = Array.from({ length: period }, (_, i) => {
+    // Handle changes for Period
+    const handlePeriodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setPeriod(value === "" ? "" : Number(value)); // Handle empty input
+    };
+
+    // Handle changes for APY
+    const handleApyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setApy(value === "" ? "" : Number(value)); // Handle empty input
+    };
+
+    const totalBalance = initialDeposit ? calculateCompoundInterest(Number(initialDeposit), apy as number, period as number) : 0;
+    const totalInterest = totalBalance - (initialDeposit ? Number(initialDeposit) : 0);
+
+    const data = Array.from({ length: period as number }, (_, i) => {
         const year = i + 1;
-        const balance = calculateCompoundInterest(initialDeposit, apy, year);
-        const nationalAvgBalance = calculateCompoundInterest(initialDeposit, 1.5, year); // Assuming 1.5% national average
+        const balance = calculateCompoundInterest(Number(initialDeposit), apy as number, year);
+        const nationalAvgBalance = calculateCompoundInterest(Number(initialDeposit), 1.5, year);
         return { name: `Year ${year}`, "Your earnings": balance, "National Average": nationalAvgBalance };
     });
 
-    // Pie Chart Data: Distribution of Earnings between Your Earnings and National Average
     const pieData = [
         { name: "Your Earnings", value: totalInterest },
-        { name: "National Average", value: calculateCompoundInterest(initialDeposit, 1.5, period) - initialDeposit }
+        { name: "National Average", value: calculateCompoundInterest(Number(initialDeposit), 1.5, period as number) - (Number(initialDeposit)) }
     ];
 
     return (
@@ -79,8 +87,8 @@ export default function Calculator() {
                             <Input
                                 id="initialDeposit"
                                 type="number"
-                                value={initialDeposit}
-                                onChange={(e) => setInitialDeposit(Number(e.target.value))}
+                                value={initialDeposit === "" ? "" : initialDeposit}
+                                onChange={handleInitialDepositChange}
                             />
                         </div>
                         <div className="space-y-2">
@@ -95,8 +103,8 @@ export default function Calculator() {
                                 <Input
                                     id="period"
                                     type="number"
-                                    value={period}
-                                    onChange={(e) => setPeriod(Number(e.target.value))}
+                                    value={period === "" ? "" : period}
+                                    onChange={handlePeriodChange}
                                 />
                                 <select
                                     value={timeUnit}
@@ -113,8 +121,8 @@ export default function Calculator() {
                             <Input
                                 id="apy"
                                 type="number"
-                                value={apy}
-                                onChange={(e) => setApy(Number(e.target.value))}
+                                value={apy === "" ? "" : apy}
+                                onChange={handleApyChange}
                                 step="0.01"
                             />{" "}
                             %
@@ -134,7 +142,6 @@ export default function Calculator() {
                         </ResponsiveContainer>
                     </div>
 
-                    {/* Pie Chart to show the breakdown */}
                     <div className="mt-6 flex justify-center">
                         <ResponsiveContainer width="50%" height={300}>
                             <PieChart>
@@ -173,7 +180,7 @@ export default function Calculator() {
                             </TableRow>
                             <TableRow>
                                 <TableCell>National Average:</TableCell>
-                                <TableCell>${(calculateCompoundInterest(initialDeposit, 1.5, period) - initialDeposit).toFixed(2)}</TableCell>
+                                <TableCell>${(calculateCompoundInterest(Number(initialDeposit), 1.5, period as number) - Number(initialDeposit)).toFixed(2)}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Total interest earned =</TableCell>

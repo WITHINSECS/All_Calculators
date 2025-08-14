@@ -49,9 +49,9 @@ interface AmortizationResult {
     monthlyPayment: number;
     totalPayments: number;
     totalInterest: number;
-    totalLoanCost: number; // Added to track total cost
+    totalLoanCost: number;
     annualSchedule: { year: number; interest: number; principal: number; endingBalance: number }[];
-    monthlySchedule: { month: number; interest: number; principal: number; balance: number }[]; // Monthly schedule added
+    monthlySchedule: { month: number; interest: number; principal: number; balance: number }[];
     chartData: { year: number; balance: number; interest: number; payment: number }[];
 }
 
@@ -66,7 +66,6 @@ const calculateAmortization = (input: AmortizationInput): AmortizationResult => 
     const monthlySchedule = [];
     const chartData = [];
 
-    // Generate annual and monthly schedules
     for (let month = 1; month <= totalPayments; month++) {
         const interest = balance * monthlyInterestRate;
         const principal = monthlyPayment - interest;
@@ -74,10 +73,8 @@ const calculateAmortization = (input: AmortizationInput): AmortizationResult => 
         totalInterest += interest;
         totalPrincipal += principal;
 
-        // Create monthly schedule data
         monthlySchedule.push({ month, interest, principal, balance });
 
-        // Add annual breakdown
         if (month % 12 === 0) {
             const year = month / 12;
             const annualInterest = totalInterest - totalPrincipal;
@@ -92,7 +89,7 @@ const calculateAmortization = (input: AmortizationInput): AmortizationResult => 
                 year,
                 balance,
                 interest: annualInterest,
-                payment: monthlyPayment * 12, // Payment is annual
+                payment: monthlyPayment * 12,
             });
         }
 
@@ -105,7 +102,7 @@ const calculateAmortization = (input: AmortizationInput): AmortizationResult => 
         monthlyPayment,
         totalPayments: totalLoanCost,
         totalInterest,
-        totalLoanCost, // Total loan cost
+        totalLoanCost,
         annualSchedule,
         monthlySchedule,
         chartData,
@@ -207,24 +204,25 @@ export default function AmortizationCalculator() {
                             </div>
 
                             <div className="w-full flex items-center justify-center">
-                                <PieChart width={200} height={200}>
-                                    <Pie
-                                        data={[
-                                            { name: "Principal", value: input.loanAmount },
-                                            { name: "Interest", value: result?.totalInterest },
-                                        ]}
-                                        dataKey="value"
-                                        nameKey="name"
-                                        cx="50%"
-                                        cy="50%"
-                                        outerRadius={80}
-                                        label
-                                    >
-                                        <Cell fill="#3498db" />
-                                        <Cell fill="#e74c3c" />
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
+                                <ResponsiveContainer width="100%" height={200}>
+                                    <PieChart>
+                                        <Pie
+                                            data={[
+                                                { name: "Principal", value: input.loanAmount },
+                                                { name: "Interest", value: result?.totalInterest ?? 0 },
+                                            ]}
+                                            dataKey="value"
+                                            nameKey="name"
+                                            cx="50%"
+                                            cy="50%"
+                                            outerRadius={80}
+                                            label
+                                        >
+                                            <Cell fill="#3498db" />
+                                            <Cell fill="#e74c3c" />
+                                        </Pie>
+                                    </PieChart>
+                                </ResponsiveContainer>
                             </div>
                         </div>
 
@@ -235,9 +233,9 @@ export default function AmortizationCalculator() {
                                 <YAxis />
                                 <Tooltip />
                                 <Legend />
-                                <Line type="monotone" dataKey="balance" stroke="#3498db" name="Balance" />
-                                <Line type="monotone" dataKey="interest" stroke="#e74c3c" name="Interest" />
-                                <Line type="monotone" dataKey="payment" stroke="#2ecc71" name="Payment" />
+                                <Line type="monotone" dataKey="balance" stroke="#3498db" name="Balance" strokeWidth={2} />
+                                <Line type="monotone" dataKey="interest" stroke="#e74c3c" name="Interest" strokeWidth={2} />
+                                <Line type="monotone" dataKey="payment" stroke="#2ecc71" name="Payment" strokeWidth={2} />
                             </LineChart>
                         </ResponsiveContainer>
 

@@ -1,7 +1,7 @@
 import Wrapper from '@/app/Wrapper'
 import CalculatorCard from '@/components/Calculators/CalculatorCard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { DATA__FINANCE, DATA__HEALTH } from '@/mock/calculators'
+import { DATA__FINANCE, DATA__HEALTH, DATA__MATH } from '@/mock/calculators'
 import React from 'react'
 
 const page = () => {
@@ -49,12 +49,15 @@ const page = () => {
                     </TabsContent>
                     <TabsContent value="lifestyle">
                         <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-6 grid-cols-1">
-                           
                         </div>
                     </TabsContent>
                     <TabsContent value="math">
                         <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-6 grid-cols-1">
-                           
+                            {
+                                DATA__MATH.map((item, index) => (
+                                    <CalculatorCard key={index} {...item} />
+                                ))
+                            }
                         </div>
                     </TabsContent>
                 </Tabs>

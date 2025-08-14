@@ -54,7 +54,7 @@ interface InvestmentInput {
 interface InvestmentResult {
   futureValue: number;
   totalInterest: number;
-  yearlyBreakdown: { year: number; interest: number; accrued: number; balance: number }[];
+  yearlyBreakdown: { year: number; interest: number; accrued: number; balance: number }[]; 
 }
 
 // Function to calculate investment
@@ -63,8 +63,14 @@ const calculateInvestment = (input: InvestmentInput): InvestmentResult => {
   const compoundPerYear = frequencies[input.interestRatePeriod]; // Fixed
   const totalMonths = input.years * 12 + input.months;
   const monthlyRate = input.interestRate / 100 / compoundPerYear;
-  const depositInterval = input.additionalContributions === "deposits" ? 1 : 0;
   const yearlyBreakdown: { year: number; interest: number; accrued: number; balance: number }[] = [];
+
+  const getCompoundRate = (period: string) => {
+    if (period === "daily") return 1 + input.interestRate / 100 / 365;
+    if (period === "weekly") return 1 + input.interestRate / 100 / 52;
+    if (period === "monthly") return 1 + input.interestRate / 100 / 12;
+    return 1 + input.interestRate / 100;
+  };
 
   for (let month = 0; month <= totalMonths; month++) {
     if (month > 0 && month % 12 === 0) {
@@ -72,15 +78,28 @@ const calculateInvestment = (input: InvestmentInput): InvestmentResult => {
       const interest = balance * monthlyRate * compoundPerYear;
       const accrued: number = (yearlyBreakdown[year - 1]?.accrued || 0) + interest;
       balance += interest;
+
+      // Handling Deposits
       if (input.additionalContributions === "deposits") {
         const deposit = input.depositAmount * (1 + input.annualDepositIncrease / 100) ** (year - 1);
         if (input.depositPeriod === "beginning") {
           balance += deposit;
         }
       }
+
+      // Handling Withdrawals or Both Deposits & Withdrawals
+      if (input.additionalContributions === "withdrawals" || input.additionalContributions === "both") {
+        const withdrawalAmount = input.depositAmount * (1 + input.annualDepositIncrease / 100) ** (Math.floor(month / 12));
+        if (input.depositPeriod === "beginning") {
+          balance -= withdrawalAmount;
+        } else {
+          balance -= withdrawalAmount;
+        }
+      }
+
       yearlyBreakdown.push({ year, interest, accrued, balance });
     }
-    balance *= Math.pow(1 + monthlyRate, 1);
+    balance *= Math.pow(getCompoundRate(input.interestRatePeriod), 1);
   }
 
   const futureValue = balance;
@@ -98,30 +117,30 @@ export default function InvestmentCalculator() {
     initialInvestment: 5000,
     interestRate: 5,
     compoundFrequency: 12,
-    interestRatePeriod: "monthly", // Fixed
+    interestRatePeriod: "monthly", 
     years: 5,
     months: 0,
     depositAmount: 0,
     depositPeriod: "end",
     additionalContributions: "none",
-    annualDepositIncrease: 0, // Fixed
+    annualDepositIncrease: 0,
   });
+  
   const [result, setResult] = useState<InvestmentResult | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setInput((prev) => ({ ...prev, [name]: Number(value) }));
+    const parsedValue = value === "" ? "" : Number(value); // Handle empty string case
+    setInput((prev) => ({ ...prev, [name]: parsedValue }));
   };
 
-  // Handle compound frequency change
   const handleCompoundFrequencyChange = (value: string) => {
     setInput((prev) => ({
       ...prev,
-      interestRatePeriod: value as "daily" | "weekly" | "monthly" | "yearly", // Fixed to match valid keys
+      interestRatePeriod: value as "daily" | "weekly" | "monthly" | "yearly",
     }));
   };
 
-  // Handle additional contributions change
   const handleContributionsChange = (value: "none" | "deposits" | "withdrawals" | "both") => {
     setInput((prev) => ({
       ...prev,
@@ -129,7 +148,6 @@ export default function InvestmentCalculator() {
     }));
   };
 
-  // Handle deposit period change (beginning or end of period)
   const handleDepositPeriodChange = (value: "beginning" | "end") => {
     setInput((prev) => ({
       ...prev,
@@ -142,13 +160,27 @@ export default function InvestmentCalculator() {
     setResult(calcResult);
   };
 
+  const handleReset = () => {
+    setInput({
+      initialInvestment: 5000,
+      interestRate: 5,
+      compoundFrequency: 12,
+      interestRatePeriod: "monthly",
+      years: 5,
+      months: 0,
+      depositAmount: 0,
+      depositPeriod: "end",
+      additionalContributions: "none",
+      annualDepositIncrease: 0,
+    });
+    setResult(null);
+  };
+
   return (
     <Wrapper>
       <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8">
         <div className="mx-auto max-w-3xl text-center mb-8">
-          <h1 className="text-2xl font-semibold lg:text-4xl">
-            Compound Interest Calculator
-          </h1>
+          <h1 className="text-2xl font-semibold lg:text-4xl">Compound Interest Calculator</h1>
           <p className="text-muted-foreground mt-4 text-xl">
             Explore our comprehensive range of calculators designed to assist you with various financial, health, lifestyle, and mathematical needs.
           </p>
@@ -295,11 +327,11 @@ export default function InvestmentCalculator() {
               <TableBody>
                 <TableRow>
                   <TableCell>Future investment value</TableCell>
-                  <TableCell className="text-right">${result?.futureValue.toFixed(2) ?? "0.00"}</TableCell>
+                  <TableCell className="text-right">${result?.futureValue.toFixed(2) ?? "-"}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Total interest earned</TableCell>
-                  <TableCell className="text-right">${result?.totalInterest.toFixed(2) ?? "0.00"}</TableCell>
+                  <TableCell className="text-right">${result?.totalInterest.toFixed(2) ?? "-"}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>

@@ -282,4 +282,56 @@ export const DATA__HEALTH = [
         link: "/health/period-calculator",
         category: "health"
     },
+    {
+        title: "Fitness Age Calculator",
+        subTitle: "Fitness Age Calculator",
+        description: "Calculate your estimated fitness age based on your age and fitness level.",
+        link: "/health/fitness-age-calculator",
+        category: "health"
+    },
+    {
+        title: "Calories Burned Calculator",
+        subTitle: "Calories Burned Calculator",
+        description: "Calculate the number of calories burned during a workout based on your weight and duration.",
+        link: "/health/calories-burned-calculator",
+        category: "health"
+    },
+    {
+        title: "Lean Body Mass Calculator",
+        subTitle: "Lean Body Mass Calculator",
+        description: "Calculate your lean body mass based on your height and weight.",
+        link: "/health/lean-body-mass-calculator",
+        category: "health"
+    },
+    {
+        title: "Cost of Smoking Calculator",
+        subTitle: "Cost of Smoking Calculator",
+        description: "Calculate the cost of smoking based on your age, tobacco use, and health status.",
+        link: "/health/cost-of-smoking-calculator",
+        category: "health"
+    },
+]
+
+export const DATA__MATH = [
+    {
+        title: "Scientific Calculator",
+        subTitle: "Scientific Calculator",
+        description: "Scientific Calculator is a tool that helps you calculate the amount that you will receive after at least five years of work.",
+        link: "/math/scientific-calculator",
+        category: "math"
+    },
+    {
+        title: "Percentage Calculator",
+        subTitle: "Percentage Calculator",
+        description: "Percentage Calculator is a tool that helps you calculate the amount that you will receive after at least five years of work.",
+        link: "/math/percentage-calculator",
+        category: "math"
+    },
+    {
+        title: "Algebra Calculator",
+        subTitle: "Algebra Calculator",
+        description: "Algebra Calculator is a tool that helps you calculate the amount that you will receive after at least five years of work.",
+        link: "/math/algebra-calculator",
+        category: "math"
+    },
 ]
