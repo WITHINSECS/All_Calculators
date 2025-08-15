@@ -16,29 +16,33 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function InflationCalculator() {
-    const [initialAmount, setInitialAmount] = useState(0);
-    const [inflationRate, setInflationRate] = useState(0);
-    const [years, setYears] = useState(1);
+    const [initialAmount, setInitialAmount] = useState<string>("");
+    const [inflationRate, setInflationRate] = useState<string>("");
+    const [years, setYears] = useState<string>("");
     const [inflationResult, setInflationResult] = useState({ futureCost: 0, priceIncrease: 0 });
-    const [errorMessage, setErrorMessage] = useState("");
 
     const calculateInflation = () => {
-        // Check if inflation rate exceeds 20%
-        if (inflationRate > 20) {
-            toast.error("Inflation rate entered can be maximum up to 20%");
-            return;
-        }
+        // Parse the values as numbers
+        const initialAmountNum = parseFloat(initialAmount);
+        const inflationRateNum = parseFloat(inflationRate);
+        const yearsNum = parseFloat(years);
 
-        // Check if fields are empty or 0
-        if (initialAmount === 0 || inflationRate === 0 || years === 0) {
+        // Validation: Ensure all fields are filled and not zero
+        if (!initialAmount || !inflationRate || !years || initialAmountNum <= 0 || inflationRateNum <= 0 || yearsNum <= 0) {
             toast.error("All fields are required and cannot be zero.");
             return;
         }
 
-        const rate = inflationRate / 100;
+        // Check if inflation rate exceeds 20%
+        if (inflationRateNum > 20) {
+            toast.error("Inflation rate entered can be maximum up to 20%");
+            return;
+        }
+
         // Future cost calculation based on compound interest formula: A = P * (1 + r)^t
-        const futureCost = initialAmount * Math.pow(1 + rate, years);
-        const priceIncrease = futureCost - initialAmount;
+        const rate = inflationRateNum / 100;
+        const futureCost = initialAmountNum * Math.pow(1 + rate, yearsNum);
+        const priceIncrease = futureCost - initialAmountNum;
 
         setInflationResult({
             futureCost: parseFloat(futureCost.toFixed(2)),
@@ -74,7 +78,7 @@ export default function InflationCalculator() {
                                     id="initialAmount"
                                     type="number"
                                     value={initialAmount}
-                                    onChange={(e) => setInitialAmount(Number(e.target.value))}
+                                    onChange={(e) => setInitialAmount(e.target.value)}
                                     placeholder="Enter Initial Amount"
                                 />
                             </div>
@@ -84,10 +88,10 @@ export default function InflationCalculator() {
                                     id="inflationRate"
                                     type="number"
                                     value={inflationRate}
-                                    onChange={(e) => setInflationRate(Math.min(Number(e.target.value), 20))}
+                                    onChange={(e) => setInflationRate(Math.min(Number(e.target.value), 20).toString())}
                                     placeholder="Enter Inflation Rate"
                                 />
-                                {inflationRate > 20 && (
+                                {parseFloat(inflationRate) > 20 && (
                                     <p className="text-red-500 text-sm">Error: Inflation rate entered can be maximum up to 20%</p>
                                 )}
                             </div>
@@ -97,7 +101,7 @@ export default function InflationCalculator() {
                                     id="years"
                                     type="number"
                                     value={years}
-                                    onChange={(e) => setYears(Number(e.target.value))}
+                                    onChange={(e) => setYears(e.target.value)}
                                     placeholder="Enter Number of Years"
                                 />
                             </div>

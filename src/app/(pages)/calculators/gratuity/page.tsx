@@ -71,7 +71,7 @@ export default function GratuityCalculator() {
                                 type="number"
                                 value={salary ? salary : ""}
                                 onChange={(e) => setSalary(Number(e.target.value))}
-                                placeholder="Salary (PKR)"
+                                placeholder="Salary"
                             />
                         </div>
 

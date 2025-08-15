@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -81,7 +80,7 @@ export default function InvestmentCalculator() {
               </Select>
             </div>
             <div className="space-y-2">
-              <label className="mb-1.5 block font-semibold">Monthly Investment Amount <span className="text-red-600">*</span></label>
+              <label className="mb-1.5 block font-semibold">Investment Amount <span className="text-red-600">*</span></label>
               <Input
                 placeholder="Ex: 1000"
                 value={amount}
@@ -142,9 +141,9 @@ export default function InvestmentCalculator() {
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
-                      data={[
+                      data={[ 
                         { name: "Invested", value: result.invested },
-                        { name: "Returns", value: result.returns },
+                        { name: "Returns", value: result.returns }
                       ]}
                       dataKey="value"
                       nameKey="name"

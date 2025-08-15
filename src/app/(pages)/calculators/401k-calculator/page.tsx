@@ -1,28 +1,29 @@
 "use client";
 
-import Wrapper from "@/app/Wrapper";
 import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { PieChart, Pie, Cell, Tooltip as PieTooltip, ResponsiveContainer as PieResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell } from "recharts";
+import Wrapper from "@/app/Wrapper";
+import { toast } from "react-toastify";
 
 // Define the colors for the lines and pie chart
 const COLORS = ["#0D74FF", "#FF5733"]; // Blue for employee contribution, Green for employer contribution
 
 const RetirementCalculator = () => {
   // States to hold user input and calculated values
-  const [salary, setSalary] = useState<number>(40000);
-  const [monthlyContribution, setMonthlyContribution] = useState<number>(10); // Percentage of salary
-  const [salaryIncrease, setSalaryIncrease] = useState<number>(0);
-  const [currentAge, setCurrentAge] = useState<number>(30);
-  const [retirementAge, setRetirementAge] = useState<number>(65);
-  const [rateOfReturn, setRateOfReturn] = useState<number>(7);
-  const [current401k, setCurrent401k] = useState<number>(0);
-  const [employerMatch, setEmployerMatch] = useState<number>(50);
-  const [salaryLimit, setSalaryLimit] = useState<number>(6);
+  const [salary, setSalary] = useState<string>(""); // Empty string initially
+  const [monthlyContribution, setMonthlyContribution] = useState<string>(""); // Empty string initially
+  const [salaryIncrease, setSalaryIncrease] = useState<string>(""); // Empty string initially
+  const [currentAge, setCurrentAge] = useState<string>(""); // Empty string initially
+  const [retirementAge, setRetirementAge] = useState<string>(""); // Empty string initially
+  const [rateOfReturn, setRateOfReturn] = useState<string>(""); // Empty string initially
+  const [current401k, setCurrent401k] = useState<string>(""); // Empty string initially
+  const [employerMatch, setEmployerMatch] = useState<string>(""); // Empty string initially
+  const [salaryLimit, setSalaryLimit] = useState<string>(""); // Empty string initially
 
   const [estimatedRetirement, setEstimatedRetirement] = useState<number>(0);
   const [employeeContributions, setEmployeeContributions] = useState<number>(0);
@@ -34,23 +35,27 @@ const RetirementCalculator = () => {
 
   // Function to calculate retirement value with and without employer match
   const calculateRetirement = () => {
-    const yearsToRetirement = retirementAge - currentAge;
-    let employeeBalance = current401k;
-    let employerBalance = current401k;
+    if (!salary || !monthlyContribution || !currentAge || !retirementAge || !rateOfReturn || !current401k || !employerMatch || !salaryLimit) {
+      toast.error("All fields are required!");
+      return;
+    }
+
+    let employeeBalance = parseFloat(current401k);
+    let employerBalance = parseFloat(current401k);
     let employeeContributionTotal = 0;
     let employerContributionTotal = 0;
 
-    let salaryAtStart = salary;
+    let salaryAtStart = parseFloat(salary);
 
     const employeeDataArray: { age: number; savings: number }[] = [];
     const employerDataArray: { age: number; savings: number }[] = [];
 
-    for (let age = currentAge; age <= retirementAge; age++) {
-      const employeeContribution = (salaryAtStart * (monthlyContribution / 100)) * 12; // Annual employee contribution
-      const employerContribution = (salaryAtStart * (Math.min(salaryLimit, employerMatch) / 100)) * 12; // Annual employer contribution
+    for (let age = parseInt(currentAge); age <= parseInt(retirementAge); age++) {
+      const employeeContribution = (salaryAtStart * (parseFloat(monthlyContribution) / 100)) * 12; // Annual employee contribution
+      const employerContribution = (salaryAtStart * (Math.min(parseFloat(salaryLimit), parseFloat(employerMatch)) / 100)) * 12; // Annual employer contribution
 
-      employeeBalance += employeeContribution + (employeeBalance * rateOfReturn / 100);
-      employerBalance += employerContribution + (employerBalance * rateOfReturn / 100);
+      employeeBalance += employeeContribution + (employeeBalance * (parseFloat(rateOfReturn) / 100));
+      employerBalance += employerContribution + (employerBalance * (parseFloat(rateOfReturn) / 100));
 
       // Accumulate total contributions
       employeeContributionTotal += employeeContribution;
@@ -59,7 +64,7 @@ const RetirementCalculator = () => {
       employeeDataArray.push({ age, savings: employeeBalance });
       employerDataArray.push({ age, savings: employerBalance });
 
-      salaryAtStart += salaryAtStart * (salaryIncrease / 100); // Increase salary each year
+      salaryAtStart += salaryAtStart * (parseFloat(salaryIncrease) / 100); // Increase salary each year
     }
 
     setEstimatedRetirement(employeeBalance);
@@ -78,13 +83,9 @@ const RetirementCalculator = () => {
   ];
 
   // Handle input changes and strip any leading zeros or invalid characters
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<number>>) => {
-    const value = e.target.value.replace(/[^0-9.]/g, ""); // Only allow numbers and decimal points
-    if (value !== "") {
-      setter(parseFloat(value));
-    } else {
-      setter(0); // Set to 0 when input is cleared
-    }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<string>>) => {
+    const value = e.target.value;
+    setter(value); // Update value
   };
 
   return (
@@ -107,7 +108,7 @@ const RetirementCalculator = () => {
               <Input
                 type="number"
                 id="salary"
-                value={salary || ""}
+                value={salary}
                 onChange={(e) => handleInputChange(e, setSalary)}
                 className="w-full"
               />
@@ -119,8 +120,8 @@ const RetirementCalculator = () => {
               </Label>
               <div className="flex items-center">
                 <Slider
-                  value={[monthlyContribution]} // Use an array for Slider
-                  onValueChange={(val) => setMonthlyContribution(val[0])} // Handle array value
+                  value={[parseFloat(monthlyContribution)]} // Use an array for Slider
+                  onValueChange={(val) => setMonthlyContribution(val[0].toString())} // Handle array value
                   min={0}
                   max={100}
                   step={1}
@@ -128,7 +129,7 @@ const RetirementCalculator = () => {
                 />
                 <Input
                   type="number"
-                  value={monthlyContribution || ""}
+                  value={monthlyContribution}
                   onChange={(e) => handleInputChange(e, setMonthlyContribution)}
                   className="w-24 ml-4"
                 />
@@ -142,7 +143,7 @@ const RetirementCalculator = () => {
               <Input
                 type="number"
                 id="salaryIncrease"
-                value={salaryIncrease || ""}
+                value={salaryIncrease}
                 onChange={(e) => handleInputChange(e, setSalaryIncrease)}
                 className="w-full"
               />
@@ -155,7 +156,7 @@ const RetirementCalculator = () => {
               <Input
                 type="number"
                 id="currentAge"
-                value={currentAge || ""}
+                value={currentAge}
                 onChange={(e) => handleInputChange(e, setCurrentAge)}
                 className="w-full"
               />
@@ -168,7 +169,7 @@ const RetirementCalculator = () => {
               <Input
                 type="number"
                 id="retirementAge"
-                value={retirementAge || ""}
+                value={retirementAge}
                 onChange={(e) => handleInputChange(e, setRetirementAge)}
                 className="w-full"
               />
@@ -181,7 +182,7 @@ const RetirementCalculator = () => {
               <Input
                 type="number"
                 id="rateOfReturn"
-                value={rateOfReturn || ""}
+                value={rateOfReturn}
                 onChange={(e) => handleInputChange(e, setRateOfReturn)}
                 className="w-full"
               />
@@ -194,7 +195,7 @@ const RetirementCalculator = () => {
               <Input
                 type="number"
                 id="current401k"
-                value={current401k || ""}
+                value={current401k}
                 onChange={(e) => handleInputChange(e, setCurrent401k)}
                 className="w-full"
               />
@@ -206,8 +207,8 @@ const RetirementCalculator = () => {
               </Label>
               <div className="flex items-center">
                 <Slider
-                  value={[employerMatch]} // Wrap the value in an array
-                  onValueChange={(val) => setEmployerMatch(val[0])}
+                  value={[parseFloat(employerMatch)]} // Wrap the value in an array
+                  onValueChange={(val) => setEmployerMatch(val[0].toString())}
                   min={0}
                   max={100}
                   step={1}
@@ -215,7 +216,7 @@ const RetirementCalculator = () => {
                 />
                 <Input
                   type="number"
-                  value={employerMatch || ""}
+                  value={employerMatch}
                   onChange={(e) => handleInputChange(e, setEmployerMatch)}
                   className="w-24 ml-4"
                 />
@@ -228,8 +229,8 @@ const RetirementCalculator = () => {
               </Label>
               <div className="flex items-center">
                 <Slider
-                  value={[salaryLimit]} // Wrap the value in an array
-                  onValueChange={(val) => setSalaryLimit(val[0])}
+                  value={[parseFloat(salaryLimit)]} // Wrap the value in an array
+                  onValueChange={(val) => setSalaryLimit(val[0].toString())}
                   min={0}
                   max={100}
                   step={1}
@@ -237,7 +238,7 @@ const RetirementCalculator = () => {
                 />
                 <Input
                   type="number"
-                  value={salaryLimit || ""}
+                  value={salaryLimit}
                   onChange={(e) => handleInputChange(e, setSalaryLimit)}
                   className="w-24 ml-4"
                 />

@@ -27,21 +27,26 @@ const compoundingFrequencies = [
 ];
 
 export default function FDCaclulator() {
-    const [investment, setInvestment] = useState(0);
-    const [interestRate, setInterestRate] = useState(0);
-    const [years, setYears] = useState(1);
+    const [investment, setInvestment] = useState<string>("");
+    const [interestRate, setInterestRate] = useState<string>("");
+    const [years, setYears] = useState<string>("");
     const [compoundingFrequency, setCompoundingFrequency] = useState("Monthly");
     const [fdResult, setFdResult] = useState({ maturityAmount: 0, returns: 0 });
 
     const calculateFD = () => {
-        // Check if any field is empty or 0
-        if (investment === 0 || interestRate === 0 || years === 0 || compoundingFrequency === "") {
+        // Parse string inputs to numbers
+        const investmentNum = parseFloat(investment);
+        const interestRateNum = parseFloat(interestRate);
+        const yearsNum = parseFloat(years);
+
+        // Validation: Check if any field is empty or zero
+        if (!investment || !interestRate || !years || investmentNum <= 0 || interestRateNum <= 0 || yearsNum <= 0 || compoundingFrequency === "") {
             toast.error("All fields are required and cannot be zero.");
             return;
         }
 
         // Check if the interest rate exceeds 20%
-        if (interestRate > 20) {
+        if (interestRateNum > 20) {
             toast.error("Interest rate entered can be maximum up to 20%");
             return;
         }
@@ -50,20 +55,19 @@ export default function FDCaclulator() {
         const selectedFrequency = compoundingFrequencies.find(frequency => frequency.value === compoundingFrequency);
         if (!selectedFrequency) return;
 
-        const rate = interestRate / 100;
+        const rate = interestRateNum / 100;
         const periods = selectedFrequency.periods;
-        const totalPeriods = years * periods;
+        const totalPeriods = yearsNum * periods;
 
         // FD Calculation formula: A = P(1 + r/n)^(nt)
-        const maturityAmount = investment * Math.pow(1 + rate / periods, totalPeriods);
-        const returns = maturityAmount - investment;
+        const maturityAmount = investmentNum * Math.pow(1 + rate / periods, totalPeriods);
+        const returns = maturityAmount - investmentNum;
 
         setFdResult({
             maturityAmount: parseFloat(maturityAmount.toFixed(2)),
             returns: parseFloat(returns.toFixed(2)),
         });
     };
-
 
     const pieData = [
         { name: "Investment Amount", value: fdResult.returns },
@@ -92,7 +96,7 @@ export default function FDCaclulator() {
                                     id="investment"
                                     type="number"
                                     value={investment}
-                                    onChange={(e) => setInvestment(Number(e.target.value))}
+                                    onChange={(e) => setInvestment(e.target.value)}
                                     placeholder="Enter FD Investment"
                                 />
                             </div>
@@ -102,10 +106,10 @@ export default function FDCaclulator() {
                                     id="interestRate"
                                     type="number"
                                     value={interestRate}
-                                    onChange={(e) => setInterestRate(Math.min(Number(e.target.value), 20))}
+                                    onChange={(e) => setInterestRate(Math.min(Number(e.target.value), 20).toString())}
                                     placeholder="Enter Interest Rate"
                                 />
-                                {interestRate > 20 && (
+                                {parseFloat(interestRate) > 20 && (
                                     <p className="text-red-500 text-sm">Error: Interest rate entered can be maximum up to 20%</p>
                                 )}
                             </div>
@@ -115,7 +119,7 @@ export default function FDCaclulator() {
                                     id="years"
                                     type="number"
                                     value={years}
-                                    onChange={(e) => setYears(Number(e.target.value))}
+                                    onChange={(e) => setYears(e.target.value)}
                                     placeholder="Enter Number of Years"
                                 />
                             </div>

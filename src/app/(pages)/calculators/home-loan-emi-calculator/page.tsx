@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button"
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts'
 
 const Page = () => {
-    const [amount, setAmount] = useState(2500000)
-    const [tenure, setTenure] = useState(30)
-    const [rate, setRate] = useState(7.9)
-    const [calculate, setCalculate] = useState(false)  // State to trigger calculation
+    const [amount, setAmount] = useState<number>(0);  // Use number type for amount
+    const [tenure, setTenure] = useState<number>(0);  // Use number type for tenure
+    const [rate, setRate] = useState<number>(0);  // Use number type for rate
+    const [calculate, setCalculate] = useState(false);  // State to trigger calculation
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<number>>) => {
         const value = e.target.value.replace(/,/g, '').replace(/^0+/, ''); // Strip leading zeros
@@ -22,21 +22,21 @@ const Page = () => {
     }
 
     const EMI = useMemo(() => {
-        if (!calculate) return 0
-        const principal = amount
-        const r = rate / (12 * 100)
-        const n = tenure * 12
-        const emi = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)
-        return emi // Avoid rounding here
-    }, [amount, rate, tenure, calculate])
+        if (!calculate || !amount || !tenure || !rate) return 0;
+        const principal = amount;
+        const r = rate / (12 * 100);
+        const n = tenure * 12;
+        const emi = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+        return emi;  // Avoid rounding here
+    }, [amount, rate, tenure, calculate]);
 
-    const totalPayment = EMI * tenure * 12
-    const interestPayable = totalPayment - amount
+    const totalPayment = EMI * (tenure * 12);
+    const interestPayable = totalPayment - amount;
 
     const chartData = [
         { name: 'Principal Amount', value: amount },
         { name: 'Interest Payable', value: interestPayable }
-    ]
+    ];
 
     return (
         <Wrapper>
@@ -60,7 +60,7 @@ const Page = () => {
                             max={100000000}
                             step={10000}
                             value={[amount]}
-                            onValueChange={([val]) => setAmount(val)}
+                            onValueChange={([val]) => setAmount(val)}  // Set value directly as a number
                         />
                         <div className="flex justify-between text-sm text-muted-foreground mt-1">
                             <span>₹1 Lac</span>
@@ -68,8 +68,8 @@ const Page = () => {
                         </div>
                         <Input
                             type="text"
-                            value={amount === 0 ? '' : amount.toLocaleString()} // Show empty if 0
-                            onChange={(e) => handleInputChange(e, setAmount)}  // Allow editing the number
+                            value={amount === 0 ? "" : amount.toLocaleString()}  // Show empty if 0
+                            onChange={(e) => handleInputChange(e, setAmount)}  // Handle number input
                             className="mt-2"
                         />
                     </div>
@@ -82,7 +82,7 @@ const Page = () => {
                             max={30}
                             step={1}
                             value={[tenure]}
-                            onValueChange={([val]) => setTenure(val)}
+                            onValueChange={([val]) => setTenure(val)}  // Set value directly as a number
                         />
                         <div className="flex justify-between text-sm text-muted-foreground mt-1">
                             <span>1</span>
@@ -90,8 +90,8 @@ const Page = () => {
                         </div>
                         <Input
                             type="number"
-                            value={tenure === 0 ? '' : tenure} // Show empty if 0
-                            onChange={(e) => handleInputChange(e, setTenure)}
+                            value={tenure === 0 ? "" : tenure}  // Show empty if 0
+                            onChange={(e) => handleInputChange(e, setTenure)}  // Handle number input
                             className="mt-2 w-24"
                         />
                     </div>
@@ -104,7 +104,7 @@ const Page = () => {
                             max={15}
                             step={0.1}
                             value={[rate]}
-                            onValueChange={([val]) => setRate(parseFloat(val.toFixed(1)))}
+                            onValueChange={([val]) => setRate(parseFloat(val.toFixed(1)))}  // Set value directly as a number
                         />
                         <div className="flex justify-between text-sm text-muted-foreground mt-1">
                             <span>0.5</span>
@@ -112,8 +112,8 @@ const Page = () => {
                         </div>
                         <Input
                             type="number"
-                            value={rate === 0 ? '' : rate} // Show empty if 0
-                            onChange={(e) => handleInputChange(e, setRate)}
+                            value={rate === 0 ? "" : rate}  // Show empty if 0
+                            onChange={(e) => handleInputChange(e, setRate)}  // Handle number input
                             className="mt-2 w-24"
                         />
                     </div>

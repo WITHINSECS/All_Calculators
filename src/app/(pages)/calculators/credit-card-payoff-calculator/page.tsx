@@ -10,10 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 const COLORS = ["#0D74FF", "#FF5733"];
 
 const DebtCalculator = () => {
-    // States to hold user input
-    const [balance, setBalance] = useState(2000);
-    const [interestRate, setInterestRate] = useState(15);
-    const [monthlyPayment, setMonthlyPayment] = useState(45);
+    // States to hold user input, initialized as empty string
+    const [balance, setBalance] = useState<string>(""); 
+    const [interestRate, setInterestRate] = useState<string>(""); 
+    const [monthlyPayment, setMonthlyPayment] = useState<string>("");
 
     // Calculated states
     const [numPayments, setNumPayments] = useState(0);
@@ -24,15 +24,19 @@ const DebtCalculator = () => {
 
     // Function to calculate debt repayment plan
     const calculateDebt = () => {
-        let balanceRemaining = balance;
+        const balanceValue = balance ? parseFloat(balance) : 0;
+        const interestRateValue = interestRate ? parseFloat(interestRate) : 0;
+        const monthlyPaymentValue = monthlyPayment ? parseFloat(monthlyPayment) : 0;
+
+        let balanceRemaining = balanceValue;
         let totalInterestPaid = 0;
         let totalPrincipalPaid = 0;
         let numPaymentsCount = 0;
-        let adjustedMonthlyPayment = monthlyPayment;
+        let adjustedMonthlyPayment = monthlyPaymentValue;
 
         // While the balance is still above 0
         while (balanceRemaining > 0) {
-            const interestForThisMonth = balanceRemaining * (interestRate / 100) / 12;
+            const interestForThisMonth = balanceRemaining * (interestRateValue / 100) / 12;
             let principalForThisMonth = adjustedMonthlyPayment - interestForThisMonth;
 
             if (principalForThisMonth > balanceRemaining) {
@@ -76,14 +80,19 @@ const DebtCalculator = () => {
         // Remove non-numeric characters except the decimal point
         value = value.replace(/[^0-9]/g, '');
 
-        // If the value is empty, set it to 0 but show an empty string
         if (value === '') {
-            setBalance(0);
+            setBalance("");  // Set to empty string instead of 0
         } else {
-            // Ensure no leading zeros unless it's just "0"
-            value = parseInt(value, 10).toString(); // Convert to number to remove leading zeros
-            setBalance(Number(value)); // Set the balance
+            setBalance(value); // Keep it as a string
         }
+    };
+
+    const handleInterestRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setInterestRate(e.target.value || ""); // Handle empty string scenario
+    };
+
+    const handleMonthlyPaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setMonthlyPayment(e.target.value || ""); // Handle empty string scenario
     };
 
     return (
@@ -106,7 +115,7 @@ const DebtCalculator = () => {
                             <Input
                                 type="text"  // Change type to text for handling input more flexibly
                                 id="balance"
-                                value={balance === 0 ? '' : balance.toLocaleString()}  // Show empty if balance is 0
+                                value={balance}  // Display the balance as an empty string when 0
                                 onChange={handleBalanceChange}  // Use the custom handleBalanceChange function
                                 className="w-full"
                             />
@@ -118,7 +127,7 @@ const DebtCalculator = () => {
                                 type="number"
                                 id="interest"
                                 value={interestRate}
-                                onChange={(e) => setInterestRate(Number(e.target.value))}
+                                onChange={handleInterestRateChange}
                                 className="w-full"
                             />
                         </div>
@@ -129,7 +138,7 @@ const DebtCalculator = () => {
                                 type="number"
                                 id="payment"
                                 value={monthlyPayment}
-                                onChange={(e) => setMonthlyPayment(Number(e.target.value))}
+                                onChange={handleMonthlyPaymentChange}
                                 className="w-full"
                             />
                         </div>
@@ -151,7 +160,6 @@ const DebtCalculator = () => {
                                 ))}
                             </Pie>
                             <Tooltip />
-                            {/* Displaying percentages in the center of the pie chart */}
                             <RechartsLabel value={`${principalPercentage.toFixed(1)}%`} position="center" fontSize={16} fill="#0D74FF" />
                         </PieChart>
                     </div>
@@ -180,7 +188,7 @@ const DebtCalculator = () => {
                                 </TableRow>
                                 <TableRow>
                                     <TableCell className="font-medium">Estimated monthly payment</TableCell>
-                                    <TableCell>${monthlyPayment.toFixed(2)}</TableCell>
+                                    <TableCell>${monthlyPayment ? parseFloat(monthlyPayment).toFixed(2) : "0.00"}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell className="font-medium">Total interest paid</TableCell>

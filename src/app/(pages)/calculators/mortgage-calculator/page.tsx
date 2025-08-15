@@ -2,51 +2,75 @@
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import { format } from "date-fns";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import Wrapper from "@/app/Wrapper";
 
 const COLORS = ["#0D74FF", "#FF5733", "#2D94A0", "#FFB900"];
 
 const Page = () => {
-  const [homePrice, setHomePrice] = useState(400000);
-  const [downPaymentPercent, setDownPaymentPercent] = useState(20); // Ensure this is a number
-  const [loanTerm, setLoanTerm] = useState(30);
-  const [interestRate, setInterestRate] = useState(6.732);
-  const [startDate, setStartDate] = useState(new Date());
-  const [propertyTaxes, setPropertyTaxes] = useState(1.2);
-  const [homeInsurance, setHomeInsurance] = useState(1500);
-  const [pmiInsurance, setPmiInsurance] = useState(0);
-  const [hoaFee, setHoaFee] = useState(0);
-  const [otherCosts, setOtherCosts] = useState(4000);
+  const [homePrice, setHomePrice] = useState<string | number>("");
+  const [downPaymentPercent, setDownPaymentPercent] = useState<string | number>(
+    ""
+  );
+  const [loanTerm, setLoanTerm] = useState<string | number>("");
+  const [interestRate, setInterestRate] = useState<string | number>("");
+  const [startDate, setStartDate] = useState<Date>(new Date());
+  const [propertyTaxes, setPropertyTaxes] = useState<string | number>("");
+  const [homeInsurance, setHomeInsurance] = useState<string | number>("");
+  const [pmiInsurance, setPmiInsurance] = useState<string | number>("");
+  const [hoaFee, setHoaFee] = useState<string | number>("");
+  const [otherCosts, setOtherCosts] = useState<string | number>("");
 
-  const [monthlyPayment, setMonthlyPayment] = useState(0);
-  const [totalOutOfPocket, setTotalOutOfPocket] = useState(0);
-  const [totalPayment, setTotalPayment] = useState(0);
-  const [totalInterest, setTotalInterest] = useState(0);
-  const [loanAmount, setLoanAmount] = useState(0);
+  const [monthlyPayment, setMonthlyPayment] = useState<number>(0);
+  const [totalOutOfPocket, setTotalOutOfPocket] = useState<number>(0);
+  const [totalPayment, setTotalPayment] = useState<number>(0);
+  const [totalInterest, setTotalInterest] = useState<number>(0);
+  const [loanAmount, setLoanAmount] = useState<number>(0);
 
   const calculateMortgage = () => {
-    const loanAmount = homePrice * (1 - downPaymentPercent / 100);
+    const loanAmount = homePrice
+      ? Number(homePrice) * (1 - Number(downPaymentPercent) / 100)
+      : 0;
     setLoanAmount(loanAmount);
 
-    const monthlyInterestRate = interestRate / 100 / 12;
-    const numberOfPayments = loanTerm * 12;
+    const monthlyInterestRate = interestRate
+      ? Number(interestRate) / 100 / 12
+      : 0;
+    const numberOfPayments = loanTerm ? Number(loanTerm) * 12 : 0;
 
     const mortgagePayment =
-      (loanAmount * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments))) /
-      (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
+      loanAmount > 0 && monthlyInterestRate > 0 && numberOfPayments > 0
+        ? (loanAmount *
+            (monthlyInterestRate *
+              Math.pow(1 + monthlyInterestRate, numberOfPayments))) /
+          (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1)
+        : 0;
 
-    const propertyTaxPayment = (homePrice * propertyTaxes) / 100 / 12;
-    const homeInsurancePayment = homeInsurance / 12;
-    const totalOtherCosts = (hoaFee + otherCosts + pmiInsurance) / 12;
+    const propertyTaxPayment = homePrice
+      ? (Number(homePrice) * Number(propertyTaxes)) / 100 / 12
+      : 0;
+    const homeInsurancePayment = homeInsurance ? Number(homeInsurance) / 12 : 0;
+    const totalOtherCosts =
+      hoaFee && otherCosts && pmiInsurance
+        ? (Number(hoaFee) + Number(otherCosts) + Number(pmiInsurance)) / 12
+        : 0;
 
     const totalMonthlyPayment =
-      mortgagePayment + propertyTaxPayment + homeInsurancePayment + totalOtherCosts;
+      mortgagePayment +
+      propertyTaxPayment +
+      homeInsurancePayment +
+      totalOtherCosts;
 
     const totalOutOfPocket = totalMonthlyPayment * numberOfPayments;
     const totalPayment =
@@ -78,47 +102,37 @@ const Page = () => {
 
   const pieData = [
     { name: "Principal & Interest", value: loanAmount },
-    { name: "Property Taxes", value: homePrice * propertyTaxes / 100 },
-    { name: "Home Insurance", value: homeInsurance },
-    { name: "Other Costs", value: hoaFee + otherCosts + pmiInsurance },
+    {
+      name: "Property Taxes",
+      value: homePrice ? (Number(homePrice) * Number(propertyTaxes)) / 100 : 0,
+    },
+    {
+      name: "Home Insurance",
+      value: homeInsurance ? Number(homeInsurance) : 0,
+    },
+    {
+      name: "Other Costs",
+      value:
+        (hoaFee ? Number(hoaFee) : 0) +
+        (otherCosts ? Number(otherCosts) : 0) +
+        (pmiInsurance ? Number(pmiInsurance) : 0),
+    },
   ];
-
-  const handleClear = () => {
-    setHomePrice(400000);
-    setDownPaymentPercent(20);
-    setLoanTerm(30);
-    setInterestRate(6.732);
-    setStartDate(new Date());
-    setPropertyTaxes(1.2);
-    setHomeInsurance(1500);
-    setPmiInsurance(0);
-    setHoaFee(0);
-    setOtherCosts(4000);
-    setMonthlyPayment(0);
-    setTotalOutOfPocket(0);
-    setTotalPayment(0);
-    setTotalInterest(0);
-    setLoanAmount(0);
-  };
 
   // Handle Down Payment change to ensure 0 disappears
   const handleDownPaymentChange = (value: number | string) => {
-    if (value === "") {
-      // If cleared, set to 0
-      setDownPaymentPercent(0);
-    } else {
-      // Otherwise, update to the valid number
-      setDownPaymentPercent(Number(value));
-    }
+    setDownPaymentPercent(typeof value === "string" ? Number(value) : value);
   };
-
 
   return (
     <Wrapper>
       <div className="mx-auto md:mt-16 p-5 mt-8 max-w-3xl text-center">
-        <h1 className="text-2xl font-semibold lg:text-4xl">Mortgage Calculator</h1>
+        <h1 className="text-2xl font-semibold lg:text-4xl">
+          Mortgage Calculator
+        </h1>
         <p className="text-muted-foreground mt-4 text-xl">
-          This tool helps you calculate your monthly mortgage payments, total out-of-pocket expenses, and more.
+          This tool helps you calculate your monthly mortgage payments, total
+          out-of-pocket expenses, and more.
         </p>
       </div>
 
@@ -134,13 +148,12 @@ const Page = () => {
                 type="number"
                 id="homePrice"
                 value={homePrice || ""}
-                onChange={(e) => setHomePrice(Number(e.target.value))}
+                onChange={(e) => setHomePrice(e.target.value)}
                 className="w-full"
                 placeholder="Enter Home Price"
               />
             </div>
 
-            {/* Down Payment */}
             {/* Down Payment */}
             <div>
               <Label className="block mb-1.5" htmlFor="downPayment">
@@ -148,8 +161,8 @@ const Page = () => {
               </Label>
               <div className="flex items-center">
                 <Slider
-                  value={[downPaymentPercent || 0]} // Ensure it doesn't show "0"
-                  onValueChange={(val) => handleDownPaymentChange(val[0])} // Handle array value
+                  value={[Number(downPaymentPercent) || 0]} // Always pass a number
+                  onValueChange={(val) => handleDownPaymentChange(val[0])}
                   min={0}
                   max={100}
                   step={1}
@@ -167,7 +180,6 @@ const Page = () => {
               </div>
             </div>
 
-
             {/* Loan Term */}
             <div>
               <Label className="block mb-1.5" htmlFor="loanTerm">
@@ -177,7 +189,7 @@ const Page = () => {
                 type="number"
                 id="loanTerm"
                 value={loanTerm || ""}
-                onChange={(e) => setLoanTerm(Number(e.target.value))}
+                onChange={(e) => setLoanTerm(e.target.value)}
                 className="w-full"
                 placeholder="Enter Loan Term"
               />
@@ -192,7 +204,7 @@ const Page = () => {
                 type="number"
                 id="interestRate"
                 value={interestRate || ""}
-                onChange={(e) => setInterestRate(Number(e.target.value))}
+                onChange={(e) => setInterestRate(e.target.value)}
                 className="w-full"
                 placeholder="Enter Interest Rate"
               />
@@ -221,7 +233,7 @@ const Page = () => {
                 type="number"
                 id="taxes"
                 value={propertyTaxes || ""}
-                onChange={(e) => setPropertyTaxes(Number(e.target.value))}
+                onChange={(e) => setPropertyTaxes(e.target.value)}
                 className="w-full"
                 placeholder="Enter Property Taxes"
               />
@@ -235,7 +247,7 @@ const Page = () => {
                 type="number"
                 id="insurance"
                 value={homeInsurance || ""}
-                onChange={(e) => setHomeInsurance(Number(e.target.value))}
+                onChange={(e) => setHomeInsurance(e.target.value)}
                 className="w-full"
                 placeholder="Enter Home Insurance"
               />
@@ -249,7 +261,7 @@ const Page = () => {
                 type="number"
                 id="otherCosts"
                 value={otherCosts || ""}
-                onChange={(e) => setOtherCosts(Number(e.target.value))}
+                onChange={(e) => setOtherCosts(e.target.value)}
                 className="w-full"
                 placeholder="Enter Other Costs"
               />
@@ -274,7 +286,10 @@ const Page = () => {
                 dataKey="value"
               >
                 {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip />
@@ -284,7 +299,9 @@ const Page = () => {
 
         {/* Total Payment Breakdown */}
         <div className="mt-6">
-          <h3 className="font-semibold text-lg mb-4 text-center">Loan Summary</h3>
+          <h3 className="font-semibold text-lg mb-4 text-center">
+            Loan Summary
+          </h3>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -295,7 +312,9 @@ const Page = () => {
               </TableHeader>
               <TableBody>
                 <TableRow>
-                  <TableCell className="font-medium">Total Out-of-Pocket</TableCell>
+                  <TableCell className="font-medium">
+                    Total Out-of-Pocket
+                  </TableCell>
                   <TableCell>${totalOutOfPocket.toFixed(2)}</TableCell>
                 </TableRow>
                 <TableRow>
@@ -311,8 +330,12 @@ const Page = () => {
                   <TableCell>${loanAmount.toFixed(2)}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Mortgage Payoff Date</TableCell>
-                  <TableCell>{format(new Date(startDate), "MMM yyyy")}</TableCell>
+                  <TableCell className="font-medium">
+                    Mortgage Payoff Date
+                  </TableCell>
+                  <TableCell>
+                    {format(new Date(startDate), "MMM yyyy")}
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>

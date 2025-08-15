@@ -9,8 +9,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import Wrapper from '@/app/Wrapper';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-// Define the colors for the pie chart
-const COLORS = ["#0D74FF", "#FF5733"]; // Blue for net salary, Green for tax deducted
 
 interface PieData {
   name: string;
@@ -39,8 +37,10 @@ const SalaryToHourlyCalculator = () => {
 
     setGrossHourlyWage(grossHourly);
     setNetHourlyWage(netHourly);
-    setGrossMonthly(grossHourly * hoursPerWeek * 4); // Approx. 4 weeks per month
-    setNetMonthly(netHourly * hoursPerWeek * 4);
+    
+    // Corrected gross and net monthly calculations
+    setGrossMonthly(grossHourly * hoursPerWeek * weeksPerYear / 12);  // Monthly calculation
+    setNetMonthly(netHourly * hoursPerWeek * weeksPerYear / 12);  // Monthly calculation
 
     const taxAmount = annualSalary - annualSalary * taxMultiplier;
 

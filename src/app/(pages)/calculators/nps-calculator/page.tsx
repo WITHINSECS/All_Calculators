@@ -13,41 +13,57 @@ import { Label } from "@/components/ui/label";
 import Wrapper from '@/app/Wrapper';
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { toast } from 'react-toastify';
 
 export default function NPSCalculator() {
-    const [monthlyInvestment, setMonthlyInvestment] = useState(0);
-    const [currentAge, setCurrentAge] = useState(0);
-    const [expectedROI, setExpectedROI] = useState(0);
-    const [annuityPercentage, setAnnuityPercentage] = useState(40);
-    const [expectedReturns, setExpectedReturns] = useState(10);
-    const [npsResult, setNpsResult] = useState({ pensionWealth: 0, investmentAmount: 0, lumpsumWithdrawn: 0, annuityValue: 0, monthlyPension: 0 });
+    const [monthlyInvestment, setMonthlyInvestment] = useState<string>("");
+    const [currentAge, setCurrentAge] = useState<string>("");
+    const [expectedROI, setExpectedROI] = useState<string>("");
+    const [annuityPercentage, setAnnuityPercentage] = useState<string>("");
+    const [expectedReturns, setExpectedReturns] = useState<string>("");
+    const [npsResult, setNpsResult] = useState({
+        pensionWealth: 0,
+        investmentAmount: 0,
+        lumpsumWithdrawn: 0,
+        annuityValue: 0,
+        monthlyPension: 0
+    });
     const [errorMessage, setErrorMessage] = useState("");
 
     const calculateNPS = () => {
-        // Check if any field is empty or zero
-        if (monthlyInvestment === 0 || currentAge === 0 || expectedROI === 0 || annuityPercentage === 0 || expectedReturns === 0) {
-            alert("All fields are required and cannot be zero.");
+        // Parse string inputs to numbers
+        const monthlyInvestmentNum = parseFloat(monthlyInvestment);
+        const currentAgeNum = parseFloat(currentAge);
+        const expectedROINum = parseFloat(expectedROI);
+        const annuityPercentageNum = parseFloat(annuityPercentage);
+        const expectedReturnsNum = parseFloat(expectedReturns);
+
+        // Validation: Check if any field is empty or zero
+        if (!monthlyInvestment || !currentAge || !expectedROI || !annuityPercentage || !expectedReturns || 
+            monthlyInvestmentNum <= 0 || currentAgeNum <= 0 || expectedROINum <= 0 || annuityPercentageNum <= 0 || expectedReturnsNum <= 0) {
+            toast.error("All fields are required and cannot be zero.");
             return;
         }
 
         // Ensure Expected ROI and Expected Returns do not exceed 30
-        if (expectedROI > 30 || expectedReturns > 30) {
+        if (expectedROINum > 30 || expectedReturnsNum > 30) {
             setErrorMessage("Expected Return on Investment and Expected Returns from the Annuity cannot be more than 30.");
+            toast.error("Expected ROI and Expected Returns cannot be more than 30.");
             return;
         } else {
             setErrorMessage(""); // Clear error message
         }
 
-        const totalYears = 60 - currentAge;
-        const totalAmount = monthlyInvestment * 12 * totalYears * (1 + expectedROI / 100);
-        const annuityAmount = totalAmount * (annuityPercentage / 100);
+        const totalYears = 60 - currentAgeNum;
+        const totalAmount = monthlyInvestmentNum * 12 * totalYears * (1 + expectedROINum / 100);
+        const annuityAmount = totalAmount * (annuityPercentageNum / 100);
         const lumpsumAmount = totalAmount - annuityAmount;
-        const pensionWealth = totalAmount + (annuityAmount * expectedReturns / 100);
+        const pensionWealth = totalAmount + (annuityAmount * expectedReturnsNum / 100);
         const monthlyPension = annuityAmount / 12;
 
         setNpsResult({
             pensionWealth,
-            investmentAmount: monthlyInvestment * 12 * totalYears,
+            investmentAmount: monthlyInvestmentNum * 12 * totalYears,
             lumpsumWithdrawn: lumpsumAmount,
             annuityValue: annuityAmount,
             monthlyPension
@@ -82,7 +98,7 @@ export default function NPSCalculator() {
                                     id="monthlyInvestment"
                                     type="number"
                                     value={monthlyInvestment}
-                                    onChange={(e) => setMonthlyInvestment(Number(e.target.value))}
+                                    onChange={(e) => setMonthlyInvestment(e.target.value)}
                                     placeholder="Enter Monthly Investment"
                                 />
                             </div>
@@ -92,7 +108,7 @@ export default function NPSCalculator() {
                                     id="currentAge"
                                     type="number"
                                     value={currentAge}
-                                    onChange={(e) => setCurrentAge(Number(e.target.value))}
+                                    onChange={(e) => setCurrentAge(e.target.value)}
                                     placeholder="Enter Current Age"
                                 />
                             </div>
@@ -102,10 +118,10 @@ export default function NPSCalculator() {
                                     id="expectedROI"
                                     type="number"
                                     value={expectedROI}
-                                    onChange={(e) => setExpectedROI(Math.min(Number(e.target.value), 30))}
+                                    onChange={(e) => setExpectedROI(Math.min(Number(e.target.value), 30).toString())}
                                     placeholder="Enter Expected ROI"
                                 />
-                                {expectedROI > 30 && (
+                                {parseFloat(expectedROI) > 30 && (
                                     <p className="text-red-500 text-sm">Cannot be more than 30.</p>
                                 )}
                             </div>
@@ -115,7 +131,7 @@ export default function NPSCalculator() {
                                     id="annuityPercentage"
                                     type="number"
                                     value={annuityPercentage}
-                                    onChange={(e) => setAnnuityPercentage(Number(e.target.value))}
+                                    onChange={(e) => setAnnuityPercentage(e.target.value)}
                                     placeholder="Enter Annuity Percentage"
                                 />
                             </div>
@@ -125,10 +141,10 @@ export default function NPSCalculator() {
                                     id="expectedReturns"
                                     type="number"
                                     value={expectedReturns}
-                                    onChange={(e) => setExpectedReturns(Math.min(Number(e.target.value), 30))}
+                                    onChange={(e) => setExpectedReturns(Math.min(Number(e.target.value), 30).toString())}
                                     placeholder="Enter Expected Returns"
                                 />
-                                {expectedReturns > 30 && (
+                                {parseFloat(expectedReturns) > 30 && (
                                     <p className="text-red-500 text-sm">Cannot be more than 30.</p>
                                 )}
                             </div>

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,9 +24,10 @@ import Wrapper from "@/app/Wrapper";
 import { Label } from "@/components/ui/label";
 
 export default function Calculator() {
-    const [initialDeposit, setInitialDeposit] = useState<number | "">(10000); // Allow empty string or number
-    const [period, setPeriod] = useState<number | "">(5); // Allow empty string or number
-    const [apy, setApy] = useState<number | "">(3.15); // Allow empty string or number
+    // Initialize state as empty string
+    const [initialDeposit, setInitialDeposit] = useState<string>("");
+    const [period, setPeriod] = useState<string>("");
+    const [apy, setApy] = useState<string>("");
     const [timeUnit, setTimeUnit] = useState("Years");
 
     // Function to calculate compound interest based on the time period
@@ -39,43 +40,42 @@ export default function Calculator() {
     // Handle changes for Initial Deposit
     const handleInitialDepositChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        setInitialDeposit(value === "" ? "" : Number(value)); // Handle empty input
+        setInitialDeposit(value === "" ? "" : value); // Handle empty input
     };
 
     // Handle changes for Period
     const handlePeriodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        setPeriod(value === "" ? "" : Number(value)); // Handle empty input
+        setPeriod(value === "" ? "" : value); // Handle empty input
     };
 
     // Handle changes for APY
     const handleApyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        setApy(value === "" ? "" : Number(value)); // Handle empty input
+        setApy(value === "" ? "" : value); // Handle empty input
     };
 
-    const totalBalance = initialDeposit ? calculateCompoundInterest(Number(initialDeposit), apy as number, period as number) : 0;
+    // If initial values are entered, proceed with calculation
+    const totalBalance = initialDeposit && period && apy ? calculateCompoundInterest(Number(initialDeposit), Number(apy), Number(period)) : 0;
     const totalInterest = totalBalance - (initialDeposit ? Number(initialDeposit) : 0);
 
-    const data = Array.from({ length: period as number }, (_, i) => {
+    const data = Array.from({ length: Number(period) }, (_, i) => {
         const year = i + 1;
-        const balance = calculateCompoundInterest(Number(initialDeposit), apy as number, year);
+        const balance = calculateCompoundInterest(Number(initialDeposit), Number(apy), year);
         const nationalAvgBalance = calculateCompoundInterest(Number(initialDeposit), 1.5, year);
         return { name: `Year ${year}`, "Your earnings": balance, "National Average": nationalAvgBalance };
     });
 
     const pieData = [
         { name: "Your Earnings", value: totalInterest },
-        { name: "National Average", value: calculateCompoundInterest(Number(initialDeposit), 1.5, period as number) - (Number(initialDeposit)) }
+        { name: "National Average", value: calculateCompoundInterest(Number(initialDeposit), 1.5, Number(period)) - (Number(initialDeposit)) }
     ];
 
     return (
         <Wrapper>
             <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8">
                 <div className="mx-auto max-w-3xl text-center mb-8">
-                    <h1 className="text-2xl font-semibold lg:text-4xl">
-                        CD Calculator
-                    </h1>
+                    <h1 className="text-2xl font-semibold lg:text-4xl">CD Calculator</h1>
                     <p className="text-muted-foreground mt-4 text-xl">
                         Explore our comprehensive range of calculators designed to assist you with various financial, health, lifestyle, and mathematical needs.
                     </p>
@@ -87,8 +87,9 @@ export default function Calculator() {
                             <Input
                                 id="initialDeposit"
                                 type="number"
-                                value={initialDeposit === "" ? "" : initialDeposit}
+                                value={initialDeposit}
                                 onChange={handleInitialDepositChange}
+                                placeholder="Enter Initial Deposit"
                             />
                         </div>
                         <div className="space-y-2">
@@ -103,8 +104,9 @@ export default function Calculator() {
                                 <Input
                                     id="period"
                                     type="number"
-                                    value={period === "" ? "" : period}
+                                    value={period}
                                     onChange={handlePeriodChange}
+                                    placeholder="Enter Period"
                                 />
                                 <select
                                     value={timeUnit}
@@ -121,10 +123,11 @@ export default function Calculator() {
                             <Input
                                 id="apy"
                                 type="number"
-                                value={apy === "" ? "" : apy}
+                                value={apy}
                                 onChange={handleApyChange}
                                 step="0.01"
-                            />{" "}
+                                placeholder="Enter APY"
+                            />
                             %
                         </div>
                     </div>
@@ -180,7 +183,7 @@ export default function Calculator() {
                             </TableRow>
                             <TableRow>
                                 <TableCell>National Average:</TableCell>
-                                <TableCell>${(calculateCompoundInterest(Number(initialDeposit), 1.5, period as number) - Number(initialDeposit)).toFixed(2)}</TableCell>
+                                <TableCell>${(calculateCompoundInterest(Number(initialDeposit), 1.5, Number(period)) - Number(initialDeposit)).toFixed(2)}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Total interest earned =</TableCell>
