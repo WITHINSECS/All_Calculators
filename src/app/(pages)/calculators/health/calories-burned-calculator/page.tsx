@@ -1,55 +1,122 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import Wrapper from '@/app/Wrapper';
+import Wrapper from "@/app/Wrapper";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend } from "recharts";
+import {
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Legend,
+} from "recharts";
+
+// NEW: shadcn combobox primitives
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandItem,
+  CommandGroup,
+} from "@/components/ui/command";
+import { Check, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type Activity = {
+  id: string;
+  name: string;
+  met: number; // metabolic equivalent
+};
+
+const ACTIVITIES: Activity[] = [
+  { id: "chopping-wood", name: "Chopping Wood", met: 6.0 },
+  { id: "cleaning-household", name: "Cleaning, Household Tasks", met: 3.5 },
+  { id: "felling-trees", name: "Felling Trees", met: 7.0 },
+  { id: "gym-exercise", name: "Gym Exercise (general)", met: 5.5 },
+  { id: "walking-brisk", name: "Walking (brisk, 4 mph)", met: 5.0 },
+  { id: "running-6", name: "Running (6 mph)", met: 9.8 },
+  { id: "cycling-12to13", name: "Cycling (12–13.9 mph)", met: 8.0 },
+  { id: "yoga", name: "Yoga", met: 2.5 },
+  { id: "swimming", name: "Swimming (moderate)", met: 6.0 },
+];
 
 interface CaloriesInput {
-  exercise: string;
-  duration: number;
+  exercise: string;    // activity name (shown to user)
+  met?: number;        // chosen activity MET
+  duration: number;    // minutes
   gender: string;
   age: number;
   weight: number;
-  weightUnit: string; // 'kg' or 'lb'
+  weightUnit: "kg" | "lb";
 }
 
 interface CaloriesResult {
   caloriesBurned: number;
   caloriesPerMinute: number;
-  chartData: { time: number; calories: number }[]; // Data for the line chart
+  chartData: { time: number; calories: number }[];
 }
 
+// Converts lb to kg if needed
+const toKg = (weight: number, unit: "kg" | "lb") =>
+  unit === "kg" ? weight : weight * 0.45359237;
+
+// MET formula (ACSM):
+// kcal = MET * 3.5 * weight(kg) / 200 * duration(min)
+const calcByMET = (met: number, duration: number, weightKg: number) =>
+  met * 3.5 * weightKg * (duration / 200);
+
 const calculateCaloriesBurned = (input: CaloriesInput): CaloriesResult => {
-  let baseCalories = 0;
-  
-  if (input.gender === "male") {
-    baseCalories = 8 * input.duration * (input.weight / 70); // Example for male
-  } else if (input.gender === "female") {
-    baseCalories = 7 * input.duration * (input.weight / 60); // Example for female
+  const weightKg = toKg(input.weight, input.weightUnit);
+
+  let baseCalories: number;
+
+  if (input.met && input.met > 0) {
+    baseCalories = calcByMET(input.met, input.duration, weightKg);
+  } else {
+    // Fallback: simple heuristic if no activity chosen
+    baseCalories =
+      (input.gender === "male" ? 8 : 7) *
+      input.duration *
+      (weightKg / (input.gender === "male" ? 70 : 60));
   }
 
   if (input.age < 18) {
-    baseCalories *= 1.1; // Younger people burn more calories, for example
+    baseCalories *= 1.1;
   }
 
-  const chartData = [];
-  for (let i = 0; i < input.duration; i++) {
-    chartData.push({ time: i + 1, calories: (baseCalories / input.duration) * (i + 1) });
-  }
+  const perMin = baseCalories / input.duration;
+  const chartData = Array.from({ length: input.duration }, (_v, i) => ({
+    time: i + 1,
+    calories: perMin * (i + 1),
+  }));
 
-  const caloriesPerMinute = baseCalories / input.duration;
-
-  return { caloriesBurned: baseCalories, caloriesPerMinute, chartData };
+  return { caloriesBurned: baseCalories, caloriesPerMinute: perMin, chartData };
 };
 
 export default function CaloriesCalculator() {
+  const [open, setOpen] = useState(false); // combobox
+  const [selected, setSelected] = useState<Activity | null>(null);
+
   const [input, setInput] = useState<CaloriesInput>({
     exercise: "",
+    met: undefined,
     duration: 60,
     gender: "male",
     age: 21,
@@ -60,51 +127,51 @@ export default function CaloriesCalculator() {
   const [result, setResult] = useState<CaloriesResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    // Allow only numeric input for duration, age, and weight fields
-    if (name === "duration" || name === "age" || name === "weight") {
-      // Check if the value is a valid number and not empty
-      if (!/^\d*$/.test(value)) {
-        return; // Prevent non-numeric characters
-      }
-    }
-
+    if (!/^\d*$/.test(value)) return;
     setInput((prev) => ({
       ...prev,
-      [name]: value === "" ? "" : Number(value), // Handle empty input
+      [name]: value === "" ? ("" as unknown as number) : Number(value),
     }));
   };
 
-  const handleSelectChange = (name: string, value: string) => {
+  const handleSelectChange = (name: keyof CaloriesInput, value: string) => {
     setInput((prev) => ({ ...prev, [name]: value }));
   };
 
+  // For displaying "Burns XYZ cal/hour" per activity preview
+  const caloriesPerHourAt70kg = useMemo(
+    () =>
+      Object.fromEntries(
+        ACTIVITIES.map((a) => [
+          a.id,
+          Math.round(calcByMET(a.met, 60, 70)), // 70kg reference
+        ])
+      ),
+    []
+  );
+
   const handleCalculate = () => {
-    if (!input.exercise || input.exercise.trim() === "") {
-      setError("Please enter a valid exercise.");
+    if ((!input.exercise || input.exercise.trim() === "") && !input.met) {
+      setError("Please choose an activity.");
       return;
     }
-
     if (isNaN(input.duration) || input.duration <= 0) {
       setError("Please enter a valid duration.");
       return;
     }
-
     if (isNaN(input.age) || input.age <= 0) {
       setError("Please enter a valid age.");
       return;
     }
-
     if (isNaN(input.weight) || input.weight <= 0) {
       setError("Please enter a valid weight.");
       return;
     }
 
-    setError(null); // Clear error message if inputs are valid
-    const calcResult = calculateCaloriesBurned(input);
-    setResult(calcResult);
+    setError(null);
+    setResult(calculateCaloriesBurned(input));
   };
 
   return (
@@ -119,39 +186,97 @@ export default function CaloriesCalculator() {
           </p>
         </div>
 
-        {/* Form Inputs */}
-        <div className="space-y-4">
-          {/* Exercise input */}
+        {/* Form */}
+        <div className="space-y-5">
+
+          {/* === Activity searchable dropdown (combobox) === */}
           <div className="space-y-2">
             <Label>Enter an exercise to calculate your calories burned</Label>
+
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-full justify-between"
+                >
+                  {selected ? selected.name : "Search for exercise or activity"}
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                <Command>
+                  <CommandInput placeholder="Search activities..." />
+                  <CommandList>
+                    <CommandEmpty>No activity found.</CommandEmpty>
+                    <CommandGroup heading="Activities">
+                      {ACTIVITIES.map((act) => (
+                        <CommandItem
+                          key={act.id}
+                          value={act.name}
+                          onSelect={() => {
+                            setSelected(act);
+                            setInput((prev) => ({
+                              ...prev,
+                              exercise: act.name,
+                              met: act.met,
+                            }));
+                            setOpen(false);
+                          }}
+                          className="flex items-start justify-between"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selected?.id === act.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <span>{act.name}</span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">
+                            Burns {caloriesPerHourAt70kg[act.id]} cal/hour
+                          </span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+
+            {/* Optional: allow custom text entry (kept from your original) */}
             <Input
-              className="mt-2 mb-3"
-              name="exercise"
+              className="mt-2"
+              placeholder="Or type a custom activity name"
               value={input.exercise}
-              onChange={handleChange}
-              placeholder="Search for exercise or activity"
+              onChange={(e) =>
+                setInput((p) => ({ ...p, exercise: e.target.value, met: p.met }))
+              }
             />
           </div>
 
-          {/* Activity Duration */}
+          {/* Duration */}
           <div className="space-y-2">
             <Label>Activity duration</Label>
-            <Input
-              className="mt-2 mb-3"
-              name="duration"
-              value={input.duration}
-              onChange={handleChange}
-              type="number"
-              inputMode="numeric" // Ensures numeric input
-            />
-            <span>min</span>
+            <div className="flex items-center gap-3">
+              <Input
+                name="duration"
+                value={input.duration}
+                onChange={handleNumber}
+                type="number"
+                inputMode="numeric"
+              />
+              <span className="text-sm text-muted-foreground">min</span>
+            </div>
           </div>
 
-          {/* Gender selection */}
+          {/* Gender */}
           <div className="space-y-2">
             <Label>What is your sex?</Label>
             <Select
-              onValueChange={(value) => handleSelectChange('gender', value)}
+              onValueChange={(value) => handleSelectChange("gender", value)}
               defaultValue="male"
             >
               <SelectTrigger>
@@ -164,37 +289,39 @@ export default function CaloriesCalculator() {
             </Select>
           </div>
 
-          {/* Age input */}
+          {/* Age */}
           <div className="space-y-2">
             <Label>How old are you?</Label>
-            <Input
-              className="mt-2 mb-3"
-              name="age"
-              value={input.age}
-              onChange={handleChange}
-              type="number"
-              inputMode="numeric" // Ensures numeric input
-            />
-            <span>Years</span>
+            <div className="flex items-center gap-3">
+              <Input
+                name="age"
+                value={input.age}
+                onChange={handleNumber}
+                type="number"
+                inputMode="numeric"
+              />
+              <span className="text-sm text-muted-foreground">years</span>
+            </div>
           </div>
 
-          {/* Weight input */}
+          {/* Weight + unit */}
           <div className="space-y-2">
             <Label>How much do you weigh?</Label>
-            <div className="flex space-x-2">
+            <div className="flex gap-2">
               <Input
-                className="mt-2 mb-3"
                 name="weight"
                 value={input.weight}
-                onChange={handleChange}
+                onChange={handleNumber}
                 type="number"
-                inputMode="numeric" // Ensures numeric input
+                inputMode="numeric"
               />
               <Select
-                onValueChange={(value) => handleSelectChange('weightUnit', value)}
+                onValueChange={(value: "kg" | "lb") =>
+                  handleSelectChange("weightUnit", value)
+                }
                 defaultValue="kg"
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-24">
                   <SelectValue placeholder="kg" />
                 </SelectTrigger>
                 <SelectContent>
@@ -205,31 +332,31 @@ export default function CaloriesCalculator() {
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2">
-            <Button className="w-full p-5" onClick={handleCalculate}>
-              Calculate your calories burned
-            </Button>
-          </div>
+          <Button className="w-full p-5" onClick={handleCalculate}>
+            Calculate your calories burned
+          </Button>
         </div>
 
-        {/* Error message */}
-        {error && (
-          <div className="mt-4 text-red-500">{error}</div>
-        )}
+        {/* Error */}
+        {error && <div className="mt-4 text-red-500">{error}</div>}
 
         {/* Results */}
-        <div className="mt-4">
+        <div className="mt-6">
           {result && (
             <>
-              <h3 className="text-xl">Calories burned: {result.caloriesBurned.toFixed(2)} kcal</h3>
+              <h3 className="text-xl">
+                Calories burned: {result.caloriesBurned.toFixed(2)} kcal
+              </h3>
 
-              {/* Pie Chart for Calories Burned */}
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
                     data={[
                       { name: "Calories Burned", value: result.caloriesBurned },
-                      { name: "Remaining Calories", value: 1000 - result.caloriesBurned }, // Example remaining calories
+                      {
+                        name: "Remaining Calories",
+                        value: Math.max(0, 1000 - result.caloriesBurned),
+                      },
                     ]}
                     dataKey="value"
                     nameKey="name"
@@ -245,7 +372,6 @@ export default function CaloriesCalculator() {
                 </PieChart>
               </ResponsiveContainer>
 
-              {/* Line Chart for Calories Burned Per Minute */}
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={result.chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -253,7 +379,12 @@ export default function CaloriesCalculator() {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="calories" stroke="#3498db" name="Calories Burned" />
+                  <Line
+                    type="monotone"
+                    dataKey="calories"
+                    stroke="#3498db"
+                    name="Calories Burned"
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </>

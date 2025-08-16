@@ -316,22 +316,123 @@ export const DATA__MATH = [
     {
         title: "Scientific Calculator",
         subTitle: "Scientific Calculator",
-        description: "Scientific Calculator is a tool that helps you calculate the amount that you will receive after at least five years of work.",
+        description: "A tool for performing advanced mathematical calculations, including trigonometry, logarithms, and exponents.",
         link: "/math/scientific-calculator",
         category: "math"
     },
     {
         title: "Percentage Calculator",
         subTitle: "Percentage Calculator",
-        description: "Percentage Calculator is a tool that helps you calculate the amount that you will receive after at least five years of work.",
+        description: "Quickly calculate percentages for various scenarios, such as discounts, tax, or interest rates.",
         link: "/math/percentage-calculator",
         category: "math"
     },
     {
         title: "Algebra Calculator",
         subTitle: "Algebra Calculator",
-        description: "Algebra Calculator is a tool that helps you calculate the amount that you will receive after at least five years of work.",
+        description: "Solve algebraic equations, simplify expressions, and perform other basic algebraic calculations easily.",
         link: "/math/algebra-calculator",
         category: "math"
+    },
+    {
+        title: "Average Calculator",
+        subTitle: "Average Calculator",
+        description: "Calculate the average of a given set of numbers quickly and easily. Perfect for grading or data analysis.",
+        link: "/math/average-calculator",
+        category: "math"
+    },
+    {
+        title: "Median Calculator",
+        subTitle: "Median Calculator",
+        description: "Find the median value from a list of numbers, which is the middle value in an ordered dataset.",
+        link: "/math/median-calculator",
+        category: "math"
+    },
+    {
+        title: "Mode Calculator",
+        subTitle: "Mode Calculator",
+        description: "Identify the most frequently occurring number in a dataset, useful in data analysis and statistics.",
+        link: "/math/mode-calculator",
+        category: "math"
+    },
+    {
+        title: "Standard Deviation Calculator",
+        subTitle: "Standard Deviation Calculator",
+        description: "Compute the standard deviation to measure the spread or variability of data values in a dataset.",
+        link: "/math/standard-deviation-calculator",
+        category: "math"
+    },
+    {
+        title: "Equation Solver",
+        subTitle: "Equation Solver",
+        description: "Solve linear and non-linear equations step by step, making it easier to handle complex mathematical problems.",
+        link: "/math/equation-solver-calculator",
+        category: "math"
+    },
+    {
+        title: "Fractions Calculator",
+        subTitle: "Fractions Calculator",
+        description: "Perform operations on fractions, including addition, subtraction, multiplication, and division, effortlessly.",
+        link: "/math/fractions-calculator",
+        category: "math"
+    },
+    {
+        title: "Exponent Calculator",
+        subTitle: "Exponent Calculator",
+        description: "Calculate the value of a number raised to a specific power, helping with exponential and scientific calculations.",
+        link: "/math/exponent-calculator",
+        category: "math"
+    },
+    {
+        title: "Milliliter to Ounce",
+        subTitle: "Milliliter to Ounce",
+        description: "Convert milliliters to ounces with ease for accurate liquid measurement conversions in recipes or science.",
+        link: "/math/milliliter-to-ounce",
+        category: "math"
+    },
+    {
+        title: "Grams to Ounces",
+        subTitle: "Grams to Ounces",
+        description: "Accurately convert grams to ounces, useful in cooking, weight measurements, and scientific conversions.",
+        link: "/math/grams-to-ounces",
+        category: "math"
+    }
+]
+
+export const LIFESTYLE__MATH = [
+    {
+        title: "Hours Calculator",
+        subTitle: "Hours Calculator",
+        description: "Calculate the total hours worked or time spent on tasks. Easily convert between minutes, hours, and days.",
+        link: "/lifestyle/hours-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Age Calculator",
+        subTitle: "Age Calculator",
+        description: "Find your exact age based on your birthdate. Calculate age in years, months, and days.",
+        link: "/lifestyle/age-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Grade Calculator",
+        subTitle: "Grade Calculator",
+        description: "Calculate your overall grade based on individual assignment scores. Determine your final grade percentage.",
+        link: "/lifestyle/grade-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "GPA Calculator",
+        subTitle: "GPA Calculator",
+        description: "Compute your GPA based on your courses' credit hours and grades. Easily track your academic performance.",
+        link: "/lifestyle/gpa-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Square Footage Calculator",
+        subTitle: "Square Footage Calculator",
+        description: "Calculate the area of a space in square feet. Perfect for home renovations, furniture shopping, and real estate.",
+        link: "/lifestyle/square-footage-calculator",
+        category: "lifestyle"
     },
 ]
