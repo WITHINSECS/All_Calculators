@@ -435,4 +435,67 @@ export const LIFESTYLE__MATH = [
         link: "/lifestyle/square-footage-calculator",
         category: "lifestyle"
     },
+    {
+        title: "Date Calculator",
+        subTitle: "Date Calculator",
+        description: "Easily calculate the difference between two dates or add/subtract days to/from a given date. Great for planning events or tracking deadlines.",
+        link: "/lifestyle/date-calculator",
+        category: "lifestyle"
+    },  
+    {
+        title: "Random Number Generator",
+        subTitle: "Random Number Generator",
+        description: "Generate random numbers within a specified range, perfect for games, lotteries, or statistical sampling.",
+        link: "/lifestyle/random-number-generator",
+        category: "lifestyle"
+    },
+    {
+        title: "Fuel Cost Calculator",
+        subTitle: "Fuel Cost Calculator",
+        description: "Estimate your fuel costs based on your vehicle’s fuel efficiency and the distance you plan to travel.",
+        link: "/lifestyle/fuel-cost-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Discount Calculator",
+        subTitle: "Discount Calculator",
+        description: "Quickly calculate discounted prices based on the original price and discount percentage. Ideal for shopping or budgeting.",
+        link: "/lifestyle/discount-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Unit Price Calculator",
+        subTitle: "Unit Price Calculator",
+        description: "Compare unit prices for products to determine which one gives you the best value per quantity or weight.",
+        link: "/lifestyle/unit-price-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Cost of Charging Calculator",
+        subTitle: "Cost of Charging Calculator",
+        description: "Estimate the cost of charging your electric vehicle based on its battery size and your local electricity rates.",
+        link: "/lifestyle/cost-of-charging",
+        category: "lifestyle"
+    },
+    {
+        title: "Free Love Calculator",
+        subTitle: "Free Love Calculator",
+        description: "A fun calculator that predicts the compatibility between two names or partners based on a lighthearted formula.",
+        link: "/lifestyle/free-love-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Days Calculator",
+        subTitle: "Days Calculator",
+        description: "Calculate the number of days between two dates or find out how many days are left until an important event.",
+        link: "/lifestyle/days-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Steps to Miles Calculator",
+        subTitle: "Steps to Miles Calculator",
+        description: "Convert the number of steps you’ve walked into miles, helping you track your fitness progress effectively.",
+        link: "/lifestyle/steps-to-miles",
+        category: "lifestyle"
+    }
 ]
