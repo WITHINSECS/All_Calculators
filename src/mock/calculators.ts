@@ -181,6 +181,13 @@ export const DATA__FINANCE = [
         link: "/inflation-calculator",
         category: "finance"
     },
+    {
+        title: "Debt Calculator",
+        subTitle: "Debt Calculator",
+        description: "Estimate how long it will take to pay off your debt. Includes interest and monthly payment options.",
+        link: "/debt-calculator",
+        category: "finance"
+    }
 ]
 
 export const DATA__HEALTH = [
@@ -396,6 +403,34 @@ export const DATA__MATH = [
         description: "Accurately convert grams to ounces, useful in cooking, weight measurements, and scientific conversions.",
         link: "/math/grams-to-ounces",
         category: "math"
+    },
+    {
+        title: "Unit Converter",
+        subTitle: "Unit Converter",
+        description: "Convert between various units like length, weight, volume, and more. Simple and fast tool.",
+        link: "/math/unit-converter",
+        category: "math"
+    },
+    {
+        title: "Mixed Numbers Calculator",
+        subTitle: "Mixed Numbers Calculator",
+        description: "Add, subtract, multiply, or divide mixed numbers. Shows step-by-step fraction handling.",
+        link: "/math/mixed-numbers-calculator",
+        category: "math"
+    },
+    {
+        title: "Ounces to Milliliters",
+        subTitle: "Ounces to Milliliters",
+        description: "Convert fluid ounces to milliliters accurately. Useful for recipes, science, and more.",
+        link: "/math/ounces-to-milliliters",
+        category: "math"
+    },
+    {
+        title: "oz to Cups",
+        subTitle: "oz to Cups",
+        description: "Quickly convert ounces to cups for both US and UK measurements. Ideal for kitchen use.",
+        link: "/math/oz-to-cups",
+        category: "math"
     }
 ]
 
@@ -441,7 +476,7 @@ export const LIFESTYLE__MATH = [
         description: "Easily calculate the difference between two dates or add/subtract days to/from a given date. Great for planning events or tracking deadlines.",
         link: "/lifestyle/date-calculator",
         category: "lifestyle"
-    },  
+    },
     {
         title: "Random Number Generator",
         subTitle: "Random Number Generator",
@@ -496,6 +531,55 @@ export const LIFESTYLE__MATH = [
         subTitle: "Steps to Miles Calculator",
         description: "Convert the number of steps you’ve walked into miles, helping you track your fitness progress effectively.",
         link: "/lifestyle/steps-to-miles",
+        category: "lifestyle"
+    },
+    {
+        title: "Time Until Calculator",
+        subTitle: "Time Until Calculator",
+        description: "Calculate how much time is left until a future date or event. Great for countdowns and planning.",
+        link: "/lifestyle/time-until-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Split Bill Calculator",
+        subTitle: "Split Bill Calculator",
+        description: "Easily divide a bill among multiple people. Optionally include tip and tax calculations.",
+        link: "/lifestyle/split-bill-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Price Per Unit Calculator",
+        subTitle: "Price Per Unit Calculator",
+        description: "Compare product prices by unit cost to find the best value. Useful for smart shopping.",
+        link: "/lifestyle/price-per-unit-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Grocery Calculator",
+        subTitle: "Grocery Calculator",
+        description: "Track your grocery spending and budget in real time. Helps with cost control and meal planning.",
+        link: "/lifestyle/grocery-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Wedding Budget Calculator",
+        subTitle: "Wedding Budget Calculator",
+        description: "Plan your wedding expenses with ease. Allocate funds and manage costs by category.",
+        link: "/lifestyle/wedding-budget-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Steps to Miles Calculator",
+        subTitle: "Steps to Miles Calculator",
+        description: "Convert your daily steps into distance walked or run. Great for fitness tracking and goals.",
+        link: "/lifestyle/steps-to-miles-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Alcohol Unit Calculator",
+        subTitle: "Alcohol Unit Calculator",
+        description: "Estimate your weekly alcohol intake in units. Useful for staying within health guidelines.",
+        link: "/lifestyle/alcohol-unit-calculator",
         category: "lifestyle"
     }
 ]
