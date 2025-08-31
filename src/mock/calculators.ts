@@ -187,6 +187,55 @@ export const DATA__FINANCE = [
         description: "Estimate how long it will take to pay off your debt. Includes interest and monthly payment options.",
         link: "/debt-calculator",
         category: "finance"
+    },
+    {
+        title: "Depreciation Calculator",
+        subTitle: "Depreciation Calculator",
+        description: "Estimate how much value an asset loses over time using common depreciation methods. Useful for accounting, tax planning, and financial forecasting.",
+        link: "/depreciation-calculator",
+        category: "finance"
+    },
+    {
+        title: "Future Value Calculator",
+        subTitle: "Future Value Calculator",
+        description: "Determine the future value of an investment based on interest rate, time, and compounding frequency. Ideal for long-term financial planning and savings goals.",
+        link: "/future-value-calculator",
+        category: "finance"
+    },
+    {
+        title: "Currency Converter",
+        subTitle: "Currency Converter",
+        description: "Convert between global currencies using real-time exchange rates. Perfect for travelers, international businesses, and forex tracking.",
+        link: "/currency-converter",
+        category: "finance"
+    },
+    {
+        title: "Refinance Calculator",
+        subTitle: "Refinance Calculator",
+        description: "Assess whether refinancing your existing loan can lower your payments or total interest. Compare current and new loan terms easily.",
+        link: "/refinance-calculator",
+        category: "finance"
+    },
+    {
+        title: "Opportunity Cost Calculator",
+        subTitle: "Opportunity Cost Calculator",
+        description: "Analyze what you might be giving up when choosing one investment over another. A helpful tool for making smarter financial decisions.",
+        link: "/opportunity-cost-calculator",
+        category: "finance"
+    },
+    {
+        title: "Business Loan Calculator",
+        subTitle: "Business Loan Calculator",
+        description: "Calculate monthly repayments, total loan costs, and interest for business financing. Great for entrepreneurs planning to fund or expand operations.",
+        link: "/business-loan-calculator",
+        category: "finance"
+    },
+    {
+        title: "Maturity Value",
+        subTitle: "Maturity Value",
+        description: "Compute the future value of your investment with popular currencies and flexible compounding.",
+        link: "/maturity-value",
+        category: "finance"
     }
 ]
 
