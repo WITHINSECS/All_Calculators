@@ -480,7 +480,14 @@ export const DATA__MATH = [
         description: "Quickly convert ounces to cups for both US and UK measurements. Ideal for kitchen use.",
         link: "/math/oz-to-cups",
         category: "math"
-    }
+    },
+    {
+        title: "Percent Error Calculator",
+        subTitle: "Percent Error Calculator",
+        description: "Easily calculate the percent error between a measured value and an actual value. This tool helps in assessing the accuracy of experimental or observed data in scientific and mathematical contexts.",
+        link: "/math/percent-error-calculator",
+        category: "math"
+    },
 ]
 
 export const LIFESTYLE__MATH = [
@@ -534,7 +541,7 @@ export const LIFESTYLE__MATH = [
         category: "lifestyle"
     },
     {
-        title: "Fuel Cost Calculator",
+        title: "Fuel Cost Calculator*",
         subTitle: "Fuel Cost Calculator",
         description: "Estimate your fuel costs based on your vehicle’s fuel efficiency and the distance you plan to travel.",
         link: "/lifestyle/fuel-cost-calculator",
@@ -629,6 +636,55 @@ export const LIFESTYLE__MATH = [
         subTitle: "Alcohol Unit Calculator",
         description: "Estimate your weekly alcohol intake in units. Useful for staying within health guidelines.",
         link: "/lifestyle/alcohol-unit-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Character Count",
+        subTitle: "Character Count",
+        description: "Quickly count the number of characters, words, and spaces in your text. Ideal for writers, students, and social media users keeping within character limits.",
+        link: "/lifestyle/character-count",
+        category: "lifestyle"
+    },
+    {
+        title: "Rent Calculator",
+        subTitle: "Rent Calculator",
+        description: "Estimate how much rent you can afford based on your income and expenses. A useful tool for budgeting and planning your housing costs.",
+        link: "/lifestyle/rent-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Dunk Calculator",
+        subTitle: "Dunk Calculator",
+        description: "Find out if you can dunk based on your height, standing reach, and vertical jump. Perfect for basketball enthusiasts aiming to improve their game.",
+        link: "/lifestyle/dunk-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Commission Calculator",
+        subTitle: "Commission Calculator",
+        description: "Easily calculate your earnings from sales commissions. Useful for sales professionals, freelancers, and business owners tracking income.",
+        link: "/lifestyle/commission-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Inch-Pounds to Foot-Pounds Converter",
+        subTitle: "Inch-Pounds to Foot-Pounds Converter",
+        description: "Convert inch-pounds to foot-pounds quickly and accurately. Handy for mechanics, engineers, and DIYers dealing with torque measurements.",
+        link: "/lifestyle/inch-pounds-to-foot-pounds-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "Ares to hectares converter",
+        subTitle: "Ares to hectares converter",
+        description: "Convert land measurements from ares to hectares in just a few clicks. Ideal for real estate, agriculture, and land management purposes.",
+        link: "/lifestyle/areas-to-hectares-calculator",
+        category: "lifestyle"
+    },
+    {
+        title: "EV Travel Cost Calculator",
+        subTitle: "EV Travel Cost Calculator",
+        description: "Easily estimate the total cost of your electric vehicle trip, including charging expenses and energy consumption. Perfect for planning budget-friendly and eco-conscious travel routes.",
+        link: "/lifestyle/ev-travel-cost-calculator",
         category: "lifestyle"
     }
 ]
