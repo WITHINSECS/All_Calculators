@@ -63,9 +63,8 @@ const Page = () => {
 
             toast.success("Signup successful!");
             router.push("/login");
-        } catch (err: any) {
-            if (err?.digest === "NEXT_REDIRECT") return; // ignore special redirect error
-            toast.error(err.message || "Unexpected error occurred.");
+        } catch {
+            toast.error("Unexpected error occurred.");
         } finally {
             setLoading(false);
         }
