@@ -14,6 +14,7 @@ import {
 import { Menu } from "lucide-react"
 import { siteConfig } from "@/lib/siteConfig"
 import { authClient } from "@/lib/auth-client"
+import Image from "next/image"
 
 const Navbar = () => {
 
@@ -31,7 +32,8 @@ const Navbar = () => {
             <div className="container lg:px-20 mx-auto flex h-16 items-center justify-between px-4">
                 {/* Left: Logo */}
                 <Link href="/">
-                    <span className="text-lg tracking-wider font-semibold">{siteConfig.name}</span>
+                    {/* <span className="text-lg tracking-wider font-semibold">{siteConfig.name}</span> */}
+                    <Image src={"/logo.png"} width={100} height={100} alt="image" className="w-full h-14" />
                 </Link>
 
                 {/* Desktop Nav */}
