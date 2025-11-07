@@ -13,8 +13,19 @@ import {
 } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
 import { siteConfig } from "@/lib/siteConfig"
+import { authClient } from "@/lib/auth-client"
 
 const Navbar = () => {
+
+    const {
+        data: session,
+        isPending, //loading state
+        error, //error object
+        refetch //refetch the session
+    } = authClient.useSession()
+
+
+
     return (
         <header className="w-full border-b">
             <div className="container lg:px-20 mx-auto flex h-16 items-center justify-between px-4">
@@ -46,16 +57,35 @@ const Navbar = () => {
                 </nav>
 
                 <div className="md:flex hidden items-center gap-2">
-                    <Link href={"/signup"}>
-                        <Button className="cursor-pointer">
-                            Sign up
-                        </Button>
-                    </Link>
-                    <Link href={"/login"}>
-                        <Button className="cursor-pointer" variant={"outline"}>
-                            Login
-                        </Button>
-                    </Link>
+                    {
+                        !isPending && (
+                            <>
+                                {
+                                    session?.user ? (
+                                        <Link href={"/calculators"}>
+                                            <Button className="cursor-pointer">
+                                                Get Started
+                                            </Button>
+                                        </Link>
+                                    ) : (
+                                        <div className="items-center gap-2 flex">
+                                            <Link href={"/signup"}>
+                                                <Button className="cursor-pointer">
+                                                    Sign up
+                                                </Button>
+                                            </Link>
+                                            <Link href={"/login"}>
+                                                <Button className="cursor-pointer" variant={"outline"}>
+                                                    Login
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                    )
+                                }
+                            </>
+                        )
+                    }
+
                 </div>
 
                 {/* Mobile Nav (Sheet Menu) */}
