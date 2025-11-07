@@ -33,7 +33,7 @@ const Navbar = () => {
                 {/* Left: Logo */}
                 <Link href="/">
                     {/* <span className="text-lg tracking-wider font-semibold">{siteConfig.name}</span> */}
-                    <Image src={"/logo.png"} width={100} height={100} alt="image" className="w-full h-14" />
+                    <Image src={"/logo.png"} width={100} height={100} alt="image" className="w-full md:h-14 h-10" />
                 </Link>
 
                 {/* Desktop Nav */}
@@ -98,7 +98,8 @@ const Navbar = () => {
                         </SheetTrigger>
                         <SheetContent side="left">
                             <SheetHeader>
-                                <SheetTitle>{siteConfig.name}</SheetTitle>
+                                {/* <SheetTitle>{siteConfig.name}</SheetTitle> */}
+                                <Image src={"/logo.png"} width={100} height={100} alt="image" className="w-40 h-8" />
                                 <SheetDescription>
                                     Navigate through the site using the menu below.
                                 </SheetDescription>

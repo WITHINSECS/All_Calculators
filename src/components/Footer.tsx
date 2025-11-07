@@ -1,4 +1,5 @@
 import { siteConfig } from "@/lib/siteConfig";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Footer() {
@@ -13,7 +14,8 @@ export default function Footer() {
                             rel="noreferrer"
                             className="font-medium underline underline-offset-4"
                         >
-                            {siteConfig.name}
+                            {/* {siteConfig.name} */}
+                            <Image src={"/logo.png"} width={100} height={100} alt="image" className="w-full md:h-12 h-10" />
                         </Link>
                     </p>
                 </div>
@@ -23,7 +25,7 @@ export default function Footer() {
                             href="/terms"
                             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                         >
-                            Terms and Conditions 
+                            Terms and Conditions
                         </Link>
                     </nav>
                     <p className="text-center text-sm text-muted-foreground md:text-left">
