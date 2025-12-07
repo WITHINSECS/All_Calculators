@@ -34,9 +34,9 @@ const Page = () => {
         if (isPending || !data?.user) return;
 
         if (sessionRole === "admin") {
-            router.replace("/dashboard/home");
+            router.push("/dashboard/home");
         } else {
-            router.replace("/calculators");
+            router.push("/calculators");
         }
     }, [data, isPending, sessionRole, router]);
 

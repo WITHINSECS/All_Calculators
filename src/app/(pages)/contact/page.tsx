@@ -1,4 +1,4 @@
-import React from 'react'
+"use client"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,8 +7,76 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, BrainCircuit, MessageSquare, Wrench } from "lucide-react";
 import Link from "next/link";
 import Wrapper from '@/app/Wrapper'
+import { useState } from "react";
+import type { FormEvent, ChangeEvent } from "react";
+import { toast } from "sonner";
+
 
 const page = () => {
+
+    const [form, setForm] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        message: "",
+    });
+
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleChange = (
+        e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        const { name, value } = e.target;
+        setForm((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!form.firstName || !form.lastName || !form.email || !form.message) {
+            toast.error("Please fill in all required fields.");
+            return;
+        }
+
+        try {
+            setSubmitting(true);
+
+            const res = await fetch("/api/inquiries", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(form),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                toast.error(data.message ?? "Failed to send inquiry.");
+                return;
+            }
+
+            toast.success("Inquiry sent successfully!");
+            // reset form
+            setForm({
+                firstName: "",
+                lastName: "",
+                email: "",
+                phone: "",
+                message: "",
+            });
+        } catch (err) {
+            console.error("Inquiry submit error:", err);
+            toast.error("Something went wrong. Please try again later.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+
     return (
         <Wrapper>
             <div className="max-w-7xl lg:px-12 mx-auto mb-10 px-4 md:px-6 md:mt-16 mt-8">
@@ -24,7 +92,7 @@ const page = () => {
                     <Card className="p-0">
                         <CardContent className="p-6">
                             <h2 className="mb-8 text-xl font-semibold">Fill in the form</h2>
-                            <form>
+                            <form onSubmit={handleSubmit}>
                                 <div className="grid gap-4 lg:gap-6">
                                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
                                         <div>
@@ -34,7 +102,11 @@ const page = () => {
                                             <Input
                                                 type="text"
                                                 id="firstname"
+                                                name="firstName"
                                                 placeholder="Enter your first name"
+                                                value={form.firstName}
+                                                onChange={handleChange}
+                                                required
                                             />
                                         </div>
                                         <div>
@@ -44,7 +116,11 @@ const page = () => {
                                             <Input
                                                 type="text"
                                                 id="lastname"
+                                                name="lastName"
                                                 placeholder="Enter your last name"
+                                                value={form.lastName}
+                                                onChange={handleChange}
+                                                required
                                             />
                                         </div>
                                     </div>
@@ -57,7 +133,11 @@ const page = () => {
                                             <Input
                                                 type="email"
                                                 id="email"
+                                                name="email"
                                                 placeholder="Enter your email"
+                                                value={form.email}
+                                                onChange={handleChange}
+                                                required
                                             />
                                         </div>
                                         <div>
@@ -67,7 +147,10 @@ const page = () => {
                                             <Input
                                                 type="tel"
                                                 id="phone"
+                                                name="phone"
                                                 placeholder="Enter your phone"
+                                                value={form.phone}
+                                                onChange={handleChange}
                                             />
                                         </div>
                                     </div>
@@ -78,15 +161,19 @@ const page = () => {
                                         </Label>
                                         <Textarea
                                             id="message"
+                                            name="message"
                                             placeholder="Tell us about your project"
                                             rows={4}
+                                            value={form.message}
+                                            onChange={handleChange}
+                                            required
                                         />
                                     </div>
                                 </div>
 
                                 <div className="mt-6 grid">
-                                    <Button type="submit" size="lg">
-                                        Send inquiry
+                                    <Button type="submit" size="lg" disabled={submitting}>
+                                        {submitting ? "Sending..." : "Send inquiry"}
                                     </Button>
                                 </div>
 

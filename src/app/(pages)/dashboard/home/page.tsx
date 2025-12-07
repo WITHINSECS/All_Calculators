@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import React from "react"
-import { Calculator, Users, Activity, TrendingUp } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
+import React, { useEffect, useState } from "react";
+import { Calculator, Users, Activity, TrendingUp } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
 import {
     Card,
@@ -11,78 +11,186 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { ScrollArea } from "@/components/ui/scroll-area"
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
     ChartConfig,
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
-} from "@/components/ui/chart"
+} from "@/components/ui/chart";
 
-// ------- CHART DATA (Users Joined) -------
-const usersJoinedData = [
-    { month: "January", users: 120 },
-    { month: "February", users: 180 },
-    { month: "March", users: 240 },
-    { month: "April", users: 200 },
-    { month: "May", users: 320 },
-    { month: "June", users: 280 },
-    { month: "February", users: 180 },
-    { month: "March", users: 240 },
-    { month: "April", users: 200 },
-    { month: "May", users: 320 },
-    { month: "June", users: 280 },
-]
+type DashboardStats = {
+    totalUsers: number;
+    totalInquiries: number;
+};
+
+type StatsApiResponse = {
+    success: boolean;
+    totalUsers: number;
+    totalInquiries: number;
+    message?: string;
+};
+
+type ActivityPoint = {
+    period: string;   // "YYYY-MM"
+    users: number;
+    inquiries: number;
+};
+
+type ActivityApiResponse = {
+    success: boolean;
+    data: ActivityPoint[];
+    message?: string;
+};
 
 const usersChartConfig = {
     users: {
-        label: "Users joined",
+        label: "New users",
         color: "var(--chart-1)",
     },
-} satisfies ChartConfig
+    inquiries: {
+        label: "Inquiries",
+        color: "var(--chart-2)",
+    },
+} satisfies ChartConfig;
 
-function UsersJoinedChart() {
+function UsersJoinedChart({
+    data,
+    loading,
+}: {
+    data: ActivityPoint[];
+    loading: boolean;
+}) {
+    const chartData = data.map((item) => {
+        // item.period = "YYYY-MM"
+        const d = new Date(`${item.period}-01T00:00:00Z`);
+        const label = d.toLocaleDateString("en-US", {
+            month: "short",
+            year: "2-digit",
+        }); // e.g. "Dec 25"
+
+        return {
+            label,
+            users: item.users,
+            inquiries: item.inquiries,
+        };
+    });
+
     return (
         <Card className="shadow-sm">
             <CardHeader>
-                <CardTitle>Users joined</CardTitle>
-                <CardDescription>Last 6 months</CardDescription>
+                <CardTitle>Activity (last 6 months)</CardTitle>
+                <CardDescription>New users & inquiries per month</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={usersChartConfig}>
-                    <BarChart accessibilityLayer data={usersJoinedData}>
-                        <CartesianGrid vertical={false} />
-                        <XAxis
-                            dataKey="month"
-                            tickLine={false}
-                            tickMargin={10}
-                            axisLine={false}
-                            tickFormatter={(value) => value.slice(0, 3)}
-                        />
-                        <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent hideLabel />}
-                        />
-                        <Bar dataKey="users" fill="var(--color-users)" radius={8} />
-                    </BarChart>
-                </ChartContainer>
+                {loading ? (
+                    <p className="text-sm text-muted-foreground">Loading chart…</p>
+                ) : chartData.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                        No activity recorded in the selected period.
+                    </p>
+                ) : (
+                    <ChartContainer config={usersChartConfig}>
+                        <BarChart accessibilityLayer data={chartData}>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                                dataKey="label"
+                                tickLine={false}
+                                tickMargin={10}
+                                axisLine={false}
+                            />
+                            <ChartTooltip
+                                cursor={false}
+                                content={<ChartTooltipContent />}
+                            />
+                            <Bar dataKey="users" fill="var(--color-users)" radius={4} />
+                            <Bar
+                                dataKey="inquiries"
+                                fill="var(--color-inquiries)"
+                                radius={4}
+                            />
+                        </BarChart>
+                    </ChartContainer>
+                )}
             </CardContent>
             <CardFooter className="flex-col items-start gap-2 text-sm">
                 <div className="flex gap-2 leading-none font-medium">
-                    Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+                    <TrendingUp className="h-4 w-4" />
+                    Live overview of recent platform activity
                 </div>
                 <div className="text-muted-foreground leading-none">
-                    Showing new users joining your calculators.
+                    Showing monthly new users and inquiries from your database.
                 </div>
             </CardFooter>
         </Card>
-    )
+    );
 }
 
+
 export default function Dashboard() {
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [statsLoading, setStatsLoading] = useState(true);
+    const [statsError, setStatsError] = useState<string | null>(null);
+
+    const [activity, setActivity] = useState<ActivityPoint[]>([]);
+    const [activityLoading, setActivityLoading] = useState(true);
+    const [activityError, setActivityError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await fetch("/api/admin/stats");
+                const data: StatsApiResponse = await res.json();
+
+                if (!res.ok || !data.success) {
+                    setStatsError(data.message ?? "Failed to load dashboard stats.");
+                    setStatsLoading(false);
+                    return;
+                }
+
+                setStats({
+                    totalUsers: data.totalUsers,
+                    totalInquiries: data.totalInquiries,
+                });
+                setStatsError(null);
+            } catch (err: unknown) {
+                console.error("Dashboard stats fetch error:", err);
+                setStatsError("Failed to load dashboard stats.");
+            } finally {
+                setStatsLoading(false);
+            }
+        };
+
+        const fetchActivity = async () => {
+            try {
+                const res = await fetch("/api/admin/activity");
+                const data: ActivityApiResponse = await res.json();
+
+                if (!res.ok || !data.success) {
+                    setActivityError(data.message ?? "Failed to load activity data.");
+                    setActivityLoading(false);
+                    return;
+                }
+
+                setActivity(data.data);
+                setActivityError(null);
+            } catch (err: unknown) {
+                console.error("Dashboard activity fetch error:", err);
+                setActivityError("Failed to load activity data.");
+            } finally {
+                setActivityLoading(false);
+            }
+        };
+
+        void fetchStats();
+        void fetchActivity();
+    }, []);
+
+    const totalUsers = stats?.totalUsers ?? 0;
+    const totalInquiries = stats?.totalInquiries ?? 0;
+
     return (
         <div className="flex flex-col gap-6 p-6 w-full">
             {/* Header */}
@@ -96,166 +204,84 @@ export default function Dashboard() {
                     </p>
                 </div>
                 <Badge variant="outline" className="text-xs">
-                    Live · Updated just now
+                    {statsLoading || activityLoading ? "Loading…" : "Live · Updated"}
                 </Badge>
             </div>
 
+            {statsError && (
+                <p className="text-sm text-red-500">{statsError}</p>
+            )}
+            {activityError && (
+                <p className="text-sm text-red-500">{activityError}</p>
+            )}
+
             {/* Top 3 Analytics Cards */}
             <div className="grid gap-4 md:grid-cols-3">
-                {/* Total Users */}
+                {/* 1) Total Users */}
                 <Card className="shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Users</CardTitle>
                         <Users className="h-5 w-5 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">12,348</div>
+                        <div className="text-2xl font-bold">
+                            {statsLoading ? "…" : totalUsers.toLocaleString()}
+                        </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            +8.2% vs last week
+                            Total registered users from Better Auth
                         </p>
-                        <Progress value={72} className="mt-3" />
+                        <Progress value={100} className="mt-3" />
                         <p className="text-[11px] text-muted-foreground mt-1">
-                            72% of monthly target reached
+                            User stats loaded from database
                         </p>
                     </CardContent>
                 </Card>
 
-                {/* Calculations Performed */}
+                {/* 2) Total Form Inquiries */}
                 <Card className="shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">
-                            Calculations Performed
+                            Total Form Inquiries
                         </CardTitle>
                         <Calculator className="h-5 w-5 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">89,210</div>
+                        <div className="text-2xl font-bold">
+                            {statsLoading ? "…" : totalInquiries.toLocaleString()}
+                        </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            +14.5% vs last week
+                            All inquiries from your contact form
                         </p>
-                        <Progress value={54} className="mt-3" />
+                        <Progress value={100} className="mt-3" />
                         <p className="text-[11px] text-muted-foreground mt-1">
-                            54% of daily capacity
+                            Stored in the inquiries collection
                         </p>
                     </CardContent>
                 </Card>
 
-                {/* Active Calculators */}
+                {/* 3) Calculator Health */}
                 <Card className="shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">
-                            Active Calculators
+                            Calculator Health
                         </CardTitle>
                         <Activity className="h-5 w-5 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">18 / 24</div>
+                        <div className="text-2xl font-bold">100%</div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            6 calculators in beta
+                            All calculators are operational
                         </p>
-                        <div className="mt-3 flex gap-2 text-[11px]">
-                            <Badge variant="secondary">Finance</Badge>
-                            <Badge variant="secondary">Health</Badge>
-                            <Badge variant="secondary">Math</Badge>
-                        </div>
+                        <Progress value={100} className="mt-3" />
+                        <p className="text-[11px] text-muted-foreground mt-1">
+                            No issues detected across active calculators
+                        </p>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Status + Recent Activity */}
-            {/* <div className="grid gap-4 md:grid-cols-3">
-                <Card className="md:col-span-2 shadow-sm">
-                    <CardHeader className="flex flex-row items-center justify-between pb-3">
-                        <CardTitle className="text-sm font-medium">
-                            Application Status
-                        </CardTitle>
-                        <Badge className="flex items-center gap-1">
-                            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                            All systems operational
-                        </Badge>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-4 text-sm">
-                            <div>
-                                <p className="text-xs text-muted-foreground mb-1">
-                                    Uptime (30 days)
-                                </p>
-                                <p className="font-semibold">99.97%</p>
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground mb-1">
-                                    Avg Response Time
-                                </p>
-                                <p className="font-semibold">154 ms</p>
-                            </div>
-                            <div>
-                                <p className="text-xs text-muted-foreground mb-1">
-                                    Error Rate
-                                </p>
-                                <p className="font-semibold">0.21%</p>
-                            </div>
-                        </div>
-
-                        <Progress value={86} className="mt-1" />
-                        <p className="text-[11px] text-muted-foreground">
-                            86% of current infrastructure capacity used. Consider scaling if
-                            growth continues.
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card className="shadow-sm">
-                    <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium">
-                            Recent Calculator Activity
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ScrollArea className="h-36 pr-2">
-                            <ul className="space-y-3 text-xs">
-                                <li className="flex items-center justify-between">
-                                    <div>
-                                        <p className="font-medium">Loan EMI Calculator</p>
-                                        <p className="text-[11px] text-muted-foreground">
-                                            2,310 runs · 123 new users
-                                        </p>
-                                    </div>
-                                    <Badge variant="outline">Trending</Badge>
-                                </li>
-                                <li className="flex items-center justify-between">
-                                    <div>
-                                        <p className="font-medium">BMI Calculator</p>
-                                        <p className="text-[11px] text-muted-foreground">
-                                            1,540 runs · 62 new users
-                                        </p>
-                                    </div>
-                                    <Badge variant="outline">Stable</Badge>
-                                </li>
-                                <li className="flex items-center justify-between">
-                                    <div>
-                                        <p className="font-medium">Currency Converter</p>
-                                        <p className="text-[11px] text-muted-foreground">
-                                            3,920 runs · 201 new users
-                                        </p>
-                                    </div>
-                                    <Badge variant="outline">High load</Badge>
-                                </li>
-                                <li className="flex items-center justify-between">
-                                    <div>
-                                        <p className="font-medium">Percentage Calculator</p>
-                                        <p className="text-[11px] text-muted-foreground">
-                                            980 runs · 44 new users
-                                        </p>
-                                    </div>
-                                    <Badge variant="outline">New</Badge>
-                                </li>
-                            </ul>
-                        </ScrollArea>
-                    </CardContent>
-                </Card>
-            </div> */}
-
-            <UsersJoinedChart />
+            {/* Activity chart (real data) */}
+            <UsersJoinedChart data={activity} loading={activityLoading} />
         </div>
-    )
+    );
 }
