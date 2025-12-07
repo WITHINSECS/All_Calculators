@@ -118,10 +118,13 @@ export default function Page() {
         }));
     };
 
-    const handleSelectChange = (name: keyof LoanFormState, value: string) => {
+    const handleSelectChange = <K extends keyof LoanFormState>(
+        name: K,
+        value: LoanFormState[K]
+    ) => {
         setForm((prev) => ({
             ...prev,
-            [name]: value as any,
+            [name]: value,
         }));
     };
 
@@ -202,10 +205,7 @@ export default function Page() {
                                     <Select
                                         value={form.vehicleType}
                                         onValueChange={(value) =>
-                                            handleSelectChange(
-                                                "vehicleType",
-                                                value
-                                            )
+                                            handleSelectChange("vehicleType", value as "new" | "used")
                                         }
                                     >
                                         <SelectTrigger>
@@ -279,15 +279,15 @@ export default function Page() {
                                         data={
                                             result
                                                 ? [
-                                                      {
-                                                          name: "Principal",
-                                                          value: result.totalPrincipal,
-                                                      },
-                                                      {
-                                                          name: "Interest",
-                                                          value: result.totalInterest,
-                                                      },
-                                                  ]
+                                                    {
+                                                        name: "Principal",
+                                                        value: result.totalPrincipal,
+                                                    },
+                                                    {
+                                                        name: "Interest",
+                                                        value: result.totalInterest,
+                                                    },
+                                                ]
                                                 : []
                                         }
                                         dataKey="value"

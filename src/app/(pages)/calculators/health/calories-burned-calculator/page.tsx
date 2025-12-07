@@ -22,7 +22,6 @@ import {
   Legend,
 } from "recharts";
 
-// NEW: shadcn combobox primitives
 import {
   Popover,
   PopoverContent,
@@ -74,12 +73,9 @@ interface CaloriesResult {
   chartData: { time: number; calories: number }[];
 }
 
-// Converts lb to kg if needed
 const toKg = (weight: number, unit: "kg" | "lb") =>
   unit === "kg" ? weight : weight * 0.45359237;
 
-// MET formula (ACSM):
-// kcal = MET * 3.5 * weight(kg) / 200 * duration(min)
 const calcByMET = (met: number, duration: number, weightKg: number) =>
   met * 3.5 * weightKg * (duration / 200);
 
@@ -99,7 +95,6 @@ const calculateCaloriesBurned = (input: {
   if (input.met && input.met > 0) {
     baseCalories = calcByMET(input.met, input.duration, weightKg);
   } else {
-    // Fallback: simple heuristic if no activity chosen
     baseCalories =
       (input.gender === "male" ? 8 : 7) *
       input.duration *
@@ -123,7 +118,6 @@ export default function CaloriesCalculator() {
   const [open, setOpen] = useState(false); // combobox
   const [selected, setSelected] = useState<Activity | null>(null);
 
-  // start everything EMPTY instead of with defaults
   const [input, setInput] = useState<CaloriesInput>({
     exercise: "",
     met: undefined,
@@ -139,7 +133,6 @@ export default function CaloriesCalculator() {
 
   const handleNumber = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // allow empty, digits only
     if (!/^\d*$/.test(value)) return;
     setInput((prev) => ({
       ...prev,
@@ -147,17 +140,23 @@ export default function CaloriesCalculator() {
     }));
   };
 
-  const handleSelectChange = (name: keyof CaloriesInput, value: any) => {
-    setInput((prev) => ({ ...prev, [name]: value }));
+  // 🔧 FIX: typed, generic, no `any`
+  const handleSelectChange = <K extends keyof CaloriesInput>(
+    name: K,
+    value: CaloriesInput[K]
+  ) => {
+    setInput((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  // For displaying "Burns XYZ cal/hour" per activity preview
   const caloriesPerHourAt70kg = useMemo(
     () =>
       Object.fromEntries(
         ACTIVITIES.map((a) => [
           a.id,
-          Math.round(calcByMET(a.met, 60, 70)), // 70kg reference
+          Math.round(calcByMET(a.met, 60, 70)),
         ])
       ),
     []
@@ -353,8 +352,11 @@ export default function CaloriesCalculator() {
                 placeholder="e.g. 60"
               />
               <Select
-                onValueChange={(value: "kg" | "lb") =>
-                  handleSelectChange("weightUnit", value)
+                onValueChange={(value) =>
+                  handleSelectChange(
+                    "weightUnit",
+                    value as CaloriesInput["weightUnit"]
+                  )
                 }
                 defaultValue={input.weightUnit}
               >
@@ -374,10 +376,8 @@ export default function CaloriesCalculator() {
           </Button>
         </div>
 
-        {/* Error */}
         {error && <div className="mt-4 text-red-500">{error}</div>}
 
-        {/* Results */}
         <div className="mt-6">
           {result && (
             <>
