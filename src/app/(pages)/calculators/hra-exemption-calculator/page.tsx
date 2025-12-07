@@ -5,31 +5,58 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from "recharts";
 import Wrapper from "@/app/Wrapper";
 
 export default function HRAExemptionCalculator() {
-  const [basicSalary, setBasicSalary] = useState<string>("0");
-  const [dearnessAllowance, setDearnessAllowance] = useState<string>("0");
-  const [hraReceived, setHraReceived] = useState<string>("0");
-  const [totalRentPaid, setTotalRentPaid] = useState<string>("0");
+  const [basicSalary, setBasicSalary] = useState<string>("");
+  const [dearnessAllowance, setDearnessAllowance] = useState<string>("");
+  const [hraReceived, setHraReceived] = useState<string>("");
+  const [totalRentPaid, setTotalRentPaid] = useState<string>("");
   const [isMetro, setIsMetro] = useState(false);
   const [exemption, setExemption] = useState(0);
   const [alertMessage, setAlertMessage] = useState("");
 
   const calculateHRAExemption = () => {
-    // Convert input values to numbers
-    const basicSalaryNum = parseFloat(basicSalary);
-    const dearnessAllowanceNum = parseFloat(dearnessAllowance);
-    const hraReceivedNum = parseFloat(hraReceived);
-    const totalRentPaidNum = parseFloat(totalRentPaid);
+    const basicSalaryNum = Number(basicSalary);
+    const dearnessAllowanceNum = Number(dearnessAllowance);
+    const hraReceivedNum = Number(hraReceived);
+    const totalRentPaidNum = Number(totalRentPaid);
 
-    // Validation: If any field is empty or zero, display an alert
-    if (basicSalaryNum <= 0 || dearnessAllowanceNum <= 0 || hraReceivedNum <= 0 || totalRentPaidNum <= 0) {
-      setAlertMessage("Please fill in all fields correctly and ensure values are not zero or empty.");
+    // Validation: empty / NaN / <= 0
+    if (
+      !basicSalary.trim() ||
+      !dearnessAllowance.trim() ||
+      !hraReceived.trim() ||
+      !totalRentPaid.trim() ||
+      isNaN(basicSalaryNum) ||
+      isNaN(dearnessAllowanceNum) ||
+      isNaN(hraReceivedNum) ||
+      isNaN(totalRentPaidNum) ||
+      basicSalaryNum <= 0 ||
+      dearnessAllowanceNum <= 0 ||
+      hraReceivedNum <= 0 ||
+      totalRentPaidNum <= 0
+    ) {
+      setAlertMessage(
+        "Please fill in all fields correctly and ensure values are not zero or empty."
+      );
+      setExemption(0);
       return;
     } else {
-      setAlertMessage(""); // Clear the alert message
+      setAlertMessage("");
     }
 
     const annualBasicSalary = basicSalaryNum * 12;
@@ -37,12 +64,14 @@ export default function HRAExemptionCalculator() {
     const annualRentPaid = totalRentPaidNum * 12;
 
     const metroFactor = isMetro ? 0.5 : 0.4;
-    const expectedExemption1 = annualBasicSalary * metroFactor; // 50% of basic for metro, 40% for non-metro
-    const expectedExemption2 = annualRentPaid - (annualBasicSalary * 0.1); // Rent paid minus 10% of basic
+
+    const expectedExemption1 = annualBasicSalary * metroFactor; // 50% or 40% of basic
+    const expectedExemption2 = annualRentPaid - annualBasicSalary * 0.1; // Rent paid - 10% of basic
     const expectedExemption3 = annualHRAReceived; // Actual HRA received
 
     const hraExemption = Math.min(expectedExemption1, expectedExemption2, expectedExemption3);
-    setExemption(hraExemption);
+
+    setExemption(hraExemption > 0 ? hraExemption : 0);
   };
 
   const handleCalculate = () => {
@@ -50,27 +79,42 @@ export default function HRAExemptionCalculator() {
   };
 
   const handleClear = () => {
-    setBasicSalary("0");
-    setDearnessAllowance("0");
-    setHraReceived("0");
-    setTotalRentPaid("0");
+    setBasicSalary("");
+    setDearnessAllowance("");
+    setHraReceived("");
+    setTotalRentPaid("");
     setIsMetro(false);
     setExemption(0);
-    setAlertMessage(""); // Clear the alert message
+    setAlertMessage("");
   };
 
   // Pie chart data
-  const pieData = [
-    { name: "HRA Exemption", value: exemption },
-    { name: "Other Deductions", value: 100000 - exemption }, // example additional deduction
-  ];
+  const pieData =
+    exemption > 0
+      ? [
+          { name: "HRA Exemption", value: exemption },
+          { name: "Other Deductions", value: 100000 - exemption }, // sample other deduction
+        ]
+      : [];
 
-  // Line chart data (showing how exemption evolves over the years)
-  const lineData = [
-    { year: 1, exemption: exemption },
-    { year: 2, exemption: exemption + 5000 }, // Assuming a growth over years
-    { year: 3, exemption: exemption + 10000 },
-  ];
+  // Line chart data (example growth over years)
+  const lineData =
+    exemption > 0
+      ? [
+          { year: 1, exemption: exemption },
+          { year: 2, exemption: exemption + 5000 },
+          { year: 3, exemption: exemption + 10000 },
+        ]
+      : [];
+
+  // numeric-input handler that still allows empty string
+  const handleNumericInput =
+    (setter: (v: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      if (value === "" || !isNaN(Number(value))) {
+        setter(value);
+      }
+    };
 
   return (
     <Wrapper>
@@ -80,7 +124,8 @@ export default function HRAExemptionCalculator() {
             HRA Exemption Calculator
           </h1>
           <p className="text-muted-foreground mt-4 md:text-lg">
-            How much of my HRA is exempted from tax? Use this calculator to calculate the amount of House Rent Allowance that is non-taxable!
+            How much of my HRA is exempted from tax? Use this calculator to calculate the amount
+            of House Rent Allowance that is non-taxable!
           </p>
         </div>
         <div className="max-w-4xl mx-auto">
@@ -89,42 +134,50 @@ export default function HRAExemptionCalculator() {
               <Label htmlFor="basicSalary">Basic Salary *</Label>
               <Input
                 id="basicSalary"
-                type="number"
+                type="text"
                 value={basicSalary}
-                onChange={(e) => setBasicSalary(e.target.value)}
+                onChange={handleNumericInput(setBasicSalary)}
+                placeholder="e.g. 50000"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="dearnessAllowance">Dearness Allowance *</Label>
               <Input
                 id="dearnessAllowance"
-                type="number"
+                type="text"
                 value={dearnessAllowance}
-                onChange={(e) => setDearnessAllowance(e.target.value)}
+                onChange={handleNumericInput(setDearnessAllowance)}
+                placeholder="e.g. 5000"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="hraReceived">HRA Received *</Label>
               <Input
                 id="hraReceived"
-                type="number"
+                type="text"
                 value={hraReceived}
-                onChange={(e) => setHraReceived(e.target.value)}
+                onChange={handleNumericInput(setHraReceived)}
+                placeholder="e.g. 20000"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="totalRentPaid">Total Rent Paid *</Label>
               <Input
                 id="totalRentPaid"
-                type="number"
+                type="text"
                 value={totalRentPaid}
-                onChange={(e) => setTotalRentPaid(e.target.value)}
+                onChange={handleNumericInput(setTotalRentPaid)}
+                placeholder="e.g. 15000"
               />
             </div>
           </div>
+
           <div className="mt-4 space-y-2">
             <Label>Do you live in Delhi, Mumbai, Kolkata, or Chennai? *</Label>
-            <RadioGroup value={isMetro ? "yes" : "no"} onValueChange={(value) => setIsMetro(value === "yes")}>
+            <RadioGroup
+              value={isMetro ? "yes" : "no"}
+              onValueChange={(value) => setIsMetro(value === "yes")}
+            >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="yes" id="yes" />
                 <Label htmlFor="yes">Yes</Label>
@@ -135,52 +188,68 @@ export default function HRAExemptionCalculator() {
               </div>
             </RadioGroup>
           </div>
-          {alertMessage && <div className="text-red-600 font-semibold mt-4">{alertMessage}</div>}
+
+          {alertMessage && (
+            <div className="text-red-600 font-semibold mt-4">{alertMessage}</div>
+          )}
+
           <div className="mt-6">
             <Button className="p-5 w-full" onClick={handleCalculate}>
               Calculate Now
             </Button>
           </div>
-          {exemption > 0 && (
+
+          {exemption > 0 && !alertMessage && (
             <div className="mt-4 p-4 bg-green-100 rounded">
               Your HRA exemption is: ₹{exemption.toFixed(2)}
             </div>
           )}
-          <div className="mt-6">
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
-                  paddingAngle={5}
-                >
-                  <Cell fill="#0D74FF" />
-                  <Cell fill="#FF5733" />
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-6">
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={lineData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="exemption" stroke="#3498db" />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+
+          {/* Pie Chart */}
+          {pieData.length > 0 && (
+            <div className="mt-6">
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    paddingAngle={5}
+                  >
+                    <Cell fill="#0D74FF" />
+                    <Cell fill="#FF5733" />
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Line Chart */}
+          {lineData.length > 0 && (
+            <div className="mt-6">
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={lineData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="year" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="exemption" stroke="#3498db" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
           <div className="mt-4">
-            <Button variant="outline" onClick={handleClear}>Clear</Button>
+            <Button variant="outline" onClick={handleClear}>
+              Clear
+            </Button>
           </div>
         </div>
       </div>

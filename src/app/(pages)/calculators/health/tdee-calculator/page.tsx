@@ -10,10 +10,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import Wrapper from '@/app/Wrapper'; // Ensure this wrapper component exists
-import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table"; // Shadcn Table
-import { toast } from "react-toastify"; // Import toast for error handling
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"; // Recharts for pie chart
+import Wrapper from '@/app/Wrapper';
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
+import { toast } from "react-toastify";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 // Define result type
 interface TDEEResult {
@@ -26,9 +26,15 @@ interface TDEEResult {
 }
 
 // Helper Function to Calculate TDEE and BMR
-const calculateTDEE = (age: number, gender: string, weight: number, height: number, activityLevel: string) => {
+const calculateTDEE = (
+  age: number,
+  gender: string,
+  weight: number,
+  height: number,
+  activityLevel: string
+) => {
   // BMR calculation based on the Mifflin-St Jeor Equation
-  let bmr;
+  let bmr: number;
   if (gender === "Male") {
     bmr = 10 * weight + 6.25 * height - 5 * age + 5;
   } else {
@@ -36,7 +42,7 @@ const calculateTDEE = (age: number, gender: string, weight: number, height: numb
   }
 
   // Adjust BMR based on activity level
-  let tdee;
+  let tdee: number;
   switch (activityLevel) {
     case "Sedentary":
       tdee = bmr * 1.2;
@@ -57,7 +63,7 @@ const calculateTDEE = (age: number, gender: string, weight: number, height: numb
       tdee = bmr * 1.2;
   }
 
-  // Calculate Calorie adjustments for different weight goals
+  // Calorie adjustments for different weight goals
   const weightLoss = tdee - 500;
   const mildWeightLoss = tdee - 250;
   const weightGain = tdee + 500;
@@ -67,23 +73,47 @@ const calculateTDEE = (age: number, gender: string, weight: number, height: numb
 };
 
 const TDEECalculator = () => {
-  const [age, setAge] = useState<number>(30); // Default age
-  const [gender, setGender] = useState<string>("Male"); // Default gender
-  const [weight, setWeight] = useState<number>(70); // Default weight in kg
-  const [height, setHeight] = useState<number>(175); // Default height in cm
-  const [activityLevel, setActivityLevel] = useState<string>("Sedentary"); // Default activity level
-  const [result, setResult] = useState<TDEEResult | null>(null); // Updated state type
+  // Use strings so fields can be empty initially
+  const [age, setAge] = useState<string>("");
+  const [gender, setGender] = useState<string>("Male");
+  const [weight, setWeight] = useState<string>("");
+  const [height, setHeight] = useState<string>("");
+  const [activityLevel, setActivityLevel] = useState<string>("Sedentary");
+  const [result, setResult] = useState<TDEEResult | null>(null);
 
-  // Handle Calculate Button Click
   const handleCalculate = () => {
-    if (!age || !weight || !height) {
+    if (!age.trim() || !weight.trim() || !height.trim()) {
       toast.error("Please fill out all fields.");
       return;
     }
 
-    const { bmr, tdee, weightLoss, mildWeightLoss, weightGain, mildWeightGain } = calculateTDEE(
-      age, gender, weight, height, activityLevel
-    );
+    const ageNum = Number(age);
+    const weightNum = Number(weight);
+    const heightNum = Number(height);
+
+    if (!Number.isFinite(ageNum) || ageNum <= 0) {
+      toast.error("Please enter a valid age.");
+      return;
+    }
+
+    if (!Number.isFinite(weightNum) || weightNum <= 0) {
+      toast.error("Please enter a valid weight.");
+      return;
+    }
+
+    if (!Number.isFinite(heightNum) || heightNum <= 0) {
+      toast.error("Please enter a valid height.");
+      return;
+    }
+
+    const {
+      bmr,
+      tdee,
+      weightLoss,
+      mildWeightLoss,
+      weightGain,
+      mildWeightGain,
+    } = calculateTDEE(ageNum, gender, weightNum, heightNum, activityLevel);
 
     setResult({ bmr, tdee, weightLoss, mildWeightLoss, weightGain, mildWeightGain });
   };
@@ -107,7 +137,7 @@ const TDEECalculator = () => {
             Calculate your daily calorie requirements based on your activity level.
           </p>
         </div>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Enter Your Details</CardTitle>
@@ -115,18 +145,23 @@ const TDEECalculator = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label className="black mb-1.5" htmlFor="age">Age (years)</Label>
+                <Label className="black mb-1.5" htmlFor="age">
+                  Age (years)
+                </Label>
                 <Input
                   type="number"
                   id="age"
                   value={age}
-                  onChange={(e) => setAge(Number(e.target.value))}
+                  onChange={(e) => setAge(e.target.value)}
                   className="w-full"
+                  placeholder="e.g. 30"
                 />
               </div>
 
               <div>
-                <Label className="black mb-1.5" htmlFor="gender">Gender</Label>
+                <Label className="black mb-1.5" htmlFor="gender">
+                  Gender
+                </Label>
                 <select
                   id="gender"
                   value={gender}
@@ -139,29 +174,37 @@ const TDEECalculator = () => {
               </div>
 
               <div>
-                <Label className="black mb-1.5" htmlFor="weight">Weight (kg)</Label>
+                <Label className="black mb-1.5" htmlFor="weight">
+                  Weight (kg)
+                </Label>
                 <Input
                   type="number"
                   id="weight"
                   value={weight}
-                  onChange={(e) => setWeight(Number(e.target.value))}
+                  onChange={(e) => setWeight(e.target.value)}
                   className="w-full"
+                  placeholder="e.g. 70"
                 />
               </div>
 
               <div>
-                <Label className="black mb-1.5" htmlFor="height">Height (cm)</Label>
+                <Label className="black mb-1.5" htmlFor="height">
+                  Height (cm)
+                </Label>
                 <Input
                   type="number"
                   id="height"
                   value={height}
-                  onChange={(e) => setHeight(Number(e.target.value))}
+                  onChange={(e) => setHeight(e.target.value)}
                   className="w-full"
+                  placeholder="e.g. 175"
                 />
               </div>
 
               <div>
-                <Label className="black mb-1.5" htmlFor="activity">Activity Level</Label>
+                <Label className="black mb-1.5" htmlFor="activity">
+                  Activity Level
+                </Label>
                 <select
                   id="activity"
                   className="border p-2 rounded-md w-full"
@@ -177,10 +220,13 @@ const TDEECalculator = () => {
               </div>
             </div>
 
-            <Button onClick={handleCalculate} className="mt-4 p-5 w-full">Calculate TDEE</Button>
+            <Button onClick={handleCalculate} className="mt-4 p-5 w-full">
+              Calculate TDEE
+            </Button>
           </CardContent>
         </Card>
 
+        {/* Only show results after a successful calculation */}
         {result && (
           <div className="mt-8">
             <h2 className="text-xl font-semibold">Your Results</h2>
@@ -220,27 +266,29 @@ const TDEECalculator = () => {
               </TableBody>
             </Table>
 
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={data}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={70}
-                  outerRadius={90}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  <Cell key="cell1" fill="#82ca9d" />
-                  <Cell key="cell2" fill="#ff8042" />
-                  <Cell key="cell3" fill="#ffbf00" />
-                  <Cell key="cell4" fill="#ff7f00" />
-                  <Cell key="cell5" fill="#ff0000" />
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="h-72 mt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={data}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={70}
+                    outerRadius={90}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    <Cell key="cell1" fill="#82ca9d" />
+                    <Cell key="cell2" fill="#ff8042" />
+                    <Cell key="cell3" fill="#ffbf00" />
+                    <Cell key="cell4" fill="#ff7f00" />
+                    <Cell key="cell5" fill="#ff0000" />
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         )}
       </div>

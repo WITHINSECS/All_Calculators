@@ -9,7 +9,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; 
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import {
     Table,
     TableBody,
@@ -29,7 +35,7 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { Label } from "@/components/ui/label";
-import Wrapper from '@/app/Wrapper';
+import Wrapper from "@/app/Wrapper";
 import {
     PieChart,
     Pie,
@@ -40,8 +46,8 @@ import {
 
 interface LoanInput {
     loanAmount: number;
-    loanTerm: number;
-    vehicleType: 'new' | 'used';
+    loanTerm: number; // months
+    vehicleType: "new" | "used";
     interestRate: number;
 }
 
@@ -49,21 +55,39 @@ interface LoanResult {
     monthlyPayment: number;
     totalPrincipal: number;
     totalInterest: number;
-    amortizationSchedule: { month: number; interest: number; principal: number; balance: number }[];
+    amortizationSchedule: {
+        month: number;
+        interest: number;
+        principal: number;
+        balance: number;
+    }[];
+}
+
+// UI state for the form so inputs can be empty
+interface LoanFormState {
+    loanAmount: string;
+    interestRate: string;
+    loanTerm: string; // months as string (for Select)
+    vehicleType: "new" | "used";
 }
 
 const calculateLoan = (input: LoanInput): LoanResult => {
     const monthlyInterestRate = input.interestRate / 100 / 12;
     const totalMonths = input.loanTerm;
-    const monthlyPayment = (input.loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -totalMonths));
+
+    const monthlyPayment =
+        (input.loanAmount * monthlyInterestRate) /
+        (1 - Math.pow(1 + monthlyInterestRate, -totalMonths));
+
     let balance = input.loanAmount;
-    const amortizationSchedule = [];
+    const amortizationSchedule: LoanResult["amortizationSchedule"] = [];
 
     for (let month = 1; month <= totalMonths; month++) {
         const interest = balance * monthlyInterestRate;
         const principal = monthlyPayment - interest;
         balance -= principal;
         if (balance < 0) balance = 0;
+
         amortizationSchedule.push({ month, interest, principal, balance });
     }
 
@@ -76,25 +100,49 @@ const calculateLoan = (input: LoanInput): LoanResult => {
 };
 
 export default function Page() {
-    const [input, setInput] = useState<LoanInput>({
-        loanAmount: 15000,
-        loanTerm: 60,
-        vehicleType: 'used',
-        interestRate: 3,
+    // Text inputs empty by default; selects have defaults
+    const [form, setForm] = useState<LoanFormState>({
+        loanAmount: "",
+        interestRate: "",
+        loanTerm: "60",
+        vehicleType: "used",
     });
+
     const [result, setResult] = useState<LoanResult | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setInput((prev) => ({ ...prev, [name]: Number(value) }));
+        setForm((prev) => ({
+            ...prev,
+            [name]: value, // keep as string so it can be ""
+        }));
     };
 
-    const handleSelectChange = (name: string, value: string) => {
-        setInput((prev) => ({ ...prev, [name]: value }));
+    const handleSelectChange = (name: keyof LoanFormState, value: string) => {
+        setForm((prev) => ({
+            ...prev,
+            [name]: value as any,
+        }));
     };
 
     const handleCalculate = () => {
-        const calcResult = calculateLoan(input);
+        const loanAmount = Number(form.loanAmount) || 0;
+        const interestRate = Number(form.interestRate) || 0;
+        const loanTerm = Number(form.loanTerm) || 0;
+        const vehicleType = form.vehicleType as "new" | "used";
+
+        if (loanAmount <= 0 || interestRate <= 0 || loanTerm <= 0) {
+            setResult(null);
+            return;
+        }
+
+        const calcResult = calculateLoan({
+            loanAmount,
+            loanTerm,
+            interestRate,
+            vehicleType,
+        });
+
         setResult(calcResult);
     };
 
@@ -119,11 +167,22 @@ export default function Page() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <Label>Loan Amount</Label>
-                                    <Input className="mt-2 mb-3" name="loanAmount" value={input.loanAmount} onChange={handleChange} />
+                                    <Input
+                                        className="mt-2 mb-3"
+                                        name="loanAmount"
+                                        value={form.loanAmount}
+                                        onChange={handleChange}
+                                        placeholder="$"
+                                    />
                                 </div>
                                 <div>
                                     <Label className="block mb-2">Loan Term</Label>
-                                    <Select onValueChange={(value) => handleSelectChange('loanTerm', value)} defaultValue="60">
+                                    <Select
+                                        value={form.loanTerm}
+                                        onValueChange={(value) =>
+                                            handleSelectChange("loanTerm", value)
+                                        }
+                                    >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select term" />
                                         </SelectTrigger>
@@ -137,8 +196,18 @@ export default function Page() {
                                     </Select>
                                 </div>
                                 <div>
-                                    <Label className="block mb-2">Is your vehicle new or used?</Label>
-                                    <Select onValueChange={(value) => handleSelectChange('vehicleType', value)} defaultValue="used">
+                                    <Label className="block mb-2">
+                                        Is your vehicle new or used?
+                                    </Label>
+                                    <Select
+                                        value={form.vehicleType}
+                                        onValueChange={(value) =>
+                                            handleSelectChange(
+                                                "vehicleType",
+                                                value
+                                            )
+                                        }
+                                    >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select type" />
                                         </SelectTrigger>
@@ -149,12 +218,20 @@ export default function Page() {
                                     </Select>
                                 </div>
                                 <div>
-                                    <Label>Interest rate</Label>
-                                    <Input className="mt-2 mb-3" name="interestRate" value={input.interestRate} onChange={handleChange} />
+                                    <Label>Interest rate (%)</Label>
+                                    <Input
+                                        className="mt-2 mb-3"
+                                        name="interestRate"
+                                        value={form.interestRate}
+                                        onChange={handleChange}
+                                        placeholder="e.g. 3"
+                                    />
                                 </div>
                             </div>
                             <div className="flex justify-end space-x-2">
-                                <Button className="w-full p-5" onClick={handleCalculate}>Calculate</Button>
+                                <Button className="w-full p-5" onClick={handleCalculate}>
+                                    Calculate
+                                </Button>
                             </div>
                         </div>
                     </CardContent>
@@ -168,13 +245,25 @@ export default function Page() {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <p>Your estimated monthly payment</p>
-                                <h2 className="text-4xl font-bold">${result?.monthlyPayment.toFixed(2)}</h2>
+                                <h2 className="text-4xl font-bold">
+                                    {result
+                                        ? `$${result.monthlyPayment.toFixed(2)}`
+                                        : "-"}
+                                </h2>
                             </div>
                             <div>
                                 <p>Total Principal Paid</p>
-                                <p>${result?.totalPrincipal.toFixed(2)}</p>
+                                <p>
+                                    {result
+                                        ? `$${result.totalPrincipal.toFixed(2)}`
+                                        : "-"}
+                                </p>
                                 <p>Total Interest Paid</p>
-                                <p>${result?.totalInterest.toFixed(2)}</p>
+                                <p>
+                                    {result
+                                        ? `$${result.totalInterest.toFixed(2)}`
+                                        : "-"}
+                                </p>
                             </div>
                         </div>
                         <div className="mt-4">
@@ -187,10 +276,20 @@ export default function Page() {
                             <PieResponsiveContainer width="100%" height={300}>
                                 <PieChart>
                                     <Pie
-                                        data={[
-                                            { name: "Principal", value: result?.totalPrincipal },
-                                            { name: "Interest", value: result?.totalInterest || 0 },
-                                        ]}
+                                        data={
+                                            result
+                                                ? [
+                                                      {
+                                                          name: "Principal",
+                                                          value: result.totalPrincipal,
+                                                      },
+                                                      {
+                                                          name: "Interest",
+                                                          value: result.totalInterest,
+                                                      },
+                                                  ]
+                                                : []
+                                        }
                                         dataKey="value"
                                         nameKey="name"
                                         cx="50%"
@@ -208,15 +307,30 @@ export default function Page() {
 
                         {/* Line Chart */}
                         <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={result?.amortizationSchedule}>
+                            <LineChart data={result?.amortizationSchedule || []}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="month" />
                                 <YAxis />
                                 <Tooltip />
                                 <Legend />
-                                <Line type="monotone" dataKey="balance" stroke="#3498db" name="Balance" />
-                                <Line type="monotone" dataKey="interest" stroke="#2ecc71" name="Interest" />
-                                <Line type="monotone" dataKey="principal" stroke="#e74c3c" name="Principal" />
+                                <Line
+                                    type="monotone"
+                                    dataKey="balance"
+                                    stroke="#3498db"
+                                    name="Balance"
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="interest"
+                                    stroke="#2ecc71"
+                                    name="Interest"
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="principal"
+                                    stroke="#e74c3c"
+                                    name="Principal"
+                                />
                             </LineChart>
                         </ResponsiveContainer>
 
@@ -236,11 +350,17 @@ export default function Page() {
                                     {result?.amortizationSchedule.map((item) => (
                                         <TableRow key={item.month}>
                                             <TableCell>{item.month}</TableCell>
-                                            <TableCell>${item.interest.toFixed(2)}</TableCell>
-                                            <TableCell>${item.principal.toFixed(2)}</TableCell>
-                                            <TableCell>${item.balance.toFixed(2)}</TableCell>
+                                            <TableCell>
+                                                ${item.interest.toFixed(2)}
+                                            </TableCell>
+                                            <TableCell>
+                                                ${item.principal.toFixed(2)}
+                                            </TableCell>
+                                            <TableCell>
+                                                ${item.balance.toFixed(2)}
+                                            </TableCell>
                                         </TableRow>
-                                    ))}
+                                    )) || null}
                                 </TableBody>
                             </Table>
                         </div>

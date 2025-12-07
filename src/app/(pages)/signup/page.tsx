@@ -10,6 +10,7 @@ import { authClient } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
 import { Spinner } from '@/components/ui/spinner'
 import { toast } from 'sonner'
+import Image from 'next/image'
 
 const Page = () => {
 
@@ -26,11 +27,11 @@ const Page = () => {
         refetch //refetch the session
     } = authClient.useSession()
 
-    useEffect(() => {
-        if (session) {
-            router.push("/calculators");
-        }
-    }, [session, router]);
+    // useEffect(() => {
+    //     if (session) {
+    //         router.push("/calculators");
+    //     }
+    // }, [session, router]);
 
     if (isPending) {
         return (
@@ -40,9 +41,9 @@ const Page = () => {
         );
     }
 
-    if (session) {
-        return null; // or show nothing (router will redirect)
-    }
+    // if (session) {
+    //     return null; // or show nothing (router will redirect)
+    // }
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -53,7 +54,7 @@ const Page = () => {
                 name,
                 email,
                 password,
-                callbackURL: "/",
+                callbackURL: "/login",
             });
 
             if (error) {
@@ -78,10 +79,13 @@ const Page = () => {
             <div className="flex flex-col gap-4 p-6 md:p-10">
                 <div className="flex justify-center gap-2 md:justify-start">
                     <Link href="/" className="flex items-center gap-2 font-medium">
-                        <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-                            <GalleryVerticalEnd className="size-4" />
-                        </div>
-                        {siteConfig.name}
+                        <Image
+                            src={"/logo.png"}
+                            width={500}
+                            height={500}
+                            alt="image"
+                            className="w-full md:h-14 h-10"
+                        />
                     </Link>
                 </div>
                 <div className="flex flex-1 items-center justify-center">

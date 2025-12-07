@@ -7,7 +7,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+    import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
     PieChart,
@@ -38,17 +38,32 @@ interface MortgageResult {
     paymentBreakdown: { name: string; value: number }[];
 }
 
+// UI state: strings for inputs so they can be empty
+interface MortgageFormState {
+    annualIncome: string;
+    monthlyDebts: string;
+    downPayment: string;
+    debtToIncome: string;
+    interestRate: string;
+    loanTerm: string;
+    includePMI: boolean;
+    includeTaxesInsurance: boolean;
+    propertyTax: string;
+    homeInsurance: string;
+    hoaDues: string;
+}
+
 const calculateMortgage = (input: MortgageInput): MortgageResult => {
     const monthlyIncome = input.annualIncome / 12;
     const maxLoanAmount = (monthlyIncome * 0.28) - input.monthlyDebts; // 28% of monthly income minus debts
 
-    // Using the mortgage formula to calculate monthly payment
     const loanAmount = maxLoanAmount - input.downPayment;
     const monthlyInterestRate = input.interestRate / 100 / 12;
-    const numPayments = input.loanTerm * 12;
+    const numPayments = input.loanTerm * 12; // loanTerm in years
 
-    // Monthly mortgage payment calculation (Principal & Interest)
-    const principalAndInterest = (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numPayments)) /
+    // Principal & Interest
+    const principalAndInterest =
+        (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numPayments)) /
         (Math.pow(1 + monthlyInterestRate, numPayments) - 1);
 
     let monthlyPayment = principalAndInterest;
@@ -56,14 +71,14 @@ const calculateMortgage = (input: MortgageInput): MortgageResult => {
         { name: "Principal & Interest", value: principalAndInterest }
     ];
 
-    // PMI calculation (only if down payment is less than 20%)
-    if (input.includePMI && (input.downPayment / maxLoanAmount) < 0.2) {
-        const pmi = loanAmount * 0.01 / 12; // PMI is generally 1% of the loan amount per year, divided by 12
+    // PMI (if down payment < 20%)
+    if (input.includePMI && maxLoanAmount > 0 && (input.downPayment / maxLoanAmount) < 0.2) {
+        const pmi = loanAmount * 0.01 / 12;
         monthlyPayment += pmi;
         paymentBreakdown.push({ name: "PMI", value: pmi });
     }
 
-    // Include property taxes and insurance
+    // Taxes & Insurance
     if (input.includeTaxesInsurance) {
         const propertyTax = (maxLoanAmount * (input.propertyTax / 100)) / 12;
         const homeInsurance = input.homeInsurance / 12;
@@ -86,33 +101,55 @@ const calculateMortgage = (input: MortgageInput): MortgageResult => {
 };
 
 export default function Page() {
-    const [input, setInput] = useState<MortgageInput>({
-        annualIncome: 70000,
-        monthlyDebts: 250,
-        downPayment: 20,
-        debtToIncome: 36,
-        interestRate: 7,
-        loanTerm: 360,
-        includePMI: true,
+    // All text inputs start as empty strings
+    const [input, setInput] = useState<MortgageFormState>({
+        annualIncome: "",
+        monthlyDebts: "",
+        downPayment: "",
+        debtToIncome: "",
+        interestRate: "",
+        loanTerm: "",
+        includePMI: true,              // you can change these defaults if you want
         includeTaxesInsurance: false,
-        propertyTax: 1.2,
-        homeInsurance: 945,
-        hoaDues: 0,
+        propertyTax: "",
+        homeInsurance: "",
+        hoaDues: "",
     });
+
     const [result, setResult] = useState<MortgageResult | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setInput((prev) => ({ ...prev, [name]: Number(value) }));
+        setInput((prev) => ({
+            ...prev,
+            [name]: value, // keep as string so it can be ""
+        }));
     };
 
     const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, checked } = e.target;
-        setInput((prev) => ({ ...prev, [name]: checked }));
+        setInput((prev) => ({
+            ...prev,
+            [name]: checked,
+        }));
     };
 
     const handleCalculate = () => {
-        const calcResult = calculateMortgage(input);
+        const numericInput: MortgageInput = {
+            annualIncome: Number(input.annualIncome) || 0,
+            monthlyDebts: Number(input.monthlyDebts) || 0,
+            downPayment: Number(input.downPayment) || 0,
+            debtToIncome: Number(input.debtToIncome) || 0,
+            interestRate: Number(input.interestRate) || 0,
+            loanTerm: Number(input.loanTerm) || 0,
+            includePMI: input.includePMI,
+            includeTaxesInsurance: input.includeTaxesInsurance,
+            propertyTax: Number(input.propertyTax) || 0,
+            homeInsurance: Number(input.homeInsurance) || 0,
+            hoaDues: Number(input.hoaDues) || 0,
+        };
+
+        const calcResult = calculateMortgage(numericInput);
         setResult(calcResult);
     };
 
@@ -143,6 +180,7 @@ export default function Page() {
                                             name="annualIncome"
                                             value={input.annualIncome}
                                             onChange={handleChange}
+                                            placeholder="$"
                                         />
                                     </div>
                                     <div>
@@ -152,6 +190,7 @@ export default function Page() {
                                             name="monthlyDebts"
                                             value={input.monthlyDebts}
                                             onChange={handleChange}
+                                            placeholder="$"
                                         />
                                     </div>
                                     <div>
@@ -161,33 +200,37 @@ export default function Page() {
                                             name="downPayment"
                                             value={input.downPayment}
                                             onChange={handleChange}
+                                            placeholder="$"
                                         />
                                     </div>
                                     <div>
-                                        <label>Debt-to-income</label>
+                                        <label>Debt-to-income (%)</label>
                                         <Input
                                             className="mt-1 mb-3"
                                             name="debtToIncome"
                                             value={input.debtToIncome}
                                             onChange={handleChange}
+                                            placeholder="e.g. 36"
                                         />
                                     </div>
                                     <div>
-                                        <label>Interest rate</label>
+                                        <label>Interest rate (%)</label>
                                         <Input
                                             className="mt-1 mb-3"
                                             name="interestRate"
                                             value={input.interestRate}
                                             onChange={handleChange}
+                                            placeholder="e.g. 7"
                                         />
                                     </div>
                                     <div>
-                                        <label>Loan term</label>
+                                        <label>Loan term (years)</label>
                                         <Input
                                             className="mt-1 mb-3"
                                             name="loanTerm"
                                             value={input.loanTerm}
                                             onChange={handleChange}
+                                            placeholder="e.g. 30"
                                         />
                                     </div>
                                 </div>
@@ -220,30 +263,33 @@ export default function Page() {
                                     {input.includeTaxesInsurance && (
                                         <>
                                             <div>
-                                                <label>Property tax</label>
+                                                <label>Property tax (%)</label>
                                                 <Input
                                                     className="mt-1 mb-3"
                                                     name="propertyTax"
                                                     value={input.propertyTax}
                                                     onChange={handleChange}
+                                                    placeholder="e.g. 1.2"
                                                 />
                                             </div>
                                             <div>
-                                                <label>Home insurance</label>
+                                                <label>Home insurance (yearly)</label>
                                                 <Input
                                                     className="mt-1 mb-3"
                                                     name="homeInsurance"
                                                     value={input.homeInsurance}
                                                     onChange={handleChange}
+                                                    placeholder="$"
                                                 />
                                             </div>
                                             <div>
-                                                <label>HOA dues</label>
+                                                <label>HOA dues (monthly)</label>
                                                 <Input
                                                     className="mt-1 mb-3"
                                                     name="hoaDues"
                                                     value={input.hoaDues}
                                                     onChange={handleChange}
+                                                    placeholder="$"
                                                 />
                                             </div>
                                         </>
@@ -277,16 +323,22 @@ export default function Page() {
                                     <tbody>
                                         <tr>
                                             <td className="px-4 py-2">Max Home Price</td>
-                                            <td className="px-4 py-2">${result.maxHomePrice.toFixed(0)}</td>
+                                            <td className="px-4 py-2">
+                                                ${result.maxHomePrice.toFixed(0)}
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td className="px-4 py-2">Monthly Payment</td>
-                                            <td className="px-4 py-2">${result.monthlyPayment.toFixed(0)}</td>
+                                            <td className="px-4 py-2">
+                                                ${result.monthlyPayment.toFixed(0)}
+                                            </td>
                                         </tr>
                                         {result.paymentBreakdown.map((item, index) => (
                                             <tr key={index}>
                                                 <td className="px-4 py-2">{item.name}</td>
-                                                <td className="px-4 py-2">${item.value.toFixed(0)}</td>
+                                                <td className="px-4 py-2">
+                                                    ${item.value.toFixed(0)}
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -317,7 +369,11 @@ export default function Page() {
                                         {result.paymentBreakdown.map((entry, index) => (
                                             <Cell
                                                 key={`cell-${index}`}
-                                                fill={['#1f1f1f', '#2c2c2c', '#3a3a3a', '#4d4d4d', '#5a5a5a'][index % 5]}
+                                                fill={
+                                                    ["#1f1f1f", "#2c2c2c", "#3a3a3a", "#4d4d4d", "#5a5a5a"][
+                                                        index % 5
+                                                    ]
+                                                }
                                             />
                                         ))}
                                     </Pie>

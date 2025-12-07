@@ -37,68 +37,106 @@ import {
     Cell,
 } from "recharts";
 import { Label } from "@/components/ui/label";
-import Wrapper from '@/app/Wrapper';
+import Wrapper from "@/app/Wrapper";
 
 interface AmortizationInput {
     loanAmount: number;
-    loanTerm: number;
-    interestRate: number;
+    loanTerm: number;      // years
+    interestRate: number;  // % per year
 }
 
 interface AmortizationResult {
+    loanAmount: number;
     monthlyPayment: number;
     totalPayments: number;
     totalInterest: number;
     totalLoanCost: number;
-    annualSchedule: { year: number; interest: number; principal: number; endingBalance: number }[];
-    monthlySchedule: { month: number; interest: number; principal: number; balance: number }[];
-    chartData: { year: number; balance: number; interest: number; payment: number }[];
+    annualSchedule: {
+        year: number;
+        interest: number;
+        principal: number;
+        endingBalance: number;
+    }[];
+    monthlySchedule: {
+        month: number;
+        interest: number;
+        principal: number;
+        balance: number;
+    }[];
+    chartData: {
+        year: number;
+        balance: number;
+        interest: number;
+        payment: number;
+    }[];
+}
+
+// UI state for inputs (strings so they can be empty)
+interface AmortizationFormState {
+    loanAmount: string;
+    loanTerm: string;
+    interestRate: string;
 }
 
 const calculateAmortization = (input: AmortizationInput): AmortizationResult => {
     const monthlyInterestRate = input.interestRate / 100 / 12;
-    const totalPayments = input.loanTerm * 12;
-    const monthlyPayment = (input.loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -totalPayments));
+    const totalPaymentsCount = input.loanTerm * 12;
+
+    const monthlyPayment =
+        (input.loanAmount * monthlyInterestRate) /
+        (1 - Math.pow(1 + monthlyInterestRate, -totalPaymentsCount));
+
     let balance = input.loanAmount;
     let totalInterest = 0;
     let totalPrincipal = 0;
-    const annualSchedule = [];
-    const monthlySchedule = [];
-    const chartData = [];
 
-    for (let month = 1; month <= totalPayments; month++) {
+    const annualSchedule: AmortizationResult["annualSchedule"] = [];
+    const monthlySchedule: AmortizationResult["monthlySchedule"] = [];
+    const chartData: AmortizationResult["chartData"] = [];
+
+    // Track per-year interest/principal
+    let yearInterest = 0;
+    let yearPrincipal = 0;
+
+    for (let month = 1; month <= totalPaymentsCount; month++) {
         const interest = balance * monthlyInterestRate;
         const principal = monthlyPayment - interest;
         balance -= principal;
+
+        if (balance < 0) balance = 0;
+
         totalInterest += interest;
         totalPrincipal += principal;
+        yearInterest += interest;
+        yearPrincipal += principal;
 
         monthlySchedule.push({ month, interest, principal, balance });
 
-        if (month % 12 === 0) {
-            const year = month / 12;
-            const annualInterest = totalInterest - totalPrincipal;
+        if (month % 12 === 0 || month === totalPaymentsCount) {
+            const year = Math.ceil(month / 12);
             annualSchedule.push({
                 year,
-                interest: annualInterest,
-                principal: totalPrincipal,
+                interest: yearInterest,
+                principal: yearPrincipal,
                 endingBalance: balance,
             });
 
             chartData.push({
                 year,
                 balance,
-                interest: annualInterest,
+                interest: yearInterest,
                 payment: monthlyPayment * 12,
             });
-        }
 
-        if (balance < 0) balance = 0;
+            yearInterest = 0;
+            yearPrincipal = 0;
+        }
     }
 
-    const totalLoanCost = monthlyPayment * totalPayments;
+    const totalLoanCost = monthlyPayment * totalPaymentsCount;
 
     return {
+        loanAmount: input.loanAmount,
         monthlyPayment,
         totalPayments: totalLoanCost,
         totalInterest,
@@ -110,20 +148,40 @@ const calculateAmortization = (input: AmortizationInput): AmortizationResult => 
 };
 
 export default function AmortizationCalculator() {
-    const [input, setInput] = useState<AmortizationInput>({
-        loanAmount: 200000,
-        loanTerm: 15,
-        interestRate: 6,
+    // Inputs start empty
+    const [form, setForm] = useState<AmortizationFormState>({
+        loanAmount: "",
+        loanTerm: "",
+        interestRate: "",
     });
+
     const [result, setResult] = useState<AmortizationResult | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setInput((prev) => ({ ...prev, [name]: Number(value) }));
+        setForm((prev) => ({
+            ...prev,
+            [name]: value, // keep as string so it can be ""
+        }));
     };
 
     const handleCalculate = () => {
-        const calcResult = calculateAmortization(input);
+        const loanAmount = Number(form.loanAmount) || 0;
+        const loanTerm = Number(form.loanTerm) || 0;
+        const interestRate = Number(form.interestRate) || 0;
+
+        // basic guard to avoid NaN and junk
+        if (loanAmount <= 0 || loanTerm <= 0 || interestRate <= 0) {
+            setResult(null);
+            return;
+        }
+
+        const calcResult = calculateAmortization({
+            loanAmount,
+            loanTerm,
+            interestRate,
+        });
+
         setResult(calcResult);
     };
 
@@ -148,15 +206,33 @@ export default function AmortizationCalculator() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <Label>Loan Amount</Label>
-                                    <Input className="mt-1 mb-2" name="loanAmount" value={input.loanAmount} onChange={handleChange} />
+                                    <Input
+                                        className="mt-1 mb-2"
+                                        name="loanAmount"
+                                        value={form.loanAmount}
+                                        onChange={handleChange}
+                                        placeholder="$"
+                                    />
                                 </div>
                                 <div>
-                                    <Label>Loan Term</Label>
-                                    <Input className="mt-1 mb-2" name="loanTerm" value={input.loanTerm} onChange={handleChange} />
+                                    <Label>Loan Term (years)</Label>
+                                    <Input
+                                        className="mt-1 mb-2"
+                                        name="loanTerm"
+                                        value={form.loanTerm}
+                                        onChange={handleChange}
+                                        placeholder="e.g. 15 or 30"
+                                    />
                                 </div>
                                 <div>
-                                    <Label>Interest Rate</Label>
-                                    <Input className="mt-1 mb-2" name="interestRate" value={input.interestRate} onChange={handleChange} />
+                                    <Label>Interest Rate (%)</Label>
+                                    <Input
+                                        className="mt-1 mb-2"
+                                        name="interestRate"
+                                        value={form.interestRate}
+                                        onChange={handleChange}
+                                        placeholder="e.g. 6"
+                                    />
                                 </div>
                             </div>
                             <div className="flex justify-end space-x-2">
@@ -185,19 +261,27 @@ export default function AmortizationCalculator() {
                                     <TableBody>
                                         <TableRow>
                                             <TableCell>Monthly Payment</TableCell>
-                                            <TableCell className="text-right">${result?.monthlyPayment.toFixed(2)}</TableCell>
+                                            <TableCell className="text-right">
+                                                {result ? `$${result.monthlyPayment.toFixed(2)}` : "-"}
+                                            </TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell>Total Payments</TableCell>
-                                            <TableCell className="text-right">${result?.totalPayments.toFixed(2)}</TableCell>
+                                            <TableCell className="text-right">
+                                                {result ? `$${result.totalPayments.toFixed(2)}` : "-"}
+                                            </TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell>Total Interest</TableCell>
-                                            <TableCell className="text-right">${result?.totalInterest.toFixed(2)}</TableCell>
+                                            <TableCell className="text-right">
+                                                {result ? `$${result.totalInterest.toFixed(2)}` : "-"}
+                                            </TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell>Total Loan Cost</TableCell>
-                                            <TableCell className="text-right">${result?.totalLoanCost.toFixed(2)}</TableCell>
+                                            <TableCell className="text-right">
+                                                {result ? `$${result.totalLoanCost.toFixed(2)}` : "-"}
+                                            </TableCell>
                                         </TableRow>
                                     </TableBody>
                                 </Table>
@@ -207,10 +291,14 @@ export default function AmortizationCalculator() {
                                 <ResponsiveContainer width="100%" height={200}>
                                     <PieChart>
                                         <Pie
-                                            data={[
-                                                { name: "Principal", value: input.loanAmount },
-                                                { name: "Interest", value: result?.totalInterest ?? 0 },
-                                            ]}
+                                            data={
+                                                result
+                                                    ? [
+                                                          { name: "Principal", value: result.loanAmount },
+                                                          { name: "Interest", value: result.totalInterest },
+                                                      ]
+                                                    : []
+                                            }
                                             dataKey="value"
                                             nameKey="name"
                                             cx="50%"
@@ -227,15 +315,33 @@ export default function AmortizationCalculator() {
                         </div>
 
                         <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={result?.chartData}>
+                            <LineChart data={result?.chartData || []}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="year" />
                                 <YAxis />
                                 <Tooltip />
                                 <Legend />
-                                <Line type="monotone" dataKey="balance" stroke="#3498db" name="Balance" strokeWidth={2} />
-                                <Line type="monotone" dataKey="interest" stroke="#e74c3c" name="Interest" strokeWidth={2} />
-                                <Line type="monotone" dataKey="payment" stroke="#2ecc71" name="Payment" strokeWidth={2} />
+                                <Line
+                                    type="monotone"
+                                    dataKey="balance"
+                                    stroke="#3498db"
+                                    name="Balance"
+                                    strokeWidth={2}
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="interest"
+                                    stroke="#e74c3c"
+                                    name="Interest"
+                                    strokeWidth={2}
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="payment"
+                                    stroke="#2ecc71"
+                                    name="Payment"
+                                    strokeWidth={2}
+                                />
                             </LineChart>
                         </ResponsiveContainer>
 
@@ -264,7 +370,7 @@ export default function AmortizationCalculator() {
                                                     <TableCell>${item.principal.toFixed(2)}</TableCell>
                                                     <TableCell>${item.endingBalance.toFixed(2)}</TableCell>
                                                 </TableRow>
-                                            ))}
+                                            )) || null}
                                         </TableBody>
                                     </Table>
                                 </TabsContent>
@@ -286,7 +392,7 @@ export default function AmortizationCalculator() {
                                                     <TableCell>${item.principal.toFixed(2)}</TableCell>
                                                     <TableCell>${item.balance.toFixed(2)}</TableCell>
                                                 </TableRow>
-                                            ))}
+                                            )) || null}
                                         </TableBody>
                                     </Table>
                                 </TabsContent>

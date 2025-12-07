@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import Wrapper from '@/app/Wrapper'; // Ensure this wrapper component exists
+import Wrapper from "@/app/Wrapper";
 import {
   PieChart,
   Pie,
@@ -19,7 +19,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { toast } from "react-toastify"; // Import toast for error handling
+import { toast } from "react-toastify";
 
 // Helper Function to Calculate Water Intake
 const calculateWaterIntake = (
@@ -29,7 +29,7 @@ const calculateWaterIntake = (
   activityLevel: string
 ) => {
   let intake: number = weight * 35; // Basic calculation in mL
-  
+
   // Adjust based on activity level
   if (activityLevel === "Light") {
     intake += 500;
@@ -53,31 +53,56 @@ const calculateWaterIntake = (
 };
 
 const DailyWaterIntakeCalculator = () => {
-  const [weight, setWeight] = useState<number>(70); // Default weight in kg
-  const [height, setHeight] = useState<number>(175); // Default height in cm
-  const [age, setAge] = useState<number>(21); // Default age
-  const [activityLevel, setActivityLevel] = useState<string>("Light");
+  // keep inputs as strings so fields can be empty
+  const [weight, setWeight] = useState<string>("");
+  const [height, setHeight] = useState<string>("");
+  const [age, setAge] = useState<string>("");
+  const [activityLevel, setActivityLevel] = useState<string>(""); // start empty
   const [result, setResult] = useState<number | null>(null);
 
   // Handle Calculate Button Click
   const handleCalculate = () => {
+    const w = Number(weight);
+    const h = Number(height);
+    const a = Number(age);
+
     if (!weight || !height || !age || !activityLevel) {
       toast.error("Please fill out all fields.");
       return;
     }
 
-    const intake = calculateWaterIntake(weight, height, age, activityLevel);
+    if (!Number.isFinite(w) || w <= 0) {
+      toast.error("Please enter a valid weight.");
+      return;
+    }
+    if (!Number.isFinite(h) || h <= 0) {
+      toast.error("Please enter a valid height.");
+      return;
+    }
+    if (!Number.isFinite(a) || a <= 0) {
+      toast.error("Please enter a valid age.");
+      return;
+    }
+
+    const intake = calculateWaterIntake(w, h, a, activityLevel);
+    if (intake <= 0) {
+      toast.error("Calculated intake is invalid. Please check your inputs.");
+      setResult(null);
+      return;
+    }
+
     setResult(intake);
   };
 
+  const remaining = Math.max(0, 2787 - (result ?? 0));
   const data = [
     {
       name: "Recommended Water Intake",
-      value: result || 0,
+      value: result ?? 0,
     },
     {
       name: "Remaining Intake",
-      value: 2787 - (result || 0),
+      value: remaining,
     },
   ];
 
@@ -92,7 +117,7 @@ const DailyWaterIntakeCalculator = () => {
             Calculate the optimal daily water intake based on your personal details.
           </p>
         </div>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Enter Your Details</CardTitle>
@@ -100,46 +125,58 @@ const DailyWaterIntakeCalculator = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10">
               <div>
-                <Label className="black mb-1.5" htmlFor="age">Age (years)</Label>
+                <Label className="black mb-1.5" htmlFor="age">
+                  Age (years)
+                </Label>
                 <Input
                   type="number"
                   id="age"
                   value={age}
-                  onChange={(e) => setAge(Number(e.target.value))}
+                  onChange={(e) => setAge(e.target.value)}
                   className="w-full"
+                  placeholder="e.g. 25"
                 />
               </div>
 
               <div>
-                <Label className="black mb-1.5" htmlFor="height">Height (cm)</Label>
+                <Label className="black mb-1.5" htmlFor="height">
+                  Height (cm)
+                </Label>
                 <Input
                   type="number"
                   id="height"
                   value={height}
-                  onChange={(e) => setHeight(Number(e.target.value))}
+                  onChange={(e) => setHeight(e.target.value)}
                   className="w-full"
+                  placeholder="e.g. 175"
                 />
               </div>
 
               <div>
-                <Label className="black mb-1.5" htmlFor="weight">Weight (kg)</Label>
+                <Label className="black mb-1.5" htmlFor="weight">
+                  Weight (kg)
+                </Label>
                 <Input
                   type="number"
                   id="weight"
                   value={weight}
-                  onChange={(e) => setWeight(Number(e.target.value))}
+                  onChange={(e) => setWeight(e.target.value)}
                   className="w-full"
+                  placeholder="e.g. 70"
                 />
               </div>
 
               <div>
-                <Label className="black mb-1.5" htmlFor="activity">Activity Level</Label>
+                <Label className="black mb-1.5" htmlFor="activity">
+                  Activity Level
+                </Label>
                 <select
                   id="activity"
                   className="border p-2 rounded-md w-full"
                   value={activityLevel}
                   onChange={(e) => setActivityLevel(e.target.value)}
                 >
+                  <option value="">Select activity level</option>
                   <option value="Light">Light (exercise 1-3 times a week)</option>
                   <option value="Moderate">Moderate (exercise 3-5 times a week)</option>
                   <option value="High">High (heavy exercise 6-7 times a week)</option>
@@ -148,33 +185,47 @@ const DailyWaterIntakeCalculator = () => {
               </div>
             </div>
 
-            <Button onClick={handleCalculate} className="mt-4 w-full p-5">Calculate</Button>
+            <Button onClick={handleCalculate} className="mt-4 w-full p-5">
+              Calculate
+            </Button>
           </CardContent>
         </Card>
 
-        {result !== null && (
+        {/* Only show result if it's non-null AND greater than 0 */}
+        {result !== null && result > 0 && (
           <div className="mt-8">
-            <h2 className="text-xl text-center font-semibold">Your Recommended Water Intake: </h2>
-            <p className="text-3xl font-bold mt-2 text-center">{result} mL/day</p>
+            <h2 className="text-xl text-center font-semibold">
+              Your Recommended Water Intake:
+            </h2>
+            <p className="text-3xl font-bold mt-2 text-center">
+              {result.toFixed(0)} mL/day
+            </p>
 
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={data}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={70}
-                  outerRadius={90}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  <Cell key="cell1" fill="#82ca9d" />
-                  <Cell key="cell2" fill="#ff8042" />
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="h-72 mt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={data}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={70}
+                    outerRadius={90}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    <Cell key="cell1" fill="#82ca9d" />
+                    <Cell key="cell2" fill="#ff8042" />
+                  </Pie>
+                  <Tooltip
+                    formatter={(v: number, name: string) => [
+                      `${v.toFixed(0)} mL`,
+                      name,
+                    ]}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         )}
       </div>

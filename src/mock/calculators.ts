@@ -7,14 +7,14 @@ export const DATA__FINANCE = [
         category: "finance"
     },
     {
-        title: "*Credit Card Payoff Calculator",
+        title: "Credit Card Payoff Calculator",
         subTitle: "Credit Card Payoff Calculator",
         description: "Estimate how long it will take to pay off your credit card debt with our Credit Card Payoff Calculator.",
         link: "/credit-card-payoff-calculator",
         category: "finance"
     },
     {
-        title: "*Mortgage Calculator",
+        title: "Mortgage Calculator",
         subTitle: "Mortgage Calculator",
         description: "Calculate your mortgage payments easily with our Mortgage Calculator.",
         link: "/mortgage-calculator",
@@ -35,7 +35,7 @@ export const DATA__FINANCE = [
         category: "finance"
     },
     {
-        title: "*401K Calculator",
+        title: "401K Calculator",
         subTitle: "401K Calculator",
         description: "Estimate your 401K savings with our best 401K Calculator.",
         link: "/401k-calculator",
@@ -70,7 +70,7 @@ export const DATA__FINANCE = [
         category: "finance"
     },
     {
-        title: "*TVM Calculator",
+        title: "TVM Calculator",
         subTitle: "TVM Calculator",
         description: "With the following pieces of information, our TVM calculator can help you estimate the future value of your investments.",
         link: "/tvm-calculator",
@@ -91,7 +91,7 @@ export const DATA__FINANCE = [
         category: "finance"
     },
     {
-        title: "*Pension Calculator",
+        title: "Pension Calculator",
         subTitle: "Pension Calculator",
         description: "Use our pension calculator to estimate your retirement savings and monthly pension payouts.",
         link: "/pension-calculator",
@@ -541,7 +541,7 @@ export const LIFESTYLE__MATH = [
         category: "lifestyle"
     },
     {
-        title: "Fuel Cost Calculator*",
+        title: "Fuel Cost Calculator",
         subTitle: "Fuel Cost Calculator",
         description: "Estimate your fuel costs based on your vehicle’s fuel efficiency and the distance you plan to travel.",
         link: "/lifestyle/fuel-cost-calculator",

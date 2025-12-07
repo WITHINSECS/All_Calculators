@@ -15,7 +15,7 @@ export default function Footer() {
                             className="font-medium underline underline-offset-4"
                         >
                             {/* {siteConfig.name} */}
-                            <Image src={"/logo.png"} width={100} height={100} alt="image" className="w-full md:h-12 h-10" />
+                            <Image src={"/logo.png"} width={300} height={300} alt="image" className="w-full md:h-12 h-10" />
                         </Link>
                     </p>
                 </div>

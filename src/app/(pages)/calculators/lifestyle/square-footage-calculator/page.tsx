@@ -48,17 +48,40 @@ const calculateArea = (
 };
 
 export default function SquareFootageCalculator() {
-  const [shape, setShape] = useState<string>("Rectangle");
-  const [length, setLength] = useState<number>(0);
-  const [width, setWidth] = useState<number>(0);
-  const [quantity, setQuantity] = useState<number>(1);
-  const [costPerSquareFoot, setCostPerSquareFoot] = useState<number>(0);
+  const [shape, setShape] = useState<string>("");
+  const [length, setLength] = useState<number | "">("");
+  const [width, setWidth] = useState<number | "">("");
+  const [quantity, setQuantity] = useState<number | "">("");
+  const [costPerSquareFoot, setCostPerSquareFoot] = useState<number | "">("");
   const [result, setResult] = useState<Result | null>(null);
 
   const handleCalculate = () => {
-    const areaResult = calculateArea(shape, length, width, quantity);
+    if (!shape || length === "" || width === "" || quantity === "") {
+      return;
+    }
+
+    const areaResult = calculateArea(
+      shape,
+      Number(length),
+      Number(width),
+      Number(quantity)
+    );
     setResult(areaResult);
   };
+
+  const handleReset = () => {
+    setShape("");
+    setLength("");
+    setWidth("");
+    setQuantity("");
+    setCostPerSquareFoot("");
+    setResult(null);
+  };
+
+  const calculatedCost =
+    result && typeof costPerSquareFoot === "number"
+      ? result.squareFootage * costPerSquareFoot
+      : 0;
 
   return (
     <Wrapper>
@@ -95,8 +118,11 @@ export default function SquareFootageCalculator() {
             <Input
               id="length"
               type="number"
-              value={length}
-              onChange={(e) => setLength(Number(e.target.value))}
+              value={length === "" ? "" : length}
+              onChange={(e) => {
+                const value = e.target.value;
+                setLength(value === "" ? "" : Number(value));
+              }}
               placeholder="Enter Length"
             />
           </div>
@@ -105,8 +131,11 @@ export default function SquareFootageCalculator() {
             <Input
               id="width"
               type="number"
-              value={width}
-              onChange={(e) => setWidth(Number(e.target.value))}
+              value={width === "" ? "" : width}
+              onChange={(e) => {
+                const value = e.target.value;
+                setWidth(value === "" ? "" : Number(value));
+              }}
               placeholder="Enter Width"
             />
           </div>
@@ -117,8 +146,11 @@ export default function SquareFootageCalculator() {
             <Input
               id="quantity"
               type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
+              value={quantity === "" ? "" : quantity}
+              onChange={(e) => {
+                const value = e.target.value;
+                setQuantity(value === "" ? "" : Number(value));
+              }}
               placeholder="Enter Quantity"
             />
           </div>
@@ -128,15 +160,21 @@ export default function SquareFootageCalculator() {
             <Input
               id="cost"
               type="number"
-              value={costPerSquareFoot}
-              onChange={(e) => setCostPerSquareFoot(Number(e.target.value))}
+              value={costPerSquareFoot === "" ? "" : costPerSquareFoot}
+              onChange={(e) => {
+                const value = e.target.value;
+                setCostPerSquareFoot(value === "" ? "" : Number(value));
+              }}
               placeholder="Enter Cost"
             />
           </div>
 
-          {/* Calculate Button */}
+          {/* Buttons */}
           <div className="flex gap-2">
             <Button onClick={handleCalculate}>Calculate</Button>
+            <Button variant="outline" type="button" onClick={handleReset}>
+              Reset
+            </Button>
           </div>
 
           {/* Result Display */}
@@ -181,7 +219,7 @@ export default function SquareFootageCalculator() {
               <div className="rounded-md border p-4">
                 <div className="text-sm text-muted-foreground mb-1">Cost</div>
                 <div className="text-xl font-semibold">
-                  ${(result.squareFootage * costPerSquareFoot).toFixed(2)}
+                  ${calculatedCost.toFixed(2)}
                 </div>
               </div>
             </div>

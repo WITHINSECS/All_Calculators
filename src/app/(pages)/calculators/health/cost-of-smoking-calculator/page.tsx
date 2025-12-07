@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -20,19 +20,29 @@ interface SmokingCostResult {
   chartData: { month: number; cost: number }[];
 }
 
+// Form state type – allows empty string so inputs can be blank
+interface SmokingCostFormState {
+  startDate: string;
+  packetCost: number | "";
+  cigarettesInPacket: number | "";
+  cigarettesPerDay: number | "";
+}
+
 const calculateSmokingCost = (input: SmokingCostInput): SmokingCostResult => {
   const currentDate = new Date();
   const startDate = new Date(input.startDate);
-  const daysSmoked = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24));
+  const daysSmoked = Math.floor(
+    (currentDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
+  );
 
-  const costPerDay = (input.cigarettesPerDay / input.cigarettesInPacket) * input.packetCost;
+  const costPerDay =
+    (input.cigarettesPerDay / input.cigarettesInPacket) * input.packetCost;
   const totalCost = costPerDay * daysSmoked;
 
-  // Generate data for the line chart (monthly cost over time)
-  const chartData = [];
+  const chartData: { month: number; cost: number }[] = [];
   let cumulativeCost = 0;
   for (let month = 1; month <= Math.floor(daysSmoked / 30); month++) {
-    cumulativeCost += costPerDay * 30; // Assuming 30 days per month for simplicity
+    cumulativeCost += costPerDay * 30; // simple 30-day month assumption
     chartData.push({ month, cost: cumulativeCost });
   }
 
@@ -44,25 +54,28 @@ const calculateSmokingCost = (input: SmokingCostInput): SmokingCostResult => {
 };
 
 export default function SmokingCostCalculator() {
-  const [input, setInput] = useState<SmokingCostInput>({
-    startDate: "", // Initially empty
-    packetCost: 0,
-    cigarettesInPacket: 20,
-    cigarettesPerDay: 1,
+  const [input, setInput] = useState<SmokingCostFormState>({
+    startDate: "",
+    packetCost: "",
+    cigarettesInPacket: "",
+    cigarettesPerDay: "",
   });
 
   const [result, setResult] = useState<SmokingCostResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNumberChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    // allow empty + digits only
+    if (!/^\d*$/.test(value)) return;
+
     setInput((prev) => ({
       ...prev,
-      [name]: value === "" ? "" : Number(value), // Handle empty input
+      [name]: value === "" ? "" : Number(value),
     }));
   };
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInput((prev) => ({ ...prev, startDate: e.target.value }));
   };
 
@@ -72,23 +85,30 @@ export default function SmokingCostCalculator() {
       return;
     }
 
-    if (isNaN(input.packetCost) || input.packetCost <= 0) {
+    if (input.packetCost === "" || Number(input.packetCost) <= 0) {
       setError("Please enter a valid cost for the packet.");
       return;
     }
 
-    if (isNaN(input.cigarettesInPacket) || input.cigarettesInPacket <= 0) {
+    if (input.cigarettesInPacket === "" || Number(input.cigarettesInPacket) <= 0) {
       setError("Please enter a valid number of cigarettes in the packet.");
       return;
     }
 
-    if (isNaN(input.cigarettesPerDay) || input.cigarettesPerDay <= 0) {
+    if (input.cigarettesPerDay === "" || Number(input.cigarettesPerDay) <= 0) {
       setError("Please enter a valid number of cigarettes smoked per day.");
       return;
     }
 
-    setError(null); // Clear error message if inputs are valid
-    const calcResult = calculateSmokingCost(input);
+    const numericInput: SmokingCostInput = {
+      startDate: input.startDate,
+      packetCost: Number(input.packetCost),
+      cigarettesInPacket: Number(input.cigarettesInPacket),
+      cigarettesPerDay: Number(input.cigarettesPerDay),
+    };
+
+    setError(null);
+    const calcResult = calculateSmokingCost(numericInput);
     setResult(calcResult);
   };
 
@@ -96,7 +116,9 @@ export default function SmokingCostCalculator() {
     <Wrapper>
       <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8">
         <div className="mx-auto max-w-3xl text-center mb-8">
-          <h1 className="text-2xl font-semibold lg:text-4xl">Cost of Smoking Calculator</h1>
+          <h1 className="text-2xl font-semibold lg:text-4xl">
+            Cost of Smoking Calculator
+          </h1>
           <p className="text-muted-foreground mt-4 text-xl">
             Calculate how much you have spent on smoking over the years.
           </p>
@@ -111,7 +133,7 @@ export default function SmokingCostCalculator() {
               name="startDate"
               value={input.startDate}
               onChange={handleDateChange}
-              type="date" // Default HTML date picker
+              type="date"
               placeholder="Select start date"
             />
           </div>
@@ -123,7 +145,7 @@ export default function SmokingCostCalculator() {
               className="mt-2 mb-3"
               name="packetCost"
               value={input.packetCost}
-              onChange={handleChange}
+              onChange={handleNumberChange}
               type="number"
               inputMode="numeric"
               placeholder="Enter cost in Rupees"
@@ -137,7 +159,7 @@ export default function SmokingCostCalculator() {
               className="mt-2 mb-3"
               name="cigarettesInPacket"
               value={input.cigarettesInPacket}
-              onChange={handleChange}
+              onChange={handleNumberChange}
               type="number"
               inputMode="numeric"
               placeholder="Enter number of cigarettes"
@@ -151,7 +173,7 @@ export default function SmokingCostCalculator() {
               className="mt-2 mb-3"
               name="cigarettesPerDay"
               value={input.cigarettesPerDay}
-              onChange={handleChange}
+              onChange={handleNumberChange}
               type="number"
               inputMode="numeric"
               placeholder="Enter number of cigarettes per day"
@@ -172,15 +194,19 @@ export default function SmokingCostCalculator() {
         <div className="mt-4">
           {result && (
             <>
-              <h3 className="text-xl">Your smoking cost to date: Rs. {result.totalCost.toFixed(2)}</h3>
+              <h3 className="text-xl">
+                Your smoking cost to date: Rs. {result.totalCost.toFixed(2)}
+              </h3>
 
-              {/* Pie Chart for Smoking Cost */}
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
                     data={[
                       { name: "Smoking Cost", value: result.totalCost },
-                      { name: "Potential Savings", value: 1000 - result.totalCost }, // Example remaining savings
+                      {
+                        name: "Potential Savings",
+                        value: Math.max(0, 1000 - result.totalCost),
+                      },
                     ]}
                     dataKey="value"
                     nameKey="name"

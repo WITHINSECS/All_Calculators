@@ -15,31 +15,46 @@ interface PieData {
 }
 
 const SalaryCalculator = () => {
-  const [hoursPerWeek, setHoursPerWeek] = useState(40);
-  const [weeksPerYear, setWeeksPerYear] = useState(52);
-  const [hourlyWage, setHourlyWage] = useState(800);
-  const [tax, setTax] = useState(12);
+  // Inputs as strings so they can be empty
+  const [hoursPerWeek, setHoursPerWeek] = useState<string>("");
+  const [weeksPerYear, setWeeksPerYear] = useState<string>("");
+  const [hourlyWage, setHourlyWage] = useState<string>("");
+  const [tax, setTax] = useState<string>("");
 
   const [annualIncome, setAnnualIncome] = useState(0);
   const [netHourlyWage, setNetHourlyWage] = useState(0);
   const [netAnnualIncome, setNetAnnualIncome] = useState(0);
 
-  // Update pieData to a specific type
   const [pieData, setPieData] = useState<PieData[]>([]);
 
+  // Helper: safe parse
+  const parseOrZero = (val: string) => (val.trim() === "" ? 0 : Number(val));
+
   useEffect(() => {
-    const grossAnnual = hoursPerWeek * weeksPerYear * hourlyWage;
-    const taxMultiplier = (100 - tax) / 100;
-    const netHourly = hourlyWage * taxMultiplier;
+    const hours = parseOrZero(hoursPerWeek);
+    const weeks = parseOrZero(weeksPerYear);
+    const wage = parseOrZero(hourlyWage);
+    const taxRate = parseOrZero(tax);
+
+    // If any required value is missing or invalid, clear results & chart
+    if (hours <= 0 || weeks <= 0 || wage <= 0 || taxRate < 0) {
+      setAnnualIncome(0);
+      setNetHourlyWage(0);
+      setNetAnnualIncome(0);
+      setPieData([]);
+      return;
+    }
+
+    const grossAnnual = hours * weeks * wage;
+    const taxMultiplier = (100 - taxRate) / 100;
+    const netHourly = wage * taxMultiplier;
     const netAnnual = grossAnnual * taxMultiplier;
+    const taxAmount = grossAnnual - netAnnual;
 
     setAnnualIncome(grossAnnual);
     setNetHourlyWage(netHourly);
     setNetAnnualIncome(netAnnual);
 
-    const taxAmount = grossAnnual - netAnnual;
-
-    // Pie chart data
     setPieData([
       { name: "Net Salary", value: netAnnual },
       { name: "Tax Deducted", value: taxAmount },
@@ -47,11 +62,24 @@ const SalaryCalculator = () => {
   }, [hoursPerWeek, weeksPerYear, hourlyWage, tax]);
 
   const reset = () => {
-    setHoursPerWeek(40);
-    setWeeksPerYear(52);
-    setHourlyWage(800);
-    setTax(12);
+    setHoursPerWeek("");
+    setWeeksPerYear("");
+    setHourlyWage("");
+    setTax("");
+    setAnnualIncome(0);
+    setNetHourlyWage(0);
+    setNetAnnualIncome(0);
+    setPieData([]);
   };
+
+  // Common input handler to allow empty string or numeric
+  const handleNumericInput =
+    (setter: (v: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      if (value === "" || !isNaN(Number(value))) {
+        setter(value);
+      }
+    };
 
   return (
     <Wrapper>
@@ -67,27 +95,30 @@ const SalaryCalculator = () => {
           <div>
             <Label className="block mb-1.5">Working hours per week</Label>
             <Input
-              type="number"
+              type="text"
               value={hoursPerWeek}
-              onChange={(e) => setHoursPerWeek(parseFloat(e.target.value))}
+              onChange={handleNumericInput(setHoursPerWeek)}
+              placeholder="e.g. 40"
             />
           </div>
 
           <div>
             <Label className="block mb-1.5">Working weeks per year</Label>
             <Input
-              type="number"
+              type="text"
               value={weeksPerYear}
-              onChange={(e) => setWeeksPerYear(parseFloat(e.target.value))}
+              onChange={handleNumericInput(setWeeksPerYear)}
+              placeholder="e.g. 52"
             />
           </div>
 
           <div>
             <Label className="block mb-1.5">Hourly wage</Label>
             <Input
-              type="number"
+              type="text"
               value={hourlyWage}
-              onChange={(e) => setHourlyWage(parseFloat(e.target.value))}
+              onChange={handleNumericInput(setHourlyWage)}
+              placeholder="e.g. 25"
             />
           </div>
 
@@ -96,9 +127,10 @@ const SalaryCalculator = () => {
           <div>
             <Label className="block mb-1.5">Tax (%)</Label>
             <Input
-              type="number"
+              type="text"
               value={tax}
-              onChange={(e) => setTax(parseFloat(e.target.value))}
+              onChange={handleNumericInput(setTax)}
+              placeholder="e.g. 12"
             />
           </div>
 
@@ -109,45 +141,62 @@ const SalaryCalculator = () => {
 
             <div>
               <Label className="block mb-1.5">Annual Income (Gross)</Label>
-              <Input type="text" value={`${annualIncome.toLocaleString()}`} readOnly />
+              <Input
+                type="text"
+                value={annualIncome ? annualIncome.toLocaleString() : ""}
+                readOnly
+              />
             </div>
 
             <div>
               <Label className="block mb-1.5">Net Hourly Wage</Label>
-              <Input type="text" value={`${netHourlyWage.toFixed(2)}`} readOnly />
+              <Input
+                type="text"
+                value={netHourlyWage ? netHourlyWage.toFixed(2) : ""}
+                readOnly
+              />
             </div>
 
             <div>
               <Label className="block mb-1.5">Net Annual Income</Label>
-              <Input type="text" value={`${netAnnualIncome.toLocaleString()}`} readOnly />
+              <Input
+                type="text"
+                value={netAnnualIncome ? netAnnualIncome.toLocaleString() : ""}
+                readOnly
+              />
             </div>
           </div>
 
           <Separator />
 
           {/* Pie Chart */}
-          <div className="mt-4">
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  fill="#8884d8"
-                  paddingAngle={5}
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "#0D74FF" : "#FF5733"} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+          {pieData.length > 0 && (
+            <div className="mt-4">
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    fill="#8884d8"
+                    paddingAngle={5}
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={index % 2 === 0 ? "#0D74FF" : "#FF5733"}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
 
           <div className="flex justify-between mt-4">
             <Button variant="outline" onClick={reset}>

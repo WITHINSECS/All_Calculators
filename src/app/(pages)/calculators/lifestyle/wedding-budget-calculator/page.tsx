@@ -8,8 +8,8 @@ import { Label } from "@/components/ui/label";
 
 export default function WeddingBudgetCalculator() {
   // State variables for wedding info
-  const [totalBudget, setTotalBudget] = useState<number | string>(200000); // Default total budget
-  const [numGuests, setNumGuests] = useState<number | string>(100); // Default number of guests
+  const [totalBudget, setTotalBudget] = useState<number | "">("");
+  const [numGuests, setNumGuests] = useState<number | "">("");
 
   // State variables for various wedding categories
   const [brideGroom, setBrideGroom] = useState({
@@ -71,15 +71,38 @@ export default function WeddingBudgetCalculator() {
     }
 
     // Calculate totals for each section
-    const brideGroomTotal = Object.values(brideGroom).reduce((acc, val) => acc + (Number(val) || 0), 0);
-    const subcontractorsTotal = Object.values(subcontractors).reduce((acc, val) => acc + (Number(val) || 0), 0);
-    const venueFoodDrinksTotal = Object.values(venueFoodDrinks).reduce((acc, val) => acc + (Number(val) || 0), 0);
-    const ceremonyTotal = Object.values(ceremony).reduce((acc, val) => acc + (Number(val) || 0), 0);
-    const transportationAccommodationTotal = Object.values(transportationAccommodation).reduce((acc, val) => acc + (Number(val) || 0), 0);
-    const customExpensesTotal = Object.values(customExpenses).reduce((acc, val) => acc + (Number(val) || 0), 0);
+    const brideGroomTotal = Object.values(brideGroom).reduce(
+      (acc, val) => acc + (Number(val) || 0),
+      0
+    );
+    const subcontractorsTotal = Object.values(subcontractors).reduce(
+      (acc, val) => acc + (Number(val) || 0),
+      0
+    );
+    const venueFoodDrinksTotal = Object.values(venueFoodDrinks).reduce(
+      (acc, val) => acc + (Number(val) || 0),
+      0
+    );
+    const ceremonyTotal = Object.values(ceremony).reduce(
+      (acc, val) => acc + (Number(val) || 0),
+      0
+    );
+    const transportationAccommodationTotal = Object.values(
+      transportationAccommodation
+    ).reduce((acc, val) => acc + (Number(val) || 0), 0);
+    const customExpensesTotal = Object.values(customExpenses).reduce(
+      (acc, val) => acc + (Number(val) || 0),
+      0
+    );
 
     // Calculate grand total
-    const grandTotal = brideGroomTotal + subcontractorsTotal + venueFoodDrinksTotal + ceremonyTotal + transportationAccommodationTotal + customExpensesTotal;
+    const grandTotal =
+      brideGroomTotal +
+      subcontractorsTotal +
+      venueFoodDrinksTotal +
+      ceremonyTotal +
+      transportationAccommodationTotal +
+      customExpensesTotal;
 
     // Calculate average cost per guest
     const averageCostPerGuest = totalGuests > 0 ? grandTotal / totalGuests : 0;
@@ -90,7 +113,9 @@ export default function WeddingBudgetCalculator() {
     // Determine the budget message
     let budgetMessage = "";
     if (weddingBudgetBalance < 0) {
-      budgetMessage = `Your budget is too low. You need to increase your budget by $${Math.abs(weddingBudgetBalance).toFixed(2)}.`;
+      budgetMessage = `Your budget is too low. You need to increase your budget by $${Math.abs(
+        weddingBudgetBalance
+      ).toFixed(2)}.`;
     } else if (weddingBudgetBalance > 0) {
       budgetMessage = `Your budget is too much! You are prepared for unexpected costs and can maybe put some money towards the honeymoon!`;
     } else {
@@ -156,9 +181,12 @@ export default function WeddingBudgetCalculator() {
   return (
     <Wrapper>
       <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8 max-w-4xl">
-        <h1 className="text-2xl font-semibold lg:text-4xl text-center">Wedding Budget Calculator</h1>
+        <h1 className="text-2xl font-semibold lg:text-4xl text-center">
+          Wedding Budget Calculator
+        </h1>
         <p className="text-sm text-muted-foreground mt-2 text-center">
-          Enter your wedding details to calculate the total wedding cost and your remaining budget.
+          Enter your wedding details to calculate the total wedding cost and
+          your remaining budget.
         </p>
 
         {/* Wedding Info */}
@@ -169,8 +197,11 @@ export default function WeddingBudgetCalculator() {
             <Input
               id="totalBudget"
               type="number"
-              value={totalBudget}
-              onChange={(e) => setTotalBudget(e.target.value)}
+              value={totalBudget === "" ? "" : totalBudget}
+              onChange={(e) => {
+                const value = e.target.value;
+                setTotalBudget(value === "" ? "" : Number(value));
+              }}
               placeholder="Enter total budget"
             />
           </div>
@@ -179,8 +210,11 @@ export default function WeddingBudgetCalculator() {
             <Input
               id="numGuests"
               type="number"
-              value={numGuests}
-              onChange={(e) => setNumGuests(e.target.value)}
+              value={numGuests === "" ? "" : numGuests}
+              onChange={(e) => {
+                const value = e.target.value;
+                setNumGuests(value === "" ? "" : Number(value));
+              }}
               placeholder="Enter number of guests"
             />
           </div>
@@ -272,12 +306,18 @@ export default function WeddingBudgetCalculator() {
 
         {/* Transportation and Accommodation Section */}
         <div className="space-y-4 mt-6">
-          <h2 className="text-xl font-semibold">🚗 Transportation and Accommodation</h2>
+          <h2 className="text-xl font-semibold">
+            🚗 Transportation and Accommodation
+          </h2>
           {Object.keys(transportationAccommodation).map((key) => (
             <div key={key} className="space-y-2">
               <Label>{key.replace(/([A-Z])/g, " $1").toUpperCase()}</Label>
               <Input
-                value={transportationAccommodation[key as keyof typeof transportationAccommodation]}
+                value={
+                  transportationAccommodation[
+                    key as keyof typeof transportationAccommodation
+                  ]
+                }
                 onChange={(e) =>
                   setTransportationAccommodation({
                     ...transportationAccommodation,
@@ -324,8 +364,14 @@ export default function WeddingBudgetCalculator() {
               <div className="text-xl font-semibold">Wedding Budget Summary</div>
               <div className="text-lg mt-4">
                 <p>Total Wedding Cost: ${weddingResults.grandTotal}</p>
-                <p>Average Cost Per Guest: ${weddingResults.averageCostPerGuest}</p>
-                <p>Wedding Budget Balance: ${weddingResults.weddingBudgetBalance}</p>
+                <p>
+                  Average Cost Per Guest: $
+                  {weddingResults.averageCostPerGuest}
+                </p>
+                <p>
+                  Wedding Budget Balance: $
+                  {weddingResults.weddingBudgetBalance}
+                </p>
               </div>
               <div className="mt-4">
                 <p>{weddingResults.budgetMessage}</p>

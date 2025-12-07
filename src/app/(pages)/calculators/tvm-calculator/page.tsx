@@ -12,55 +12,83 @@ import Wrapper from "@/app/Wrapper";
 // Pie chart colors
 const PIE_COLORS = ["#0D74FF", "#FF5733"];
 
-export default function TVMCalculator() {
-  // States for user inputs
-  const [presentValue, setPresentValue] = useState(10000);
-  const [futureValue, setFutureValue] = useState(0);
-  const [interestRate, setInterestRate] = useState(5);
-  const [periods, setPeriods] = useState(5);
-  const [payment, setPayment] = useState(0);
-  const [calculateType, setCalculateType] = useState("Future Value");
+type CalculateType =
+  | "Future Value"
+  | "Present Value"
+  | "Interest Rate"
+  | "Periods"
+  | "Repeating Payment";
 
-  const [pieData, setPieData] = useState<{ name: string, value: number }[]>([]);
-  const [calculatedValue, setCalculatedValue] = useState(0);
+export default function TVMCalculator() {
+  // Inputs as strings so they can be empty
+  const [presentValue, setPresentValue] = useState<string>("");
+  const [futureValue, setFutureValue] = useState<string>("");
+  const [interestRate, setInterestRate] = useState<string>("");
+  const [periods, setPeriods] = useState<string>("");
+
+  const [payment, setPayment] = useState<number>(0); // result for repeating payment (not shown yet, but kept)
+  const [calculateType, setCalculateType] = useState<CalculateType>("Future Value");
+
+  const [pieData, setPieData] = useState<{ name: string; value: number }[]>([]);
+  const [calculatedValue, setCalculatedValue] = useState<number>(0);
 
   // Handle calculations
   const handleCalculate = () => {
+    const PV = Number(presentValue) || 0;
+    const FV = Number(futureValue) || 0;
+    const r = Number(interestRate) || 0;
+    const n = Number(periods) || 0;
+
     let result = 0;
+    let newPieData: { name: string; value: number }[] = [];
+
     switch (calculateType) {
-      case "Future Value":
-        result = presentValue * Math.pow(1 + interestRate / 100, periods);
-        setFutureValue(result);
-        setPieData([
-          { name: "Present Value", value: presentValue },
-          { name: "Future Value", value: result }
-        ]);
+      case "Future Value": {
+        if (PV <= 0 || r <= 0 || n <= 0) break;
+        result = PV * Math.pow(1 + r / 100, n);
+        setFutureValue(result.toString());
+        newPieData = [
+          { name: "Present Value", value: PV },
+          { name: "Future Value", value: result },
+        ];
         break;
-      case "Present Value":
-        result = futureValue / Math.pow(1 + interestRate / 100, periods);
-        setPresentValue(result);
-        setPieData([
-          { name: "Future Value", value: futureValue },
-          { name: "Present Value", value: result }
-        ]);
+      }
+      case "Present Value": {
+        if (FV <= 0 || r <= 0 || n <= 0) break;
+        result = FV / Math.pow(1 + r / 100, n);
+        setPresentValue(result.toString());
+        newPieData = [
+          { name: "Future Value", value: FV },
+          { name: "Present Value", value: result },
+        ];
         break;
-      case "Interest Rate":
-        result = (Math.pow(futureValue / presentValue, 1 / periods) - 1) * 100;
-        setInterestRate(result);
+      }
+      case "Interest Rate": {
+        if (FV <= 0 || PV <= 0 || n <= 0) break;
+        result = (Math.pow(FV / PV, 1 / n) - 1) * 100;
+        setInterestRate(result.toString());
         break;
-      case "Periods":
-        result = Math.log(futureValue / presentValue) / Math.log(1 + interestRate / 100);
-        setPeriods(result);
+      }
+      case "Periods": {
+        if (FV <= 0 || PV <= 0 || r <= 0) break;
+        result = Math.log(FV / PV) / Math.log(1 + r / 100);
+        setPeriods(result.toString());
         break;
-      case "Repeating Payment":
-        result = (futureValue - presentValue * Math.pow(1 + interestRate / 100, periods)) / 
-                  ((Math.pow(1 + interestRate / 100, periods) - 1));
+      }
+      case "Repeating Payment": {
+        if (r <= 0 || n <= 0) break;
+        const factor = Math.pow(1 + r / 100, n);
+        if (factor - 1 === 0) break;
+        result = (FV - PV * factor) / (factor - 1);
         setPayment(result);
         break;
+      }
       default:
         break;
     }
-    setCalculatedValue(result);
+
+    setCalculatedValue(result || 0);
+    setPieData(newPieData);
   };
 
   return (
@@ -79,7 +107,10 @@ export default function TVMCalculator() {
               <CardTitle>Select Calculation Type</CardTitle>
             </CardHeader>
             <CardContent>
-              <Select onValueChange={(value) => setCalculateType(value)}>
+              <Select
+                value={calculateType}
+                onValueChange={(value) => setCalculateType(value as CalculateType)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select Calculation" />
                 </SelectTrigger>
@@ -99,33 +130,38 @@ export default function TVMCalculator() {
               <CardTitle>Enter Values</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Input fields based on calculation type */}
-              {calculateType === "Future Value" || calculateType === "Present Value" || calculateType === "Repeating Payment" ? (
+              {/* PV / rate / periods (for FV, PV, Repeating Payment) */}
+              {(calculateType === "Future Value" ||
+                calculateType === "Present Value" ||
+                calculateType === "Repeating Payment") && (
                 <div className="space-y-4">
                   <div>
                     <Label>Present Value (PV):</Label>
                     <Input
-                      type="number"
+                      type="text"
                       value={presentValue}
-                      onChange={(e) => setPresentValue(Number(e.target.value))}
+                      onChange={(e) => setPresentValue(e.target.value)}
+                      placeholder="$"
                     />
                   </div>
 
                   <div>
                     <Label>Interest Rate (%):</Label>
                     <Input
-                      type="number"
+                      type="text"
                       value={interestRate}
-                      onChange={(e) => setInterestRate(Number(e.target.value))}
+                      onChange={(e) => setInterestRate(e.target.value)}
+                      placeholder="e.g. 5"
                     />
                   </div>
 
                   <div>
                     <Label>Number of Periods:</Label>
                     <Input
-                      type="number"
+                      type="text"
                       value={periods}
-                      onChange={(e) => setPeriods(Number(e.target.value))}
+                      onChange={(e) => setPeriods(e.target.value)}
+                      placeholder="e.g. 5"
                     />
                   </div>
 
@@ -133,41 +169,72 @@ export default function TVMCalculator() {
                     <div>
                       <Label>Future Value (FV):</Label>
                       <Input
-                        type="number"
+                        type="text"
                         value={futureValue}
-                        onChange={(e) => setFutureValue(Number(e.target.value))}
+                        onChange={(e) => setFutureValue(e.target.value)}
+                        placeholder="$"
                       />
                     </div>
                   )}
                 </div>
-              ) : null}
+              )}
 
-              {calculateType === "Interest Rate" || calculateType === "Periods" ? (
+              {/* FV / PV (for Interest Rate or Periods) */}
+              {(calculateType === "Interest Rate" ||
+                calculateType === "Periods") && (
                 <div className="space-y-4">
                   <div>
                     <Label>Future Value (FV):</Label>
                     <Input
-                      type="number"
+                      type="text"
                       value={futureValue}
-                      onChange={(e) => setFutureValue(Number(e.target.value))}
+                      onChange={(e) => setFutureValue(e.target.value)}
+                      placeholder="$"
                     />
                   </div>
 
                   <div>
                     <Label>Present Value (PV):</Label>
                     <Input
-                      type="number"
+                      type="text"
                       value={presentValue}
-                      onChange={(e) => setPresentValue(Number(e.target.value))}
+                      onChange={(e) => setPresentValue(e.target.value)}
+                      placeholder="$"
                     />
                   </div>
+
+                  {calculateType === "Interest Rate" && (
+                    <div>
+                      <Label>Number of Periods:</Label>
+                      <Input
+                        type="text"
+                        value={periods}
+                        onChange={(e) => setPeriods(e.target.value)}
+                        placeholder="e.g. 5"
+                      />
+                    </div>
+                  )}
+
+                  {calculateType === "Periods" && (
+                    <div>
+                      <Label>Interest Rate (%):</Label>
+                      <Input
+                        type="text"
+                        value={interestRate}
+                        onChange={(e) => setInterestRate(e.target.value)}
+                        placeholder="e.g. 5"
+                      />
+                    </div>
+                  )}
                 </div>
-              ) : null}
+              )}
             </CardContent>
           </Card>
 
           <div className="flex space-x-4">
-            <Button className="w-full" onClick={handleCalculate}>Calculate</Button>
+            <Button className="w-full" onClick={handleCalculate}>
+              Calculate
+            </Button>
           </div>
 
           {/* Display the calculated value */}
@@ -194,7 +261,10 @@ export default function TVMCalculator() {
                     paddingAngle={5}
                   >
                     {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={PIE_COLORS[index % PIE_COLORS.length]}
+                      />
                     ))}
                   </Pie>
                   <PieTooltip />
@@ -207,3 +277,4 @@ export default function TVMCalculator() {
     </Wrapper>
   );
 }
+  

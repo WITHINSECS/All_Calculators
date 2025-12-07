@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/command";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "react-toastify";
 
 type Activity = {
   id: string;
@@ -58,12 +59,12 @@ const ACTIVITIES: Activity[] = [
 ];
 
 interface CaloriesInput {
-  exercise: string;    // activity name (shown to user)
-  met?: number;        // chosen activity MET
-  duration: number;    // minutes
+  exercise: string; // activity name (shown to user)
+  met?: number; // chosen activity MET
+  duration: number | ""; // minutes
   gender: string;
-  age: number;
-  weight: number;
+  age: number | "";
+  weight: number | "";
   weightUnit: "kg" | "lb";
 }
 
@@ -82,7 +83,15 @@ const toKg = (weight: number, unit: "kg" | "lb") =>
 const calcByMET = (met: number, duration: number, weightKg: number) =>
   met * 3.5 * weightKg * (duration / 200);
 
-const calculateCaloriesBurned = (input: CaloriesInput): CaloriesResult => {
+const calculateCaloriesBurned = (input: {
+  exercise: string;
+  met?: number;
+  duration: number;
+  gender: string;
+  age: number;
+  weight: number;
+  weightUnit: "kg" | "lb";
+}): CaloriesResult => {
   const weightKg = toKg(input.weight, input.weightUnit);
 
   let baseCalories: number;
@@ -114,29 +123,31 @@ export default function CaloriesCalculator() {
   const [open, setOpen] = useState(false); // combobox
   const [selected, setSelected] = useState<Activity | null>(null);
 
+  // start everything EMPTY instead of with defaults
   const [input, setInput] = useState<CaloriesInput>({
     exercise: "",
     met: undefined,
-    duration: 60,
+    duration: "",
     gender: "male",
-    age: 21,
-    weight: 60,
+    age: "",
+    weight: "",
     weightUnit: "kg",
   });
 
   const [result, setResult] = useState<CaloriesResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleNumber = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNumber = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    // allow empty, digits only
     if (!/^\d*$/.test(value)) return;
     setInput((prev) => ({
       ...prev,
-      [name]: value === "" ? ("" as unknown as number) : Number(value),
+      [name]: value === "" ? "" : Number(value),
     }));
   };
 
-  const handleSelectChange = (name: keyof CaloriesInput, value: string) => {
+  const handleSelectChange = (name: keyof CaloriesInput, value: any) => {
     setInput((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -155,23 +166,41 @@ export default function CaloriesCalculator() {
   const handleCalculate = () => {
     if ((!input.exercise || input.exercise.trim() === "") && !input.met) {
       setError("Please choose an activity.");
+      toast.error("Please choose an activity.");
       return;
     }
-    if (isNaN(input.duration) || input.duration <= 0) {
+    if (input.duration === "" || Number(input.duration) <= 0) {
       setError("Please enter a valid duration.");
+      toast.error("Please enter a valid duration.");
       return;
     }
-    if (isNaN(input.age) || input.age <= 0) {
+    if (input.age === "" || Number(input.age) <= 0) {
       setError("Please enter a valid age.");
+      toast.error("Please enter a valid age.");
       return;
     }
-    if (isNaN(input.weight) || input.weight <= 0) {
+    if (input.weight === "" || Number(input.weight) <= 0) {
       setError("Please enter a valid weight.");
+      toast.error("Please enter a valid weight.");
       return;
     }
 
+    const durationNum = Number(input.duration);
+    const ageNum = Number(input.age);
+    const weightNum = Number(input.weight);
+
     setError(null);
-    setResult(calculateCaloriesBurned(input));
+    setResult(
+      calculateCaloriesBurned({
+        exercise: input.exercise,
+        met: input.met,
+        duration: durationNum,
+        gender: input.gender,
+        age: ageNum,
+        weight: weightNum,
+        weightUnit: input.weightUnit,
+      })
+    );
   };
 
   return (
@@ -182,14 +211,14 @@ export default function CaloriesCalculator() {
             Calories Burned Calculator
           </h1>
           <p className="text-muted-foreground mt-4 text-xl">
-            Enter details below to calculate the calories burned during an activity.
+            Enter details below to calculate the calories burned during an
+            activity.
           </p>
         </div>
 
         {/* Form */}
         <div className="space-y-5">
-
-          {/* === Activity searchable dropdown (combobox) === */}
+          {/* Activity searchable dropdown (combobox) */}
           <div className="space-y-2">
             <Label>Enter an exercise to calculate your calories burned</Label>
 
@@ -230,7 +259,9 @@ export default function CaloriesCalculator() {
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                selected?.id === act.id ? "opacity-100" : "opacity-0"
+                                selected?.id === act.id
+                                  ? "opacity-100"
+                                  : "opacity-0"
                               )}
                             />
                             <span>{act.name}</span>
@@ -246,13 +277,16 @@ export default function CaloriesCalculator() {
               </PopoverContent>
             </Popover>
 
-            {/* Optional: allow custom text entry (kept from your original) */}
             <Input
               className="mt-2"
               placeholder="Or type a custom activity name"
               value={input.exercise}
               onChange={(e) =>
-                setInput((p) => ({ ...p, exercise: e.target.value, met: p.met }))
+                setInput((p) => ({
+                  ...p,
+                  exercise: e.target.value,
+                  met: p.met,
+                }))
               }
             />
           </div>
@@ -267,6 +301,7 @@ export default function CaloriesCalculator() {
                 onChange={handleNumber}
                 type="number"
                 inputMode="numeric"
+                placeholder="e.g. 60"
               />
               <span className="text-sm text-muted-foreground">min</span>
             </div>
@@ -277,7 +312,7 @@ export default function CaloriesCalculator() {
             <Label>What is your sex?</Label>
             <Select
               onValueChange={(value) => handleSelectChange("gender", value)}
-              defaultValue="male"
+              defaultValue={input.gender}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select gender" />
@@ -299,6 +334,7 @@ export default function CaloriesCalculator() {
                 onChange={handleNumber}
                 type="number"
                 inputMode="numeric"
+                placeholder="e.g. 21"
               />
               <span className="text-sm text-muted-foreground">years</span>
             </div>
@@ -314,12 +350,13 @@ export default function CaloriesCalculator() {
                 onChange={handleNumber}
                 type="number"
                 inputMode="numeric"
+                placeholder="e.g. 60"
               />
               <Select
                 onValueChange={(value: "kg" | "lb") =>
                   handleSelectChange("weightUnit", value)
                 }
-                defaultValue="kg"
+                defaultValue={input.weightUnit}
               >
                 <SelectTrigger className="w-24">
                   <SelectValue placeholder="kg" />

@@ -9,7 +9,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   LineChart,
   Line,
@@ -30,40 +36,64 @@ import {
 } from "@/components/ui/table";
 import Wrapper from "@/app/Wrapper";
 
-// Fix frequencies object to use "yearly" instead of "annual"
+// Frequencies
 const frequencies = {
   monthly: 12,
   weekly: 52,
   daily: 365,
-  yearly: 1, // Use yearly instead of annual
+  yearly: 1,
 };
 
 interface InvestmentInput {
   initialInvestment: number;
   interestRate: number;
   compoundFrequency: number;
-  interestRatePeriod: "daily" | "weekly" | "monthly" | "yearly"; // Fixed to match valid keys
+  interestRatePeriod: "daily" | "weekly" | "monthly" | "yearly";
   years: number;
   months: number;
   depositAmount: number;
-  depositPeriod: "beginning" | "end"; // When deposits are made
+  depositPeriod: "beginning" | "end";
   additionalContributions: "none" | "deposits" | "withdrawals" | "both";
-  annualDepositIncrease: number; // Added missing property
+  annualDepositIncrease: number;
 }
 
 interface InvestmentResult {
   futureValue: number;
   totalInterest: number;
-  yearlyBreakdown: { year: number; interest: number; accrued: number; balance: number }[]; 
+  yearlyBreakdown: {
+    year: number;
+    interest: number;
+    accrued: number;
+    balance: number;
+  }[];
 }
 
-// Function to calculate investment
+// UI state: strings for inputs so they can be empty
+interface InvestmentFormState {
+  initialInvestment: string;
+  interestRate: string;
+  years: string;
+  months: string;
+  depositAmount: string;
+  annualDepositIncrease: string;
+  interestRatePeriod: "daily" | "weekly" | "monthly" | "yearly";
+  depositPeriod: "beginning" | "end";
+  additionalContributions: "none" | "deposits" | "withdrawals" | "both";
+}
+
+// Calculation
 const calculateInvestment = (input: InvestmentInput): InvestmentResult => {
   let balance = input.initialInvestment;
-  const compoundPerYear = frequencies[input.interestRatePeriod]; // Fixed
+  const compoundPerYear = frequencies[input.interestRatePeriod];
   const totalMonths = input.years * 12 + input.months;
   const monthlyRate = input.interestRate / 100 / compoundPerYear;
-  const yearlyBreakdown: { year: number; interest: number; accrued: number; balance: number }[] = [];
+
+  const yearlyBreakdown: {
+    year: number;
+    interest: number;
+    accrued: number;
+    balance: number;
+  }[] = [];
 
   const getCompoundRate = (period: string) => {
     if (period === "daily") return 1 + input.interestRate / 100 / 365;
@@ -76,29 +106,34 @@ const calculateInvestment = (input: InvestmentInput): InvestmentResult => {
     if (month > 0 && month % 12 === 0) {
       const year = Math.floor(month / 12);
       const interest = balance * monthlyRate * compoundPerYear;
-      const accrued: number = (yearlyBreakdown[year - 1]?.accrued || 0) + interest;
+      const accrued: number =
+        (yearlyBreakdown[year - 1]?.accrued || 0) + interest;
       balance += interest;
 
-      // Handling Deposits
+      // Deposits
       if (input.additionalContributions === "deposits") {
-        const deposit = input.depositAmount * (1 + input.annualDepositIncrease / 100) ** (year - 1);
+        const deposit =
+          input.depositAmount *
+          (1 + input.annualDepositIncrease / 100) ** (year - 1);
         if (input.depositPeriod === "beginning") {
           balance += deposit;
         }
       }
 
-      // Handling Withdrawals or Both Deposits & Withdrawals
-      if (input.additionalContributions === "withdrawals" || input.additionalContributions === "both") {
-        const withdrawalAmount = input.depositAmount * (1 + input.annualDepositIncrease / 100) ** (Math.floor(month / 12));
-        if (input.depositPeriod === "beginning") {
-          balance -= withdrawalAmount;
-        } else {
-          balance -= withdrawalAmount;
-        }
+      // Withdrawals / both
+      if (
+        input.additionalContributions === "withdrawals" ||
+        input.additionalContributions === "both"
+      ) {
+        const withdrawalAmount =
+          input.depositAmount *
+          (1 + input.annualDepositIncrease / 100) ** Math.floor(month / 12);
+        balance -= withdrawalAmount;
       }
 
       yearlyBreakdown.push({ year, interest, accrued, balance });
     }
+
     balance *= Math.pow(getCompoundRate(input.interestRatePeriod), 1);
   }
 
@@ -113,35 +148,41 @@ const calculateInvestment = (input: InvestmentInput): InvestmentResult => {
 };
 
 export default function InvestmentCalculator() {
-  const [input, setInput] = useState<InvestmentInput>({
-    initialInvestment: 5000,
-    interestRate: 5,
-    compoundFrequency: 12,
-    interestRatePeriod: "monthly", 
-    years: 5,
-    months: 0,
-    depositAmount: 0,
+  // All numeric inputs start as empty strings
+  const [input, setInput] = useState<InvestmentFormState>({
+    initialInvestment: "",
+    interestRate: "",
+    years: "",
+    months: "",
+    depositAmount: "",
+    annualDepositIncrease: "",
+    interestRatePeriod: "monthly",
     depositPeriod: "end",
     additionalContributions: "none",
-    annualDepositIncrease: 0,
   });
-  
+
   const [result, setResult] = useState<InvestmentResult | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    const parsedValue = value === "" ? "" : Number(value); // Handle empty string case
-    setInput((prev) => ({ ...prev, [name]: parsedValue }));
-  };
-
-  const handleCompoundFrequencyChange = (value: string) => {
     setInput((prev) => ({
       ...prev,
-      interestRatePeriod: value as "daily" | "weekly" | "monthly" | "yearly",
+      [name]: value, // keep as string so it can be ""
     }));
   };
 
-  const handleContributionsChange = (value: "none" | "deposits" | "withdrawals" | "both") => {
+  const handleCompoundFrequencyChange = (
+    value: "daily" | "weekly" | "monthly" | "yearly"
+  ) => {
+    setInput((prev) => ({
+      ...prev,
+      interestRatePeriod: value,
+    }));
+  };
+
+  const handleContributionsChange = (
+    value: "none" | "deposits" | "withdrawals" | "both"
+  ) => {
     setInput((prev) => ({
       ...prev,
       additionalContributions: value,
@@ -156,22 +197,34 @@ export default function InvestmentCalculator() {
   };
 
   const handleCalculate = () => {
-    const calcResult = calculateInvestment(input);
+    const numericInput: InvestmentInput = {
+      initialInvestment: Number(input.initialInvestment) || 0,
+      interestRate: Number(input.interestRate) || 0,
+      compoundFrequency: frequencies[input.interestRatePeriod],
+      interestRatePeriod: input.interestRatePeriod,
+      years: Number(input.years) || 0,
+      months: Number(input.months) || 0,
+      depositAmount: Number(input.depositAmount) || 0,
+      depositPeriod: input.depositPeriod,
+      additionalContributions: input.additionalContributions,
+      annualDepositIncrease: Number(input.annualDepositIncrease) || 0,
+    };
+
+    const calcResult = calculateInvestment(numericInput);
     setResult(calcResult);
   };
 
   const handleReset = () => {
     setInput({
-      initialInvestment: 5000,
-      interestRate: 5,
-      compoundFrequency: 12,
+      initialInvestment: "",
+      interestRate: "",
+      years: "",
+      months: "",
+      depositAmount: "",
+      annualDepositIncrease: "",
       interestRatePeriod: "monthly",
-      years: 5,
-      months: 0,
-      depositAmount: 0,
       depositPeriod: "end",
       additionalContributions: "none",
-      annualDepositIncrease: 0,
     });
     setResult(null);
   };
@@ -180,9 +233,13 @@ export default function InvestmentCalculator() {
     <Wrapper>
       <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8">
         <div className="mx-auto max-w-3xl text-center mb-8">
-          <h1 className="text-2xl font-semibold lg:text-4xl">Compound Interest Calculator</h1>
+          <h1 className="text-2xl font-semibold lg:text-4xl">
+            Compound Interest Calculator
+          </h1>
           <p className="text-muted-foreground mt-4 text-xl">
-            Explore our comprehensive range of calculators designed to assist you with various financial, health, lifestyle, and mathematical needs.
+            Explore our comprehensive range of calculators designed to assist
+            you with various financial, health, lifestyle, and mathematical
+            needs.
           </p>
         </div>
         <Card>
@@ -191,6 +248,7 @@ export default function InvestmentCalculator() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
+              {/* Left side */}
               <div>
                 <h3 className="text-lg font-semibold mb-3">Basic Info</h3>
                 <div className="space-y-2">
@@ -201,20 +259,29 @@ export default function InvestmentCalculator() {
                       name="initialInvestment"
                       value={input.initialInvestment}
                       onChange={handleChange}
+                      placeholder="$"
                     />
                   </div>
                   <div>
-                    <label>Interest rate</label>
+                    <label>Interest rate (%)</label>
                     <Input
                       className="mt-1 mb-3"
                       name="interestRate"
                       value={input.interestRate}
                       onChange={handleChange}
+                      placeholder="e.g. 5"
                     />
                   </div>
                   <div>
                     <label className="mb-1 block">Compound frequency</label>
-                    <Select onValueChange={handleCompoundFrequencyChange} defaultValue="monthly">
+                    <Select
+                      value={input.interestRatePeriod}
+                      onValueChange={(val) =>
+                        handleCompoundFrequencyChange(
+                          val as "daily" | "weekly" | "monthly" | "yearly"
+                        )
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select frequency" />
                       </SelectTrigger>
@@ -234,6 +301,7 @@ export default function InvestmentCalculator() {
                         name="years"
                         value={input.years}
                         onChange={handleChange}
+                        placeholder="e.g. 5"
                       />
                     </div>
                     <div>
@@ -243,28 +311,43 @@ export default function InvestmentCalculator() {
                         name="months"
                         value={input.months}
                         onChange={handleChange}
+                        placeholder="e.g. 6"
                       />
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Right side */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Additional Contributions</h3>
+                <h3 className="text-lg font-semibold mb-3">
+                  Additional Contributions
+                </h3>
                 <div className="space-y-2">
                   <div>
                     <label className="mb-1 block">Additional contributions</label>
-                    <Select onValueChange={handleContributionsChange} defaultValue="none">
+                    <Select
+                      value={input.additionalContributions}
+                      onValueChange={(val) =>
+                        handleContributionsChange(
+                          val as "none" | "deposits" | "withdrawals" | "both"
+                        )
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select option" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
                         <SelectItem value="deposits">Deposits</SelectItem>
-                        <SelectItem value="withdrawals">Withdrawals</SelectItem>
+                        <SelectItem value="withdrawals">
+                          Withdrawals
+                        </SelectItem>
                         <SelectItem value="both">Both</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
+
                   {input.additionalContributions === "deposits" && (
                     <>
                       <div>
@@ -274,6 +357,7 @@ export default function InvestmentCalculator() {
                           name="depositAmount"
                           value={input.depositAmount}
                           onChange={handleChange}
+                          placeholder="$"
                         />
                       </div>
                       <div>
@@ -283,14 +367,23 @@ export default function InvestmentCalculator() {
                           name="annualDepositIncrease"
                           value={input.annualDepositIncrease}
                           onChange={handleChange}
+                          placeholder="e.g. 3"
                         />
                       </div>
                     </>
                   )}
+
                   {input.additionalContributions !== "none" && (
                     <div>
                       <label className="mb-1 block">Deposit Period</label>
-                      <Select onValueChange={handleDepositPeriodChange} defaultValue="end">
+                      <Select
+                        value={input.depositPeriod}
+                        onValueChange={(val) =>
+                          handleDepositPeriodChange(
+                            val as "beginning" | "end"
+                          )
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Select period" />
                         </SelectTrigger>
@@ -304,9 +397,13 @@ export default function InvestmentCalculator() {
                 </div>
               </div>
             </div>
-            <div className="flex justify-end">
+
+            <div className="flex gap-2 items-center justify-center flex-col">
               <Button className="p-5 w-full" onClick={handleCalculate}>
                 Calculate
+              </Button>
+              <Button variant="outline" className="w-full" onClick={handleReset}>
+                Reset
               </Button>
             </div>
           </CardContent>
@@ -327,23 +424,42 @@ export default function InvestmentCalculator() {
               <TableBody>
                 <TableRow>
                   <TableCell>Future investment value</TableCell>
-                  <TableCell className="text-right">${result?.futureValue.toFixed(2) ?? "-"}</TableCell>
+                  <TableCell className="text-right">
+                    {result
+                      ? `$${result.futureValue.toFixed(2)}`
+                      : "-"}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>Total interest earned</TableCell>
-                  <TableCell className="text-right">${result?.totalInterest.toFixed(2) ?? "-"}</TableCell>
+                  <TableCell className="text-right">
+                    {result
+                      ? `$${result.totalInterest.toFixed(2)}`
+                      : "-"}
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
+
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={result?.yearlyBreakdown}>
+              <LineChart data={result?.yearlyBreakdown || []}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="year" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="balance" stroke="#82ca9d" name="Balance" />
-                <Line type="monotone" dataKey="accrued" stroke="#8884d8" name="Accrued Interest" />
+                <Line
+                  type="monotone"
+                  dataKey="balance"
+                  stroke="#82ca9d"
+                  name="Balance"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="accrued"
+                  stroke="#8884d8"
+                  name="Accrued Interest"
+                />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
