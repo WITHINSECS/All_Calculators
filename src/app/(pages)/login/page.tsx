@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { GalleryVerticalEnd } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +12,10 @@ import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 
+type UserWithRole = {
+    role?: string;
+};
+
 const Page = () => {
     const router = useRouter();
 
@@ -20,24 +23,22 @@ const Page = () => {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const {
-        data,
-        isPending,
-        error,
-    } = authClient.useSession();
+    const { data, isPending, error } = authClient.useSession();
 
-    const user = data?.user;
+    // 🔹 derive role safely without `any`
+    const sessionUser = data?.user as unknown as UserWithRole | undefined;
+    const sessionRole = sessionUser?.role;
 
     // 🔁 Redirect if already logged in
     useEffect(() => {
-        if (isPending || !user) return;
+        if (isPending || !data?.user) return;
 
-        if (user.role === "admin") {
-            router.replace("/dashboard/home   ");
+        if (sessionRole === "admin") {
+            router.replace("/dashboard/home");
         } else {
             router.replace("/calculators");
         }
-    }, [user, isPending, router]);
+    }, [data, isPending, sessionRole, router]);
 
     if (isPending) {
         return (
@@ -47,7 +48,7 @@ const Page = () => {
         );
     }
 
-    if (user) {
+    if (data?.user) {
         // already logged in, redirecting above
         return (
             <div className="flex h-screen items-center justify-center">
@@ -69,12 +70,13 @@ const Page = () => {
                 return;
             }
 
-            const role = data?.user?.role;
+            const loginUser = data?.user as unknown as UserWithRole | undefined;
+            const role = loginUser?.role;
 
             toast.success("Login successful!");
 
             if (role === "admin") {
-                router.push("/dashboard");
+                router.push("/dashboard/home");
             } else {
                 router.push("/calculators");
             }
