@@ -77,13 +77,33 @@ export async function POST(request: NextRequest) {
 }
 
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     await DBconnection();
 
     try {
-        const posts = await BlogPost.find({ isPublished: true })
-            .sort({ createdAt: -1 })
-            .select("title slug category date imageUrl excerpt createdAt");
+        const { searchParams } = new URL(request.url);
+        const search = (searchParams.get("search") || "").trim();
+
+        const filter: any = { isPublished: true };
+
+        // If search is provided, use MongoDB text search
+        if (search) {
+            filter.$text = { $search: search };
+        }
+
+        const query = BlogPost.find(filter)
+            .sort(
+                search
+                    ? { score: { $meta: "textScore" }, createdAt: -1 }
+                    : { createdAt: -1 }
+            )
+            .select(
+                search
+                    ? { title: 1, slug: 1, category: 1, date: 1, imageUrl: 1, excerpt: 1, createdAt: 1, score: { $meta: "textScore" } }
+                    : "title slug category date imageUrl excerpt createdAt"
+            );
+
+        const posts = await query.exec();
 
         return NextResponse.json({ success: true, posts }, { status: 200 });
     } catch (error: unknown) {
@@ -94,3 +114,4 @@ export async function GET() {
         );
     }
 }
+

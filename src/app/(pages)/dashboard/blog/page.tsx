@@ -78,8 +78,10 @@ export default function NewBlogPostPage() {
             setError(null);
             setUploadingImage(true);
 
+            const uniqueName = `blog-images/${crypto.randomUUID()}-${file.name}`;
+
             // Upload to Vercel Blob via your route
-            const blob = await upload(file.name, file, {
+            const blob = await upload(uniqueName, file, {
                 access: "public",
                 handleUploadUrl: "/api/admin/blog/upload",
             });
@@ -266,7 +268,7 @@ export default function NewBlogPostPage() {
                             {/* Preview */}
                             {imageUrl ? (
                                 <div className="mt-2 overflow-hidden rounded-lg border">
-                                    <img src={imageUrl} alt="Preview" className="h-44 w-full object-cover" />
+                                    <img src={imageUrl} alt="Preview" className="mx-auto max-w-lg w-full object-cover" />
                                 </div>
                             ) : (
                                 <div className="mt-2 rounded-lg border border-dashed p-4 text-sm text-muted-foreground flex items-center gap-2">
