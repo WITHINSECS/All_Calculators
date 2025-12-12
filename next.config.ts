@@ -1,9 +1,25 @@
-import type { NextConfig } from "next"
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["images.unsplash.com"],
-  },
-}
+    // keep if you want, but not required when using remotePatterns
+    // domains: ["images.unsplash.com", "plus.unsplash.com"],
 
-export default nextConfig
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "plus.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+      },
+    ],
+  },
+};
+
+export default nextConfig;

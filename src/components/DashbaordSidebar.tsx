@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Mail, Users, LogOut } from "lucide-react"
+import { Home, Mail, Users, LogOut, Upload } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
@@ -32,6 +32,11 @@ const items = [
         title: "Inquiries",
         url: "inquiries",
         icon: Mail,
+    },
+    {
+        title: "Blog",
+        url: "blog",
+        icon: Upload,
     },
 ]
 
