@@ -24,6 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { Eye, CalendarIcon, Tag } from "lucide-react";
+import DeleteBlogButton from "@/components/DeleteBlogButton";
 
 export default async function AllBlogs() {
     await DBconnection();
@@ -147,13 +148,18 @@ export default async function AllBlogs() {
 
                                         {/* Action */}
                                         <TableCell className="align-top text-right">
-                                            <Button asChild variant="outline" size="sm">
-                                                <Link href={`/blog/${post.slug}`}>
-                                                    <Eye className="mr-2 h-4 w-4" />
-                                                    Preview
-                                                </Link>
-                                            </Button>
+                                            <div className="flex justify-end gap-2">
+                                                <Button asChild variant="outline" size="sm">
+                                                    <Link href={`/blog/${post.slug}`}>
+                                                        <Eye className="mr-2 h-4 w-4" />
+                                                        Preview
+                                                    </Link>
+                                                </Button>
+
+                                                <DeleteBlogButton blogId={post._id.toString()} />
+                                            </div>
                                         </TableCell>
+
                                     </TableRow>
                                 ))}
 

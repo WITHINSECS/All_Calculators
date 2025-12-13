@@ -33,6 +33,36 @@ function useDebounce<T>(value: T, delay = 400) {
     return debounced;
 }
 
+/** ✅ Skeleton Card */
+function BlogCardSkeleton() {
+    return (
+        <Card className="flex h-full flex-col overflow-hidden p-0 shadow-sm">
+            {/* image skeleton */}
+            <div className="h-40 sm:h-48 md:h-52 w-full bg-muted animate-pulse" />
+
+            <CardContent className="flex-grow py-6 space-y-3">
+                {/* date row */}
+                <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded bg-muted/70 animate-pulse" />
+                    <div className="h-3 w-24 rounded bg-muted/70 animate-pulse" />
+                </div>
+
+                {/* title */}
+                <div className="h-5 w-5/6 rounded bg-muted/70 animate-pulse" />
+                <div className="h-5 w-3/5 rounded bg-muted/70 animate-pulse" />
+
+                {/* excerpt */}
+                <div className="h-4 w-full rounded bg-muted/70 animate-pulse" />
+                <div className="h-4 w-11/12 rounded bg-muted/70 animate-pulse" />
+            </CardContent>
+
+            <CardFooter className="pb-6">
+                <div className="h-9 w-full rounded bg-muted/70 animate-pulse" />
+            </CardFooter>
+        </Card>
+    );
+}
+
 export default function Page() {
     const [posts, setPosts] = useState<BlogPost[]>([]);
     const [loading, setLoading] = useState(true);
@@ -123,69 +153,69 @@ export default function Page() {
                                 </div>
                             </form>
                             {/* End Form */}
-
-                            {/* (Your SVGs remain same) */}
-                            {/* ... keep your SVG elements exactly as you already have ... */}
                         </div>
                     </div>
                 </div>
             </div>
 
             <div className="relative max-w-7xl w-full mx-auto overflow-hidden">
-                {/* Loading / Error */}
-                {loading ? (
-                    <div className="flex items-center justify-center py-20 text-muted-foreground">
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        {debouncedSearch.trim() ? "Searching posts..." : "Loading posts..."}
-                    </div>
-                ) : error ? (
+                {/* Error */}
+                {!loading && error ? (
                     <div className="py-10 text-center text-sm text-destructive">{error}</div>
                 ) : null}
 
                 {/* Posts grid */}
                 <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-y-4 lg:px-12 grid-cols-1 md:my-16 my-8">
-                    {posts.map((post) => (
-                        <div key={post._id} className="w-full sm:px-2 px-4">
-                            <Card className="flex h-full flex-col overflow-hidden p-0 shadow-sm transition-shadow hover:shadow-md">
-                                <div className="relative h-40 overflow-hidden sm:h-48 md:h-52">
-                                    <Image
-                                        src={post.imageUrl}
-                                        alt={post.title}
-                                        fill
-                                        className="object-cover transition-transform duration-300 hover:scale-105"
-                                    />
-                                    <div className="absolute top-3 left-3">
-                                        <Badge className="bg-primary hover:bg-primary/90">
-                                            {post.category}
-                                        </Badge>
+                    {/* ✅ Skeleton grid while loading */}
+                    {loading
+                        ? Array.from({ length: 6 }).map((_, i) => (
+                            <div key={i} className="w-full sm:px-2 px-4">
+                                <BlogCardSkeleton />
+                            </div>
+                        ))
+                        : posts.map((post) => (
+                            <div key={post._id} className="w-full sm:px-2 px-4">
+                                <Card className="flex h-full flex-col overflow-hidden p-0 shadow-sm transition-shadow hover:shadow-md">
+                                    <div className="relative h-40 overflow-hidden sm:h-48 md:h-52">
+                                        <Image
+                                            src={post.imageUrl}
+                                            alt={post.title}
+                                            fill
+                                            className="object-cover transition-transform duration-300 hover:scale-105"
+                                        />
+                                        <div className="absolute top-3 left-3">
+                                            <Badge className="bg-primary hover:bg-primary/90">
+                                                {post.category}
+                                            </Badge>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <CardContent className="flex-grow">
-                                    <div className="text-muted-foreground mb-2 flex items-center text-xs sm:mb-3 sm:text-sm">
-                                        <CalendarIcon className="mr-1 h-3 w-3" />
-                                        <span>{post.date}</span>
-                                    </div>
-                                    <h3 className="mb-2 line-clamp-2 text-base font-semibold sm:text-lg">
-                                        {post.title}
-                                    </h3>
-                                    <p className="text-muted-foreground line-clamp-2 text-xs sm:line-clamp-3 sm:text-sm">
-                                        {post.excerpt}
-                                    </p>
-                                </CardContent>
+                                    <CardContent className="flex-grow">
+                                        <div className="text-muted-foreground mb-2 flex items-center text-xs sm:mb-3 sm:text-sm">
+                                            <CalendarIcon className="mr-1 h-3 w-3" />
+                                            <span>{post.date}</span>
+                                        </div>
+                                        <h3 className="mb-2 line-clamp-2 text-base font-semibold sm:text-lg">
+                                            {post.title}
+                                        </h3>
+                                        <p className="text-muted-foreground line-clamp-2 text-xs sm:line-clamp-3 sm:text-sm">
+                                            {post.excerpt}
+                                        </p>
+                                    </CardContent>
 
-                                <CardFooter className="pb-6">
-                                    <Button variant="ghost" size="sm" className="w-full text-sm" asChild>
-                                        <Link href={`/blog/${post.slug}`} className="flex items-center justify-center">
-                                            Read Article
-                                            <ArrowRightIcon className="ml-1 h-4 w-4" />
-                                        </Link>
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        </div>
-                    ))}
+                                    <CardFooter className="pb-6">
+                                        <Button variant="ghost" size="sm" className="w-full text-sm" asChild>
+                                            <Link href={`/blog/${post.slug}`} className="flex items-center justify-center">
+                                                Read Article
+                                                <ArrowRightIcon className="ml-1 h-4 w-4" />
+                                            </Link>
+                                        </Button>
+                                    </CardFooter>
+                                </Card>
+                            </div>
+                        ))}
 
+                    {/* Empty state */}
                     {!loading && !error && posts.length === 0 && (
                         <div className="col-span-full text-center text-sm text-muted-foreground py-10">
                             {debouncedSearch.trim()

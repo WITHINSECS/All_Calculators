@@ -49,11 +49,11 @@ const Navbar = () => {
                             About
                         </Button>
                     </Link>
-                    <Link href="/pricing">
+                    {/* <Link href="/pricing">
                         <Button className="cursor-pointer" variant="ghost">
                             Pricing
                         </Button>
-                    </Link>
+                    </Link> */}
                     <Link href="/calculators">
                         <Button className="cursor-pointer" variant="ghost">
                             Calculators
@@ -130,11 +130,11 @@ const Navbar = () => {
                                         Calculators
                                     </Button>
                                 </Link>
-                                <Link href="/pricing">
+                                {/* <Link href="/pricing">
                                     <Button variant="ghost" className="w-full justify-start">
                                         Pricing
                                     </Button>
-                                </Link>
+                                </Link> */}
                                 <Link href="/blog">
                                     <Button variant="ghost" className="w-full justify-start">
                                         Blog
