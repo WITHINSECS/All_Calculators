@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
-import { Eye, CalendarIcon, Tag } from "lucide-react";
+import { Eye, CalendarIcon, Tag, Plus, Pencil } from "lucide-react";
 import DeleteBlogButton from "@/components/DeleteBlogButton";
 
 export default async function AllBlogs() {
@@ -38,7 +38,6 @@ export default async function AllBlogs() {
 
     return (
         <div className="w-full p-6 flex flex-col gap-6">
-            {/* Header */}
             <div className="flex items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-semibold tracking-tight">All Blogs</h1>
@@ -49,13 +48,16 @@ export default async function AllBlogs() {
 
                 <div className="flex items-center gap-2 text-sm">
                     <Badge variant="outline">Total: {total}</Badge>
-                    <Button asChild>
-                        <Link href="/dashboard/blog/new">Create Blog</Link>
+
+                    <Button asChild variant="outline">
+                        <Link href="/dashboard/blog/new">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Blog Post
+                        </Link>
                     </Button>
                 </div>
             </div>
 
-            {/* Table */}
             <Card className="shadow-sm">
                 <CardHeader className="flex flex-row items-center justify-between">
                     <div>
@@ -83,7 +85,6 @@ export default async function AllBlogs() {
                             <TableBody>
                                 {posts.map((post: any) => (
                                     <TableRow key={post._id.toString()}>
-                                        {/* Post */}
                                         <TableCell className="align-top">
                                             <div className="flex items-start gap-3">
                                                 <div className="relative h-12 w-12 overflow-hidden rounded-md border bg-muted">
@@ -114,7 +115,6 @@ export default async function AllBlogs() {
                                             </div>
                                         </TableCell>
 
-                                        {/* Status */}
                                         <TableCell className="align-top">
                                             {post.isPublished ? (
                                                 <Badge>Published</Badge>
@@ -123,7 +123,6 @@ export default async function AllBlogs() {
                                             )}
                                         </TableCell>
 
-                                        {/* Meta */}
                                         <TableCell className="align-top">
                                             <div className="flex flex-col gap-1 text-xs text-muted-foreground">
                                                 <span className="inline-flex items-center gap-1">
@@ -146,7 +145,6 @@ export default async function AllBlogs() {
                                             </div>
                                         </TableCell>
 
-                                        {/* Action */}
                                         <TableCell className="align-top text-right">
                                             <div className="flex justify-end gap-2">
                                                 <Button asChild variant="outline" size="sm">
@@ -156,10 +154,16 @@ export default async function AllBlogs() {
                                                     </Link>
                                                 </Button>
 
+                                                <Button asChild variant="outline" size="sm">
+                                                    <Link href={`/dashboard/blog/${post._id.toString()}/edit`}>
+                                                        <Pencil className="mr-2 h-4 w-4" />
+                                                        Edit
+                                                    </Link>
+                                                </Button>
+
                                                 <DeleteBlogButton blogId={post._id.toString()} />
                                             </div>
                                         </TableCell>
-
                                     </TableRow>
                                 ))}
 
