@@ -87,7 +87,7 @@ export default async function AllBlogs() {
                     <Badge variant="outline">Total: {total}</Badge>
 
                     <Button asChild variant="outline">
-                        <Link href="/dashboard/blog/new">
+                        <Link href="/dashboard/blog">
                             <Plus className="mr-2 h-4 w-4" />
                             Add Blog Post
                         </Link>
