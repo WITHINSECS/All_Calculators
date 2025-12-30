@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { unstable_noStore as noStore } from "next/cache";
 
 import { DBconnection } from "@/lib/db";
 import BlogPost from "@/models/blog";
@@ -26,13 +27,49 @@ import { Button } from "@/components/ui/button";
 import { Eye, CalendarIcon, Tag, Plus, Pencil } from "lucide-react";
 import DeleteBlogButton from "@/components/DeleteBlogButton";
 
-export default async function AllBlogs() {
-    await DBconnection();
+type BlogRow = {
+    _id: string;
+    title?: string;
+    slug?: string;
+    category?: string;
+    date?: string;
+    imageUrl?: string;
+    excerpt?: string;
+    isPublished?: boolean;
+    createdAt?: string; // ISO string
+};
 
-    const posts = await BlogPost.find()
-        .sort({ createdAt: -1 })
-        .select("title slug category date imageUrl excerpt isPublished createdAt")
-        .lean();
+export default async function AllBlogs() {
+    // Ensure fresh data on Vercel (prevents caching surprises)
+    noStore();
+
+    let posts: BlogRow[] = [];
+
+    try {
+        await DBconnection();
+
+        const rawPosts = await BlogPost.find()
+            .sort({ createdAt: -1 })
+            .select("title slug category date imageUrl excerpt isPublished createdAt")
+            .lean();
+
+        posts = (rawPosts || []).map((p: any) => ({
+            _id: p?._id?.toString?.() ?? "",
+            title: p?.title ?? "",
+            slug: p?.slug ?? "",
+            category: p?.category ?? "",
+            date: p?.date ?? "",
+            imageUrl: p?.imageUrl ?? "",
+            excerpt: p?.excerpt ?? "",
+            isPublished: Boolean(p?.isPublished),
+            createdAt: p?.createdAt ? new Date(p.createdAt).toISOString() : "",
+        }));
+    } catch (err) {
+        // In production, failing DB connection can crash the page.
+        // We fail gracefully and show "No blog posts yet."
+        console.error("AllBlogs page error:", err);
+        posts = [];
+    }
 
     const total = posts.length;
 
@@ -83,15 +120,15 @@ export default async function AllBlogs() {
                             </TableHeader>
 
                             <TableBody>
-                                {posts.map((post: any) => (
-                                    <TableRow key={post._id.toString()}>
+                                {posts.map((post) => (
+                                    <TableRow key={post._id}>
                                         <TableCell className="align-top">
                                             <div className="flex items-start gap-3">
                                                 <div className="relative h-12 w-12 overflow-hidden rounded-md border bg-muted">
                                                     {post.imageUrl ? (
                                                         <Image
                                                             src={post.imageUrl}
-                                                            alt={post.title}
+                                                            alt={post.title || "Blog image"}
                                                             fill
                                                             className="object-cover"
                                                             sizes="48px"
@@ -101,10 +138,10 @@ export default async function AllBlogs() {
 
                                                 <div className="flex flex-col gap-1">
                                                     <p className="text-sm font-medium line-clamp-1">
-                                                        {post.title}
+                                                        {post.title || "-"}
                                                     </p>
                                                     <p className="text-xs text-muted-foreground line-clamp-1">
-                                                        /blog/{post.slug}
+                                                        /blog/{post.slug || "-"}
                                                     </p>
                                                     {post.excerpt ? (
                                                         <p className="text-xs text-muted-foreground line-clamp-1 max-w-md">
@@ -155,13 +192,13 @@ export default async function AllBlogs() {
                                                 </Button>
 
                                                 <Button asChild variant="outline" size="sm">
-                                                    <Link href={`/dashboard/blog/${post._id.toString()}/edit`}>
+                                                    <Link href={`/dashboard/blog/${post._id}/edit`}>
                                                         <Pencil className="mr-2 h-4 w-4" />
                                                         Edit
                                                     </Link>
                                                 </Button>
 
-                                                <DeleteBlogButton blogId={post._id.toString()} />
+                                                <DeleteBlogButton blogId={post._id} />
                                             </div>
                                         </TableCell>
                                     </TableRow>
