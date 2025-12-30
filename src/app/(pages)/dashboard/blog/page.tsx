@@ -156,7 +156,7 @@ export default function NewBlogPostPage() {
 
                 <div className="flex items-center gap-2">
                     <Badge variant="outline">Dashboard</Badge>
-                    <Badge>Create</Badge>
+                    <Badge>Create Blog Post</Badge>
                 </div>
             </div>
 
