@@ -295,7 +295,7 @@ const page = () => {
                         variant="secondary"
                         className="group mt-8 font-medium"
                     >
-                        <Link href="#">
+                        <Link href="/calculators">
                             See All
                             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                         </Link>

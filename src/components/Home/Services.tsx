@@ -48,7 +48,7 @@ export default function Services() {
                 {/* Section header */}
                 <div className="mb-12 text-center md:mb-16">
                     <h2 className="text-3xl font-semibold tracking-tight">
-                        My Services
+                        OUR SERVICES
                     </h2>
                     <p className="text-muted-foreground mx-auto mt-4 max-w-2xl text-lg">
                         Offering a range of reliable and tailored services to meet your personal or business needs with efficiency and quality.
@@ -61,7 +61,7 @@ export default function Services() {
                         {services.map((service) => (
                             <Link
                                 key={service.id}
-                                href={service.link}
+                                href={"/calculators"}
                                 className="group hover:border-primary/20 hover:bg-muted/50 flex items-center gap-4 rounded-lg border border-transparent p-3 transition-all duration-300"
                             >
                                 <div className="bg-primary/10 rounded-full p-3">

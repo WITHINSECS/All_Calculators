@@ -208,10 +208,14 @@ const Page = () => {
                     </div>
                     {/* Buttons */}
                     <div className="mt-8 flex gap-3 lg:justify-start justify-center">
-                        <Button size={"lg"}>Get started</Button>
-                        <Button size={"lg"} variant={"outline"}>
-                            Learn more
-                        </Button>
+                        <Link href={"/calculators"}>
+                            <Button size={"lg"}>Get started</Button>
+                        </Link>
+                        <Link href={"/about"}>
+                            <Button size={"lg"} variant={"outline"}>
+                                Learn more
+                            </Button>
+                        </Link>
                     </div>
 
                     <div className="mt-6">
@@ -236,7 +240,9 @@ const Page = () => {
                                         </p>
                                     </CardContent>
                                     <CardFooter className="flex justify-end">
-                                        <Button>Explore</Button>
+                                        <Link href={"/calculators"}>
+                                            <Button>Explore</Button>
+                                        </Link>
                                     </CardFooter>
                                 </Card>
                             </div>

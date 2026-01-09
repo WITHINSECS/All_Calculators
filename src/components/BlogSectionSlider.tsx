@@ -203,7 +203,7 @@ export default function BlogSectionSlider() {
                 <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="max-w-md space-y-1">
                         <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-                            Latest Marketing Articles
+                            Latest Articles
                         </h2>
                         <p className="text-muted-foreground text-sm md:text-base">
                             Stay updated with our most recent insights
