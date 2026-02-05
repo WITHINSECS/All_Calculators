@@ -2,8 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    // keep if you want, but not required when using remotePatterns
-    // domains: ["images.unsplash.com", "plus.unsplash.com"],
 
     remotePatterns: [
       {
