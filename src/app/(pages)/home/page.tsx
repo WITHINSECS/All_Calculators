@@ -12,6 +12,8 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import BlogSectionSlider from '@/components/BlogSectionSlider'
 import { siteConfig } from '@/lib/siteConfig'
+import AdsenseAd from '@/components/AdsenseAd'
+import { ADSENSE_SLOTS } from '@/config/adsense'
 
 const sciButtons = [
     ["sin", "cos", "tan", "Deg", "Rad"],
@@ -277,6 +279,9 @@ const Page = () => {
                 </div>
             </div>
 
+            <AdsenseAd slot={ADSENSE_SLOTS.homeTop} />
+
+
             <div className="md:mt-20 mt-10">
                 <Services />
             </div>
@@ -381,6 +386,9 @@ const Page = () => {
             <div className="md:mt-20 mt-10">
                 <BlogSectionSlider />
             </div>
+
+            <AdsenseAd slot={ADSENSE_SLOTS.homeBottom} />
+
 
             <div className="bg-primary md:mt-20 mt-10 w-full py-12 md:py-16">
                 <div className="container mx-auto px-4 text-center">

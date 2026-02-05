@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { CalendarIcon, ArrowRightIcon, Loader2, SearchIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import AdsenseAd from "@/components/AdsenseAd";
+import { ADSENSE_SLOTS } from "@/config/adsense";
 
 interface BlogPost {
     _id: string;
@@ -23,7 +25,6 @@ interface BlogPost {
     excerpt: string;
 }
 
-// small debounce hook (no extra library)
 function useDebounce<T>(value: T, delay = 400) {
     const [debounced, setDebounced] = useState(value);
     useEffect(() => {
@@ -158,6 +159,8 @@ export default function Page() {
                 </div>
             </div>
 
+            <AdsenseAd slot={ADSENSE_SLOTS.blogTop} />
+
             <div className="relative max-w-7xl w-full mx-auto overflow-hidden">
                 {/* Error */}
                 {!loading && error ? (
@@ -214,6 +217,8 @@ export default function Page() {
                                 </Card>
                             </div>
                         ))}
+
+                    <AdsenseAd slot={ADSENSE_SLOTS.blogBottom} />
 
                     {/* Empty state */}
                     {!loading && !error && posts.length === 0 && (
