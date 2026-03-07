@@ -4,6 +4,8 @@ import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "sonner";
 
+import { siteUrl } from "@/lib/site";
+
 const poppins = Poppins({
   subsets: ["latin"],
   variable: "--font-poppins",
@@ -12,8 +14,12 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Calculator App",
   description: "Top Best calculators",
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export default function RootLayout({

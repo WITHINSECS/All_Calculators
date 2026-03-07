@@ -1,10 +1,9 @@
-"use client"
+"use client";
 
-import { Home, Mail, Users, LogOut, Upload, Images } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { authClient } from "@/lib/auth-client"
+import { FilePenLine, Home, LayoutDashboard, Mail, Newspaper } from "lucide-react";
+import Link from "next/link";
 
+import DashboardLogoutButton from "@/components/DashboardLogoutButton";
 import {
     Sidebar,
     SidebarContent,
@@ -14,19 +13,13 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { Button } from "./ui/button"
+} from "@/components/ui/sidebar";
 
 const items = [
     {
         title: "Home",
         url: "home",
-        icon: Home,
-    },
-    {
-        title: "Users",
-        url: "users",
-        icon: Users,
+        icon: LayoutDashboard,
     },
     {
         title: "Inquiries",
@@ -34,35 +27,23 @@ const items = [
         icon: Mail,
     },
     {
-        title: "Blog",
+        title: "Create Blog",
         url: "blog",
-        icon: Upload,
+        icon: FilePenLine,
     },
     {
-        title: "All Blog",
+        title: "All Blogs",
         url: "allblogs",
-        icon: Images,
+        icon: Newspaper,
     },
-]
+];
 
 export function DashbaordSidebar() {
-    const router = useRouter()
-
-    const handleLogout = async () => {
-        try {
-            await authClient.signOut()       
-            router.push("/login")            
-        } catch (err) {
-            console.error("Error logging out:", err)
-        }
-    }
-
     return (
         <Sidebar>
-            {/* make content a flex column so we can push logout to bottom */}
             <SidebarContent className="flex h-full flex-col">
                 <SidebarGroup>
-                    <SidebarGroupLabel>Application</SidebarGroupLabel>
+                    <SidebarGroupLabel>Dashboard</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => (
@@ -79,25 +60,22 @@ export function DashbaordSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                {/* 🔻 Logout at the bottom */}
                 <div className="mt-auto p-2">
-                    <SidebarMenu>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton asChild>
-                                <Button
-                                    variant="destructive"
-                                    type="button"
-                                    onClick={handleLogout}
-                                    className="flex w-full items-center gap-2 hover:bg-red-300 transition-all"
-                                >
-                                    <LogOut className="h-4 w-4" />
-                                    <span>Logout</span>
-                                </Button>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    </SidebarMenu>
+                    <div className="space-y-2">
+                        <DashboardLogoutButton />
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton asChild>
+                                    <Link href="/">
+                                        <Home className="h-4 w-4" />
+                                        <span>Back to Site</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </div>
                 </div>
             </SidebarContent>
         </Sidebar>
-    )
+    );
 }

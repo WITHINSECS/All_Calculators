@@ -1,9 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Calculator, Users, Activity, TrendingUp } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { Calculator, FilePenLine, Newspaper, TrendingUp } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
@@ -12,30 +15,28 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
     ChartConfig,
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart";
+import { Progress } from "@/components/ui/progress";
 
 type DashboardStats = {
-    totalUsers: number;
     totalInquiries: number;
+    totalBlogs: number;
+    publishedBlogs: number;
+    draftBlogs: number;
 };
 
-type StatsApiResponse = {
+type StatsApiResponse = DashboardStats & {
     success: boolean;
-    totalUsers: number;
-    totalInquiries: number;
     message?: string;
 };
 
 type ActivityPoint = {
-    period: string;   // "YYYY-MM"
-    users: number;
+    period: string;
     inquiries: number;
 };
 
@@ -45,18 +46,14 @@ type ActivityApiResponse = {
     message?: string;
 };
 
-const usersChartConfig = {
-    users: {
-        label: "New users",
-        color: "var(--chart-1)",
-    },
+const inquiriesChartConfig = {
     inquiries: {
         label: "Inquiries",
         color: "var(--chart-2)",
     },
 } satisfies ChartConfig;
 
-function UsersJoinedChart({
+function InquiriesChart({
     data,
     loading,
 }: {
@@ -64,16 +61,14 @@ function UsersJoinedChart({
     loading: boolean;
 }) {
     const chartData = data.map((item) => {
-        // item.period = "YYYY-MM"
-        const d = new Date(`${item.period}-01T00:00:00Z`);
-        const label = d.toLocaleDateString("en-US", {
+        const date = new Date(`${item.period}-01T00:00:00Z`);
+        const label = date.toLocaleDateString("en-US", {
             month: "short",
             year: "2-digit",
-        }); // e.g. "Dec 25"
+        });
 
         return {
             label,
-            users: item.users,
             inquiries: item.inquiries,
         };
     });
@@ -81,18 +76,18 @@ function UsersJoinedChart({
     return (
         <Card className="shadow-sm">
             <CardHeader>
-                <CardTitle>Activity (last 6 months)</CardTitle>
-                <CardDescription>New users & inquiries per month</CardDescription>
+                <CardTitle>Inquiry Activity</CardTitle>
+                <CardDescription>Contact form submissions over the last 6 months</CardDescription>
             </CardHeader>
             <CardContent>
                 {loading ? (
-                    <p className="text-sm text-muted-foreground">Loading chart…</p>
+                    <p className="text-sm text-muted-foreground">Loading chart...</p>
                 ) : chartData.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
-                        No activity recorded in the selected period.
+                        No inquiry activity recorded in the selected period.
                     </p>
                 ) : (
-                    <ChartContainer config={usersChartConfig}>
+                    <ChartContainer config={inquiriesChartConfig}>
                         <BarChart accessibilityLayer data={chartData}>
                             <CartesianGrid vertical={false} />
                             <XAxis
@@ -101,16 +96,8 @@ function UsersJoinedChart({
                                 tickMargin={10}
                                 axisLine={false}
                             />
-                            <ChartTooltip
-                                cursor={false}
-                                content={<ChartTooltipContent />}
-                            />
-                            <Bar dataKey="users" fill="var(--color-users)" radius={4} />
-                            <Bar
-                                dataKey="inquiries"
-                                fill="var(--color-inquiries)"
-                                radius={4}
-                            />
+                            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                            <Bar dataKey="inquiries" fill="var(--color-inquiries)" radius={4} />
                         </BarChart>
                     </ChartContainer>
                 )}
@@ -118,16 +105,15 @@ function UsersJoinedChart({
             <CardFooter className="flex-col items-start gap-2 text-sm">
                 <div className="flex gap-2 leading-none font-medium">
                     <TrendingUp className="h-4 w-4" />
-                    Live overview of recent platform activity
+                    Live overview of contact activity
                 </div>
                 <div className="text-muted-foreground leading-none">
-                    Showing monthly new users and inquiries from your database.
+                    Showing monthly inquiry submissions from your database.
                 </div>
             </CardFooter>
         </Card>
     );
 }
-
 
 export default function Dashboard() {
     const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -146,17 +132,18 @@ export default function Dashboard() {
 
                 if (!res.ok || !data.success) {
                     setStatsError(data.message ?? "Failed to load dashboard stats.");
-                    setStatsLoading(false);
                     return;
                 }
 
                 setStats({
-                    totalUsers: data.totalUsers,
                     totalInquiries: data.totalInquiries,
+                    totalBlogs: data.totalBlogs,
+                    publishedBlogs: data.publishedBlogs,
+                    draftBlogs: data.draftBlogs,
                 });
                 setStatsError(null);
-            } catch (err: unknown) {
-                console.error("Dashboard stats fetch error:", err);
+            } catch (error: unknown) {
+                console.error("Dashboard stats fetch error:", error);
                 setStatsError("Failed to load dashboard stats.");
             } finally {
                 setStatsLoading(false);
@@ -170,14 +157,13 @@ export default function Dashboard() {
 
                 if (!res.ok || !data.success) {
                     setActivityError(data.message ?? "Failed to load activity data.");
-                    setActivityLoading(false);
                     return;
                 }
 
                 setActivity(data.data);
                 setActivityError(null);
-            } catch (err: unknown) {
-                console.error("Dashboard activity fetch error:", err);
+            } catch (error: unknown) {
+                console.error("Dashboard activity fetch error:", error);
                 setActivityError("Failed to load activity data.");
             } finally {
                 setActivityLoading(false);
@@ -188,56 +174,31 @@ export default function Dashboard() {
         void fetchActivity();
     }, []);
 
-    const totalUsers = stats?.totalUsers ?? 0;
     const totalInquiries = stats?.totalInquiries ?? 0;
+    const totalBlogs = stats?.totalBlogs ?? 0;
+    const publishedBlogs = stats?.publishedBlogs ?? 0;
+    const draftBlogs = stats?.draftBlogs ?? 0;
 
     return (
-        <div className="flex flex-col gap-6 p-6 w-full">
-            {/* Header */}
+        <div className="flex w-full flex-col gap-6 p-6">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold tracking-tight">
-                        Calculator Analytics
+                        Calculator Dashboard
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        Overview of usage and performance across all calculators.
+                        Admin-only overview for blog publishing and inquiry activity.
                     </p>
                 </div>
                 <Badge variant="outline" className="text-xs">
-                    {statsLoading || activityLoading ? "Loading…" : "Live · Updated"}
+                    {statsLoading || activityLoading ? "Loading..." : "Live | Updated"}
                 </Badge>
             </div>
 
-            {statsError && (
-                <p className="text-sm text-red-500">{statsError}</p>
-            )}
-            {activityError && (
-                <p className="text-sm text-red-500">{activityError}</p>
-            )}
+            {statsError ? <p className="text-sm text-red-500">{statsError}</p> : null}
+            {activityError ? <p className="text-sm text-red-500">{activityError}</p> : null}
 
-            {/* Top 3 Analytics Cards */}
             <div className="grid gap-4 md:grid-cols-3">
-                {/* 1) Total Users */}
-                <Card className="shadow-sm">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                        <Users className="h-5 w-5 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            {statsLoading ? "…" : totalUsers.toLocaleString()}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                            Total registered users from Better Auth
-                        </p>
-                        <Progress value={100} className="mt-3" />
-                        <p className="text-[11px] text-muted-foreground mt-1">
-                            User stats loaded from database
-                        </p>
-                    </CardContent>
-                </Card>
-
-                {/* 2) Total Form Inquiries */}
                 <Card className="shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">
@@ -247,41 +208,91 @@ export default function Dashboard() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                            {statsLoading ? "…" : totalInquiries.toLocaleString()}
+                            {statsLoading ? "..." : totalInquiries.toLocaleString()}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="mt-1 text-xs text-muted-foreground">
                             All inquiries from your contact form
                         </p>
                         <Progress value={100} className="mt-3" />
-                        <p className="text-[11px] text-muted-foreground mt-1">
+                        <p className="mt-1 text-[11px] text-muted-foreground">
                             Stored in the inquiries collection
                         </p>
                     </CardContent>
                 </Card>
 
-                {/* 3) Calculator Health */}
                 <Card className="shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">
-                            Calculator Health
+                            Published Blog Posts
                         </CardTitle>
-                        <Activity className="h-5 w-5 text-muted-foreground" />
+                        <Newspaper className="h-5 w-5 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">100%</div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                            All calculators are operational
+                        <div className="text-2xl font-bold">
+                            {statsLoading ? "..." : publishedBlogs.toLocaleString()}
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                            Posts currently visible on the public blog
                         </p>
-                        <Progress value={100} className="mt-3" />
-                        <p className="text-[11px] text-muted-foreground mt-1">
-                            No issues detected across active calculators
+                        <Progress
+                            value={totalBlogs > 0 ? (publishedBlogs / totalBlogs) * 100 : 0}
+                            className="mt-3"
+                        />
+                        <p className="mt-1 text-[11px] text-muted-foreground">
+                            {statsLoading
+                                ? "Loading blog counts..."
+                                : `${totalBlogs.toLocaleString()} total articles in the CMS`}
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card className="shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Draft Posts</CardTitle>
+                        <FilePenLine className="h-5 w-5 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">
+                            {statsLoading ? "..." : draftBlogs.toLocaleString()}
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                            Unpublished articles waiting in the dashboard
+                        </p>
+                        <Progress
+                            value={totalBlogs > 0 ? (draftBlogs / totalBlogs) * 100 : 0}
+                            className="mt-3"
+                        />
+                        <p className="mt-1 text-[11px] text-muted-foreground">
+                            Create, edit, and publish posts from the blog panel
                         </p>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Activity chart (real data) */}
-            <UsersJoinedChart data={activity} loading={activityLoading} />
+            <Card className="shadow-sm">
+                <CardHeader>
+                    <CardTitle>Blog Quick Actions</CardTitle>
+                    <CardDescription>
+                        Jump straight into writing or managing content.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-3">
+                    <Button asChild>
+                        <Link href="/dashboard/blog">
+                            <FilePenLine className="mr-2 h-4 w-4" />
+                            Create Blog Post
+                        </Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                        <Link href="/dashboard/allblogs">
+                            <Newspaper className="mr-2 h-4 w-4" />
+                            Manage All Blogs
+                        </Link>
+                    </Button>
+                </CardContent>
+            </Card>
+
+            <InquiriesChart data={activity} loading={activityLoading} />
         </div>
     );
 }

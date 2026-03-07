@@ -3,9 +3,8 @@ import Inquiry from "@/models/Inquiry";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
-    await DBconnection(); // ensure DB is connected
-
     try {
+        await DBconnection(); // ensure DB is connected
         const body = await request.json();
         const { firstName, lastName, email, phone, message } = body;
 
@@ -37,10 +36,10 @@ export async function POST(request: NextRequest) {
             { status: 201 }
         );
     } catch (error: unknown) {
-        console.error("Create inquiry error:", error);
-
         const errorMessage =
             error instanceof Error ? error.message : "Unknown error";
+        console.error("Create inquiry error:", errorMessage);
+        const status = errorMessage.includes("MongoDB connection failed") ? 503 : 500;
 
         return NextResponse.json(
             {
@@ -48,7 +47,7 @@ export async function POST(request: NextRequest) {
                 success: false,
                 error: errorMessage,
             },
-            { status: 500 }
+            { status }
         );
     }
 }

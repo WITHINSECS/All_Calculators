@@ -1,100 +1,84 @@
 import { NextResponse } from "next/server";
-import AuthUser from "@/models/AuthUser";
+
+import { requireAdminApiSession } from "@/lib/admin-guard";
 import Inquiry from "@/models/Inquiry";
 import { DBconnection } from "@/lib/db";
 
 type ActivityPoint = {
-  period: string;   // e.g. "2024-07"
-  users: number;    // new users that month
-  inquiries: number;// inquiries that month
+    period: string;
+    inquiries: number;
 };
 
 type ActivityApiResponse = {
-  success: boolean;
-  data: ActivityPoint[];
-  message?: string;
+    success: boolean;
+    data: ActivityPoint[];
+    message?: string;
 };
 
-
-
 export async function GET() {
-  await DBconnection();
+    try {
+        const auth = await requireAdminApiSession();
 
-  try {
-    const months = 6;
-    const now = new Date();
+        if (auth.response) {
+            return auth.response;
+        }
 
-    // first day of the earliest month we want
-    const from = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
+        await DBconnection();
 
-    const [userAgg, inquiryAgg] = await Promise.all([
-      AuthUser.aggregate([
-        { $match: { createdAt: { $gte: from } } },
-        {
-          $group: {
-            _id: {
-              $dateToString: { format: "%Y-%m", date: "$createdAt" }, // "2024-07"
+        const months = 6;
+        const now = new Date();
+        const from = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
+
+        const inquiryAgg = await Inquiry.aggregate([
+            { $match: { createdAt: { $gte: from } } },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: { format: "%Y-%m", date: "$createdAt" },
+                    },
+                    count: { $sum: 1 },
+                },
             },
-            count: { $sum: 1 },
-          },
-        },
-        { $sort: { _id: 1 } },
-      ]),
-      Inquiry.aggregate([
-        { $match: { createdAt: { $gte: from } } },
-        {
-          $group: {
-            _id: {
-              $dateToString: { format: "%Y-%m", date: "$createdAt" },
-            },
-            count: { $sum: 1 },
-          },
-        },
-        { $sort: { _id: 1 } },
-      ]),
-    ]);
+            { $sort: { _id: 1 } },
+        ]);
 
-    const usersMap = new Map<string, number>();
-    (userAgg as { _id: string; count: number }[]).forEach((row) => {
-      usersMap.set(row._id, row.count);
-    });
+        const inquiriesMap = new Map<string, number>();
+        (inquiryAgg as { _id: string; count: number }[]).forEach((row) => {
+            inquiriesMap.set(row._id, row.count);
+        });
 
-    const inquiriesMap = new Map<string, number>();
-    (inquiryAgg as { _id: string; count: number }[]).forEach((row) => {
-      inquiriesMap.set(row._id, row.count);
-    });
+        const data: ActivityPoint[] = [];
 
-    // Build continuous months (even if some months have 0 docs)
-    const data: ActivityPoint[] = [];
-    for (let i = months - 1; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0"); // 01-12
-      const key = `${year}-${month}`;
+        for (let i = months - 1; i >= 0; i--) {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const key = `${year}-${month}`;
 
-      data.push({
-        period: key,
-        users: usersMap.get(key) ?? 0,
-        inquiries: inquiriesMap.get(key) ?? 0,
-      });
+            data.push({
+                period: key,
+                inquiries: inquiriesMap.get(key) ?? 0,
+            });
+        }
+
+        const response: ActivityApiResponse = {
+            success: true,
+            data,
+        };
+
+        return NextResponse.json(response, { status: 200 });
+    } catch (error: unknown) {
+        const errorMessage =
+            error instanceof Error ? error.message : "Unknown error fetching activity";
+        console.error("Error fetching activity data:", errorMessage);
+
+        const response: ActivityApiResponse = {
+            success: false,
+            data: [],
+            message: errorMessage,
+        };
+        const status = response.message?.includes("MongoDB connection failed") ? 503 : 500;
+
+        return NextResponse.json(response, { status });
     }
-
-    const res: ActivityApiResponse = {
-      success: true,
-      data,
-    };
-
-    return NextResponse.json(res, { status: 200 });
-  } catch (error: unknown) {
-    console.error("Error fetching activity data:", error);
-
-    const res: ActivityApiResponse = {
-      success: false,
-      data: [],
-      message:
-        error instanceof Error ? error.message : "Unknown error fetching activity",
-    };
-
-    return NextResponse.json(res, { status: 500 });
-  }
 }

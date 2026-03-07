@@ -1,43 +1,32 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { Menu } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
     Sheet,
     SheetContent,
-    SheetTrigger,
-    SheetHeader,
     SheetDescription,
+    SheetHeader,
+    SheetTrigger,
 } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
-import { siteConfig } from "@/lib/siteConfig";
-import { authClient } from "@/lib/auth-client";
-import Image from "next/image";
 
 const Navbar = () => {
-    const { data, isPending } = authClient.useSession();
-
-    const user = data?.user; // ✅ user.role is now typed
-
-    const getStartedHref =
-        user?.role === "admin" ? "/dashboard/home" : "/calculators";
-
     return (
         <header className="w-full border-b">
             <div className="container lg:px-20 mx-auto flex h-16 items-center justify-between px-4">
-                {/* Left: Logo */}
                 <Link href="/">
                     <Image
-                        src={"/logo.png"}
+                        src="/logo.png"
                         width={500}
                         height={500}
-                        alt="image"
+                        alt="logo"
                         className="w-full md:h-14 h-10"
                     />
                 </Link>
 
-                {/* Desktop Nav */}
                 <nav className="hidden md:flex gap-1">
                     <Link href="/">
                         <Button className="cursor-pointer" variant="ghost">
@@ -49,11 +38,6 @@ const Navbar = () => {
                             About
                         </Button>
                     </Link>
-                    {/* <Link href="/pricing">
-                        <Button className="cursor-pointer" variant="ghost">
-                            Pricing
-                        </Button>
-                    </Link> */}
                     <Link href="/calculators">
                         <Button className="cursor-pointer" variant="ghost">
                             Calculators
@@ -71,31 +55,14 @@ const Navbar = () => {
                     </Link>
                 </nav>
 
-                {/* Desktop auth / CTA */}
                 <div className="md:flex hidden items-center gap-2">
-                    {!isPending && (
-                        <>
-                            {user ? (
-                                <Link href={getStartedHref}>
-                                    <Button className="cursor-pointer">Get Started</Button>
-                                </Link>
-                            ) : (
-                                <div className="items-center gap-2 flex">
-                                    <Link href={"/signup"}>
-                                        <Button className="cursor-pointer">Sign up</Button>
-                                    </Link>
-                                    <Link href={"/login"}>
-                                        <Button className="cursor-pointer" variant={"outline"}>
-                                            Login
-                                        </Button>
-                                    </Link>
-                                </div>
-                            )}
-                        </>
-                    )}
+                    <Link href="/calculators">
+                        <Button className="cursor-pointer" variant="outline">
+                            Explore
+                        </Button>
+                    </Link>
                 </div>
 
-                {/* Mobile Nav (Sheet Menu) */}
                 <div className="md:hidden">
                     <Sheet>
                         <SheetTrigger asChild>
@@ -104,17 +71,17 @@ const Navbar = () => {
                         <SheetContent side="left">
                             <SheetHeader>
                                 <Image
-                                    src={"/logo.png"}
+                                    src="/logo.png"
                                     width={100}
                                     height={100}
-                                    alt="image"
+                                    alt="logo"
                                     className="w-40 h-8"
                                 />
                                 <SheetDescription>
                                     Navigate through the site using the menu below.
                                 </SheetDescription>
                             </SheetHeader>
-                            <nav className="flex flex-col p-4 gap-4 ">
+                            <nav className="flex flex-col p-4 gap-4">
                                 <Link href="/">
                                     <Button variant="ghost" className="w-full justify-start">
                                         Home
@@ -130,11 +97,6 @@ const Navbar = () => {
                                         Calculators
                                     </Button>
                                 </Link>
-                                {/* <Link href="/pricing">
-                                    <Button variant="ghost" className="w-full justify-start">
-                                        Pricing
-                                    </Button>
-                                </Link> */}
                                 <Link href="/blog">
                                     <Button variant="ghost" className="w-full justify-start">
                                         Blog
@@ -145,34 +107,6 @@ const Navbar = () => {
                                         Contact
                                     </Button>
                                 </Link>
-
-                                {!isPending && (
-                                    <>
-                                        {user ? (
-                                            <Link href={getStartedHref}>
-                                                <Button className="cursor-pointer w-full">
-                                                    Get Started
-                                                </Button>
-                                            </Link>
-                                        ) : (
-                                            <>
-                                                <Link href={"/signup"}>
-                                                    <Button className="cursor-pointer w-full">
-                                                        Sign up
-                                                    </Button>
-                                                </Link>
-                                                <Link href={"/login"}>
-                                                    <Button
-                                                        className="cursor-pointer w-full"
-                                                        variant={"outline"}
-                                                    >
-                                                        Login
-                                                    </Button>
-                                                </Link>
-                                            </>
-                                        )}
-                                    </>
-                                )}
                             </nav>
                         </SheetContent>
                     </Sheet>

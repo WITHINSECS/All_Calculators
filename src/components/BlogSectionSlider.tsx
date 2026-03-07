@@ -1,39 +1,26 @@
 "use client";
 
-import { useState, useRef, useEffect, TouchEvent, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import axios from "axios";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
+    ArrowRightIcon,
     CalendarIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
-    ArrowRightIcon,
-    Loader2,
 } from "lucide-react";
 
-interface BlogPost {
-    _id: string;
-    title: string;
-    slug: string;
-    category: string;
-    date: string;
-    imageUrl: string;
-    excerpt: string;
-}
+import type { BlogPostRecord } from "@/lib/blog-shared";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 export default function BlogSectionSlider() {
-    const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+    const [blogPosts, setBlogPosts] = useState<BlogPostRecord[]>([]);
     const [loading, setLoading] = useState(true);
-
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isSwiping, setIsSwiping] = useState(false);
     const [startX, setStartX] = useState(0);
-
     const [screenSize, setScreenSize] = useState({
         isMobile: false,
         isTablet: false,
@@ -41,42 +28,49 @@ export default function BlogSectionSlider() {
     });
 
     const sliderRef = useRef<HTMLDivElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
 
-    // ✅ Fetch blogs from DB (latest 6)
     useEffect(() => {
-        const fetchBlogs = async () => {
+        let cancelled = false;
+
+        const fetchPosts = async () => {
             try {
                 setLoading(true);
-                const res = await axios.get("/api/admin/blog");
-                if (res.data?.success) {
-                    const posts: BlogPost[] = res.data.posts || [];
-                    setBlogPosts(posts.slice(0, 6));
-                } else {
-                    setBlogPosts([]);
+
+                const response = await fetch("/api/blog?limit=6", {
+                    cache: "no-store",
+                });
+                const result = await response.json();
+
+                if (!response.ok || !result.success || cancelled) {
+                    return;
                 }
-            } catch (e) {
-                console.error("Failed to fetch blogs:", e);
-                setBlogPosts([]);
+
+                setBlogPosts(result.posts ?? []);
+            } catch (error) {
+                console.error("Failed to load blog posts for home page:", error);
             } finally {
-                setLoading(false);
+                if (!cancelled) {
+                    setLoading(false);
+                }
             }
         };
 
-        fetchBlogs();
+        void fetchPosts();
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
-    // Initialize and update screen size
     useEffect(() => {
         const updateScreenSize = () => {
-            if (typeof window !== "undefined") {
-                const width = window.innerWidth;
-                setScreenSize({
-                    isMobile: width < 640,
-                    isTablet: width >= 640 && width < 1024,
-                    isDesktop: width >= 1024,
-                });
-            }
+            const width = window.innerWidth;
+
+            setScreenSize({
+                isMobile: width < 640,
+                isTablet: width >= 640 && width < 1024,
+                isDesktop: width >= 1024,
+            });
         };
 
         updateScreenSize();
@@ -85,132 +79,120 @@ export default function BlogSectionSlider() {
         return () => window.removeEventListener("resize", updateScreenSize);
     }, []);
 
-    // Calculate visible items based on screen size
     const visibleItems = screenSize.isDesktop ? 3 : screenSize.isTablet ? 2 : 1;
 
-    // maxIndex depends on fetched posts
     const maxIndex = useMemo(() => {
         return Math.max(0, blogPosts.length - visibleItems);
     }, [blogPosts.length, visibleItems]);
 
-    // Ensure current index is valid when screen size or data changes
     useEffect(() => {
         setCurrentIndex((prev) => Math.min(prev, maxIndex));
     }, [maxIndex]);
 
-    // Handle navigation
-    function handlePrevious() {
-        setCurrentIndex((prev) => Math.max(0, prev - 1));
-    }
-
-    function handleNext() {
-        setCurrentIndex((prev) => Math.min(maxIndex, prev + 1));
-    }
-
-    // Scroll to current index
     useEffect(() => {
-        if (!sliderRef.current) return;
+        if (!sliderRef.current) {
+            return;
+        }
 
         const scrollToIndex = () => {
-            if (!sliderRef.current) return;
+            if (!sliderRef.current) {
+                return;
+            }
 
             const cardWidth =
                 (sliderRef.current.querySelector(".carousel-item") as HTMLElement | null)
-                    ?.clientWidth || 0;
-
-            const scrollLeft = cardWidth * currentIndex;
+                    ?.clientWidth ?? 0;
 
             sliderRef.current.scrollTo({
-                left: scrollLeft,
+                left: cardWidth * currentIndex,
                 behavior: "smooth",
             });
         };
 
-        const timeoutId = setTimeout(scrollToIndex, 50);
-        return () => clearTimeout(timeoutId);
+        const timeoutId = window.setTimeout(scrollToIndex, 50);
+        return () => window.clearTimeout(timeoutId);
     }, [currentIndex, screenSize, blogPosts.length]);
 
-    // Touch handlers
-    const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
-        setIsSwiping(true);
-        setStartX(e.touches[0].clientX);
+    const handlePrevious = () => {
+        setCurrentIndex((prev) => Math.max(0, prev - 1));
     };
 
-    const handleTouchMove = (e: TouchEvent<HTMLDivElement>) => {
-        if (!isSwiping) return;
+    const handleNext = () => {
+        setCurrentIndex((prev) => Math.min(maxIndex, prev + 1));
+    };
 
-        const currentX = e.touches[0].clientX;
-        const diff = startX - currentX;
+    const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+        setIsSwiping(true);
+        setStartX(event.touches[0].clientX);
+    };
+
+    const handleTouchMove = (event: TouchEvent<HTMLDivElement>) => {
+        if (!isSwiping) {
+            return;
+        }
+
+        const diff = startX - event.touches[0].clientX;
 
         if (Math.abs(diff) > 5) {
-            e.preventDefault();
+            event.preventDefault();
         }
     };
 
-    const handleTouchEnd = (e: TouchEvent<HTMLDivElement>) => {
-        if (!isSwiping) return;
+    const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+        if (!isSwiping) {
+            return;
+        }
 
-        const currentX = e.changedTouches[0].clientX;
-        const diff = startX - currentX;
+        const diff = startX - event.changedTouches[0].clientX;
 
         if (Math.abs(diff) > 50) {
-            if (diff > 0 && currentIndex < maxIndex) handleNext();
-            if (diff < 0 && currentIndex > 0) handlePrevious();
+            if (diff > 0 && currentIndex < maxIndex) {
+                handleNext();
+            }
+
+            if (diff < 0 && currentIndex > 0) {
+                handlePrevious();
+            }
         }
 
         setIsSwiping(false);
     };
 
-    // Progress indicators
-    const renderProgressIndicators = () => {
+    if (loading && blogPosts.length === 0) {
         return (
-            <div className="mt-6 flex justify-center space-x-2">
-                {Array.from({ length: maxIndex + 1 }, (_, i) => (
-                    <button
-                        key={i}
-                        onClick={() => setCurrentIndex(i)}
-                        className={`h-2 rounded-full transition-all ${i === currentIndex ? "bg-primary w-6" : "bg-primary/30 w-2"
-                            }`}
-                        aria-label={`Go to slide ${i + 1}`}
-                    />
-                ))}
-            </div>
-        );
-    };
-
-    // ✅ Loading / empty behavior for homepage section
-    if (loading) {
-        return (
-            <section className="py-10">
-                <div className="container mx-auto px-4 md:px-6 2xl:max-w-[1400px] flex items-center justify-center text-muted-foreground">
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Loading blogs...
+            <section>
+                <div className="container mx-auto space-y-4 px-4 md:px-6 2xl:max-w-[1400px]">
+                    <div className="space-y-1">
+                        <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+                            Latest Articles
+                        </h2>
+                        <p className="text-sm text-muted-foreground md:text-base">
+                            Loading articles from the blog dashboard...
+                        </p>
+                    </div>
                 </div>
             </section>
         );
     }
 
     if (!blogPosts.length) {
-        return null; // hide section if no blogs
+        return null;
     }
 
     return (
-        <section className="">
-            <div
-                ref={containerRef}
-                className="container mx-auto space-y-6 px-4 md:space-y-8 md:px-6 2xl:max-w-[1400px]"
-            >
+        <section>
+            <div className="container mx-auto space-y-6 px-4 md:space-y-8 md:px-6 2xl:max-w-[1400px]">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="max-w-md space-y-1">
                         <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
                             Latest Articles
                         </h2>
-                        <p className="text-muted-foreground text-sm md:text-base">
-                            Stay updated with our most recent insights
+                        <p className="text-sm text-muted-foreground md:text-base">
+                            Fresh articles published from the dashboard
                         </p>
                     </div>
 
-                    <div className="flex items-center space-x-2 sm:flex">
+                    <div className="flex items-center space-x-2">
                         <Button
                             variant="outline"
                             size="icon"
@@ -243,7 +225,7 @@ export default function BlogSectionSlider() {
                     >
                         {blogPosts.map((post) => (
                             <div
-                                key={post._id}
+                                key={post.id}
                                 className="carousel-item w-full flex-none snap-start px-2 sm:w-1/2 sm:px-4 lg:w-1/3"
                             >
                                 <Card className="flex h-full flex-col overflow-hidden p-0 shadow-sm transition-shadow hover:shadow-md">
@@ -254,7 +236,7 @@ export default function BlogSectionSlider() {
                                             fill
                                             className="object-cover transition-transform duration-300 hover:scale-105"
                                         />
-                                        <div className="absolute top-3 left-3">
+                                        <div className="absolute left-3 top-3">
                                             <Badge className="bg-primary hover:bg-primary/90">
                                                 {post.category}
                                             </Badge>
@@ -262,7 +244,7 @@ export default function BlogSectionSlider() {
                                     </div>
 
                                     <CardContent className="flex-grow">
-                                        <div className="text-muted-foreground mb-2 flex items-center text-xs sm:mb-3 sm:text-sm">
+                                        <div className="mb-2 flex items-center text-xs text-muted-foreground sm:mb-3 sm:text-sm">
                                             <CalendarIcon className="mr-1 h-3 w-3" />
                                             <span>{post.date}</span>
                                         </div>
@@ -271,18 +253,13 @@ export default function BlogSectionSlider() {
                                             {post.title}
                                         </h3>
 
-                                        <p className="text-muted-foreground line-clamp-2 text-xs sm:line-clamp-3 sm:text-sm">
+                                        <p className="line-clamp-2 text-xs text-muted-foreground sm:line-clamp-3 sm:text-sm">
                                             {post.excerpt}
                                         </p>
                                     </CardContent>
 
                                     <CardFooter className="pb-6">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="w-full text-sm"
-                                            asChild
-                                        >
+                                        <Button variant="ghost" size="sm" className="w-full text-sm" asChild>
                                             <Link
                                                 href={`/blog/${post.slug}`}
                                                 className="flex items-center justify-center"
@@ -297,10 +274,19 @@ export default function BlogSectionSlider() {
                         ))}
                     </div>
 
-                    {/* Progress indicators for mobile */}
-                    <div className="sm:hidden">{renderProgressIndicators()}</div>
+                    <div className="mt-6 flex justify-center space-x-2 sm:hidden">
+                        {Array.from({ length: maxIndex + 1 }, (_, index) => (
+                            <button
+                                key={index}
+                                onClick={() => setCurrentIndex(index)}
+                                className={`h-2 rounded-full transition-all ${
+                                    index === currentIndex ? "w-6 bg-primary" : "w-2 bg-primary/30"
+                                }`}
+                                aria-label={`Go to slide ${index + 1}`}
+                            />
+                        ))}
+                    </div>
 
-                    {/* Mobile navigation buttons */}
                     <div className="mt-6 flex items-center justify-between sm:hidden">
                         <Button
                             variant="outline"

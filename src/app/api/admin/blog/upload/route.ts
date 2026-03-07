@@ -1,38 +1,55 @@
-import { NextRequest, NextResponse } from "next/server";
 import { handleUpload } from "@vercel/blob/client";
+import { NextRequest, NextResponse } from "next/server";
 
-// This route is called automatically by the Vercel Blob client helper.
-// It returns a signed upload token/URL so the browser can upload directly.
-export async function POST(req: NextRequest) {
+import { requireAdminApiSession } from "@/lib/admin-guard";
+import { getBlobToken } from "@/lib/blob";
+
+export const runtime = "nodejs";
+
+const allowedContentTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+export async function POST(request: NextRequest) {
     try {
-        const body = await req.json();
+        const auth = await requireAdminApiSession();
 
-        const jsonResponse = await handleUpload({
+        if (auth.response) {
+            return auth.response;
+        }
+
+        const body = await request.json();
+
+        const response = await handleUpload({
             body,
-            request: req,
+            request,
+            token: getBlobToken(),
             onBeforeGenerateToken: async (pathname) => {
-                // ✅ Optional: restrict uploads to a folder
-                // pathname will be something like: "my-image.png"
+                if (!pathname.startsWith("blog-images/")) {
+                    throw new Error("Uploads must use the blog-images folder.");
+                }
+
                 return {
-                    allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+                    allowedContentTypes,
+                    addRandomSuffix: false,
+                    maximumSizeInBytes: 5 * 1024 * 1024,
                     tokenPayload: JSON.stringify({
                         folder: "blog-images",
-                        pathname,
                     }),
                 };
             },
-            onUploadCompleted: async ({ blob, tokenPayload }) => {
-                // ✅ This runs after upload finishes (server-side)
-                // You can log or store in DB if you want.
-                // tokenPayload contains whatever you set above.
-                console.log("Upload completed:", blob.url, tokenPayload);
+            onUploadCompleted: async ({ blob }) => {
+                console.log("Blog image upload completed:", blob.url);
             },
         });
 
-        return NextResponse.json(jsonResponse);
-    } catch (error: any) {
+        return NextResponse.json(response, { status: 200 });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Image upload failed.";
+
         return NextResponse.json(
-            { success: false, message: error?.message || "Upload failed" },
+            {
+                success: false,
+                message,
+            },
             { status: 400 }
         );
     }

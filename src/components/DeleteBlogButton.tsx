@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
 import { useRouter } from "next/navigation";
+import { Loader2, Trash2 } from "lucide-react";
 
 import {
     AlertDialog,
@@ -16,38 +16,46 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Trash2, Loader2 } from "lucide-react";
 
 export default function DeleteBlogButton({ blogId }: { blogId: string }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
-    async function handleDelete() {
+    const handleDelete = async () => {
         try {
             setLoading(true);
-            await axios.delete(`/api/admin/blog/${blogId}`);
-            router.refresh(); // refresh server component
+
+            const response = await fetch(`/api/admin/blog/${blogId}`, {
+                method: "DELETE",
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.message ?? "Failed to delete blog post.");
+            }
+
+            router.refresh();
         } catch (error) {
-            console.error("Delete failed", error);
+            console.error("Delete blog post failed:", error);
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
+                <Button size="sm" variant="destructive">
                     <Trash2 className="h-4 w-4" />
                 </Button>
             </AlertDialogTrigger>
 
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Delete blog post?</AlertDialogTitle>
+                    <AlertDialogTitle>Delete this article?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete the blog
-                        post from your website.
+                        This removes the blog post from the dashboard and the public site.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 

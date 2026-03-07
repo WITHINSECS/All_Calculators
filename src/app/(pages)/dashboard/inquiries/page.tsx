@@ -19,6 +19,9 @@ import { Mail, Phone, MessageSquare } from "lucide-react";
 import Inquiry, { IInquiry } from "@/models/Inquiry";
 import { DBconnection } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const runtime = "nodejs";
 
 export default async function FormSubmissionsPage() {
     await DBconnection();

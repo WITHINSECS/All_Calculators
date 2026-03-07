@@ -7,15 +7,19 @@ export interface IBlogPost extends Document {
     date: string;
     imageUrl: string;
     excerpt: string;
-    content?: string;
-    isPublished?: boolean;
+    content: string;
+    isPublished: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
 
-const BlogPostSchema: Schema<IBlogPost> = new Schema(
+const BlogPostSchema = new Schema<IBlogPost>(
     {
-        title: { type: String, required: [true, "Title is required"], trim: true },
+        title: {
+            type: String,
+            required: [true, "Title is required"],
+            trim: true,
+        },
         slug: {
             type: String,
             required: [true, "Slug is required"],
@@ -23,14 +27,38 @@ const BlogPostSchema: Schema<IBlogPost> = new Schema(
             trim: true,
             lowercase: true,
         },
-        category: { type: String, required: [true, "Category is required"], trim: true },
-        date: { type: String, required: [true, "Date is required"], trim: true },
-        imageUrl: { type: String, required: [true, "Image URL is required"], trim: true },
-        excerpt: { type: String, required: [true, "Excerpt is required"], trim: true },
-        content: { type: String, default: "" },
-        isPublished: { type: Boolean, default: true },
+        category: {
+            type: String,
+            required: [true, "Category is required"],
+            trim: true,
+        },
+        date: {
+            type: String,
+            required: [true, "Date is required"],
+            trim: true,
+        },
+        imageUrl: {
+            type: String,
+            required: [true, "Image URL is required"],
+            trim: true,
+        },
+        excerpt: {
+            type: String,
+            required: [true, "Excerpt is required"],
+            trim: true,
+        },
+        content: {
+            type: String,
+            default: "",
+        },
+        isPublished: {
+            type: Boolean,
+            default: true,
+        },
     },
-    { timestamps: true }
+    {
+        timestamps: true,
+    }
 );
 
 BlogPostSchema.index({
