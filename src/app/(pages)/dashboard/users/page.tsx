@@ -11,14 +11,15 @@ export default function UsersPage() {
         <div className="w-full p-6">
             <Card className="shadow-sm">
                 <CardHeader>
-                    <CardTitle className="text-xl">Users Removed</CardTitle>
+                    <CardTitle className="text-xl">Admin Access Only</CardTitle>
                     <CardDescription>
-                        Better Auth has been removed from this project.
+                        The dashboard is protected behind the admin login.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="text-sm text-muted-foreground">
-                    User accounts, roles, and admin authentication are no longer part of the
-                    application. The dashboard is now open access.
+                    Public users cannot access this area. Admin accounts are verified against
+                    the MongoDB `admin_accounts` collection before dashboard pages and admin
+                    APIs are allowed.
                 </CardContent>
             </Card>
         </div>

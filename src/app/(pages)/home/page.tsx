@@ -1,421 +1,321 @@
-"use client"
-import Wrapper from '@/app/Wrapper'
+import Link from "next/link";
+import {
+    ArrowRight,
+    Calculator,
+    Clock3,
+    HeartPulse,
+    Landmark,
+    Sparkles,
+    Sigma,
+    type LucideIcon,
+} from "lucide-react";
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { evaluate } from "mathjs"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Avatar, AvatarImage } from '@/components/ui/avatar'
-// import PricingSectionCards from '@/components/Home/PricingSectionCards'
-import Services from '@/components/Home/Services'
-import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
-import BlogSectionSlider from '@/components/BlogSectionSlider'
-import { siteConfig } from '@/lib/siteConfig'
-import AdsenseAd from '@/components/AdsenseAd'
-import { ADSENSE_SLOTS } from '@/config/adsense'
+import Wrapper from "@/app/Wrapper";
+import AdsenseAd from "@/components/AdsenseAd";
+import BlogSectionSlider from "@/components/BlogSectionSlider";
+import HeroCalculator from "@/components/Home/HeroCalculator";
+import Services from "@/components/Home/Services";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ADSENSE_SLOTS } from "@/config/adsense";
+import {
+    calculatorCategoryLabels,
+    calculatorCategoryOrder,
+    groupCalculatorsByCategory,
+    type CalculatorCategory,
+} from "@/lib/calculator-catalog";
+import { getVisibleCalculatorCatalogSafe } from "@/lib/calculator-visibility";
+import { siteConfig } from "@/lib/siteConfig";
 
-const sciButtons = [
-    ["sin", "cos", "tan", "Deg", "Rad"],
-    ["asin", "acos", "atan", "π", "e"],
-    ["^", "x³", "x²", "exp", "10^"],
-    ["√", "cbrt", "nthRoot", "ln", "log"],
-    ["(", ")", "1/x", "%", "!"],
-]
+const featuredPriority = [
+    "emi-calculator",
+    "401k-calculator",
+    "currency-converter",
+    "health/bmi-calculator",
+    "math/percentage-calculator",
+    "lifestyle/age-calculator",
+    "mortgage-calculator",
+    "health/calorie-calculator",
+];
 
-const numButtons = [
-    ["7", "8", "9", "+", "Back"],
-    ["4", "5", "6", "-", "Ans"],
-    ["1", "2", "3", "*", "M+"],
-    ["0", ".", "EXP", "/", "M-"],
-    ["±", "RND", "AC", "=", "MR"],
-]
+const collectionDescriptions: Record<CalculatorCategory, string> = {
+    finance: "Loans, mortgages, investing, savings, tax planning, and quick money math.",
+    health: "Fitness, body metrics, calories, pregnancy, and wellness tracking tools.",
+    lifestyle: "Everyday calculators for time, travel, shopping, school, and planning.",
+    math: "Percentages, averages, algebra, scientific math, and unit conversions.",
+};
 
-const Page = () => {
-    const [display, setDisplay] = useState("0")
-    const [memory, setMemory] = useState(0)
-    const [angleMode, setAngleMode] = useState("Deg")
-    const [lastAnswer, setLastAnswer] = useState("")
+const categoryIconMap: Record<CalculatorCategory, LucideIcon> = {
+    finance: Landmark,
+    health: HeartPulse,
+    lifestyle: Sparkles,
+    math: Sigma,
+};
 
-    const appendToDisplay = (value: string) => {
-        if (display === "0" || display === "Error") {
-            setDisplay(value)
-        } else {
-            setDisplay(display + value)
-        }
-    }
+const featureCards = [
+    {
+        title: "Start fast",
+        description: "Open a calculator, type the numbers, and get the result without digging through cluttered menus.",
+        icon: Clock3,
+    },
+    {
+        title: "Stay in one place",
+        description: "Finance, health, lifestyle, and math tools live in one catalog so you do not have to jump across sites.",
+        icon: Calculator,
+    },
+    {
+        title: "Keep it readable",
+        description: "The layout is built for quick scanning, direct inputs, and simple follow-through to the tool you need.",
+        icon: Sparkles,
+    },
+];
 
-    const handleSciClick = (label: string) => {
-        switch (label) {
-            case "π":
-                appendToDisplay("3.14159265359")
-                break
-            case "e":
-                appendToDisplay("2.71828182846")
-                break
-            case "x²":
-                appendToDisplay("^2")
-                break
-            case "x³":
-                appendToDisplay("^3")
-                break
-            case "10^":
-                appendToDisplay("10^")
-                break
-            case "exp":
-                appendToDisplay("exp(")
-                break
-            case "√":
-                appendToDisplay("sqrt(")
-                break
-            case "cbrt":
-                appendToDisplay("cbrt(")
-                break
-            case "nthRoot":
-                appendToDisplay("nthRoot(")
-                break
-            case "ln":
-                appendToDisplay("log(")
-                break
-            case "log":
-                appendToDisplay("log10(")
-                break
-            case "1/x":
-                appendToDisplay("1/(")
-                break
-            case "%":
-                appendToDisplay("%")
-                break
-            case "!":
-                appendToDisplay("!")
-                break
-            case "sin": case "cos": case "tan":
-            case "asin": case "acos": case "atan":
-                appendToDisplay(`${label}(`)
-                break
-            case "Deg":
-            case "Rad":
-                setAngleMode(label)
-                break
-            default:
-                appendToDisplay(label)
-        }
-    }
+export default async function Page() {
+    const visibleCalculators = await getVisibleCalculatorCatalogSafe();
+    const groupedCalculators = groupCalculatorsByCategory(visibleCalculators);
+    const prioritizedFeaturedCalculators = featuredPriority
+        .map((slug) => visibleCalculators.find((calculator) => calculator.slug === slug))
+        .filter(
+            (calculator): calculator is (typeof visibleCalculators)[number] =>
+                calculator !== undefined
+        );
+    const featuredCalculatorSlugs = new Set(
+        prioritizedFeaturedCalculators.map((calculator) => calculator.slug)
+    );
+    const featuredCalculators = [
+        ...prioritizedFeaturedCalculators,
+        ...visibleCalculators.filter((calculator) => !featuredCalculatorSlugs.has(calculator.slug)),
+    ].slice(0, 6);
 
-    const handleNumClick = (label: string) => {
-        switch (label) {
-            case "Back":
-                setDisplay(display.slice(0, -1) || "0")
-                break
-            case "Ans":
-                appendToDisplay(lastAnswer)
-                break
-            case "AC":
-                setDisplay("0")
-                break
-            case "=":
-                try {
-                    const result = evaluate(display)
-                    setLastAnswer(result.toString())
-                    setDisplay(result.toString())
-                } catch {
-                    setDisplay("Error")
-                }
-                break
-            case "±":
-                if (display.startsWith("-")) {
-                    setDisplay(display.slice(1))
-                } else {
-                    setDisplay("-" + display)
-                }
-                break
-            case "RND":
-                setDisplay(Math.random().toString())
-                break
-            case "M+":
-                setMemory(memory + parseFloat(display))
-                break
-            case "M-":
-                setMemory(memory - parseFloat(display))
-                break
-            case "MR":
-                setDisplay(memory.toString())
-                break
-            default:
-                appendToDisplay(label)
-        }
-    }
+    const collections = calculatorCategoryOrder.map((category) => ({
+        key: category,
+        title: calculatorCategoryLabels[category],
+        description: collectionDescriptions[category],
+        count: groupedCalculators[category].length,
+    }));
 
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            const key = e.key
-
-            // Allow digits, operators and Enter
-            if (/^[0-9+\-*/().%]$/.test(key)) {
-                appendToDisplay(key)
-            } else if (key === "Enter") {
-                handleNumClick("=")
-            } else if (key === "Backspace") {
-                handleNumClick("Back")
-            } else if (key === "Escape") {
-                handleNumClick("AC")
-            }
-        }
-
-        window.addEventListener("keydown", handleKeyDown)
-        return () => window.removeEventListener("keydown", handleKeyDown)
-    }, [display])
-
+    const heroStats = [
+        {
+            label: "Live calculators",
+            value: `${visibleCalculators.length}+`,
+        },
+        {
+            label: "Collections",
+            value: `${collections.length}`,
+        },
+        {
+            label: "Quick picks",
+            value: `${featuredCalculators.length}`,
+        },
+    ];
 
     return (
-        <Wrapper className='mt-5'>
+        <Wrapper className="overflow-x-hidden">
+            <section className="relative overflow-hidden pb-14 pt-8 md:pb-24 md:pt-12">
+                <div className="absolute inset-x-0 top-0 -z-10 h-[42rem] bg-[linear-gradient(180deg,rgba(239,246,255,0.95)_0%,rgba(255,255,255,0.9)_55%,rgba(255,255,255,0)_100%)]" />
+                <div className="absolute left-0 top-10 -z-10 h-72 w-72 rounded-full bg-sky-200/50 blur-3xl" />
+                <div className="absolute right-0 top-28 -z-10 h-80 w-80 rounded-full bg-slate-300/35 blur-3xl" />
 
-            <div className='flex max-w-7xl items-center lg:flex-row flex-col lg:gap-5 gap-10 justify-between w-full mx-auto p-5'>
-                <div className="lg:max-w-[50%] w-full lg:p-4">
-                    {/* Announcement Banner */}
-                    <div className="flex justify-center lg:justify-start">
-                        <div
-                            className="inline-flex items-center gap-x-2 rounded-full border p-1 ps-3 text-sm transition"
+                <div className="mx-auto grid max-w-7xl gap-10 px-5 lg:grid-cols-[1.08fr_0.92fr] lg:items-center">
+                    <div className="space-y-8">
+                        <Badge
+                            variant="outline"
+                            className="rounded-full border-slate-200 bg-white/85 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-600 shadow-sm backdrop-blur"
                         >
-                            Welcome to {siteConfig.name}
-                            <span className="bg-muted-foreground/15 inline-flex items-center justify-center gap-x-2 rounded-full px-2.5 py-1.5 text-sm font-semibold">
-                                <svg
-                                    className="h-4 w-4 flex-shrink-0"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width={24}
-                                    height={24}
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth={2}
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <path d="m9 18 6-6-6-6" />
-                                </svg>
-                            </span>
+                            {siteConfig.name} Calculator Studio
+                        </Badge>
+
+                        <div className="space-y-5">
+                            <h1 className="max-w-4xl text-5xl font-bold tracking-tight text-balance text-slate-950 md:text-6xl xl:text-6xl">
+                                Calculator answers that feel instant, not industrial.
+                            </h1>
+                            <p className="max-w-2xl text-lg leading-8 text-slate-600 md:text-xl">
+                                Explore finance, health, lifestyle, and math calculators from one
+                                clean hub. Use the live calculator in the hero or jump directly to
+                                the tools people reach for most.
+                            </p>
                         </div>
-                    </div>
-                    <div className="mt-5 max-w-2xl lg:mx-0 lg:text-start text-center mx-auto">
-                        <h1 className="scroll-m-20 text-4xl font-bold lg:text-5xl">
-                            Best Calculators
-                        </h1>
-                    </div>
-                    {/* End Title */}
-                    <div className="mt-5 max-w-3xl lg:mx-0 lg:text-start text-center mx-auto">
-                        <p className="text-muted-foreground text-lg">
-                            Calculators help you perform math operations quickly and accurately.
-                            From basic to scientific, choose the right one for your needs.
-                        </p>
-                    </div>
-                    {/* Buttons */}
-                    <div className="mt-8 flex gap-3 lg:justify-start justify-center">
-                        <Link href={"/calculators"}>
-                            <Button size={"lg"}>Get started</Button>
-                        </Link>
-                        <Link href={"/about"}>
-                            <Button size={"lg"} variant={"outline"}>
-                                Learn more
+
+                        <div className="flex flex-wrap gap-3">
+                            <Button asChild size="lg" className="rounded-full px-7">
+                                <Link href="/calculators">
+                                    Browse Calculators
+                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                </Link>
                             </Button>
-                        </Link>
-                    </div>
+                            <Button asChild size="lg" variant="outline" className="rounded-full px-7">
+                                <Link href="/blog">Read Blog Guides</Link>
+                            </Button>
+                        </div>
 
-                    <div className="mt-6">
-                        <div className="w-full mx-auto">
-                            <div className="relative">
-                                {/* Background cards for stacked effect */}
-                                <div className="absolute -bottom-2 -right-2 w-full h-full  rounded-lg border"></div>
-                                <div className="absolute -bottom-1 -right-1 w-full h-full  rounded-lg border"></div>
+                        <div className="grid gap-4 sm:grid-cols-3">
+                            {heroStats.map((item) => (
+                                <div
+                                    key={item.label}
+                                    className="rounded-[24px] border border-slate-200/80 bg-white/80 px-5 py-4 shadow-[0_14px_40px_-28px_rgba(15,23,42,0.35)] backdrop-blur"
+                                >
+                                    <p className="text-3xl font-semibold text-slate-950">
+                                        {item.value}
+                                    </p>
+                                    <p className="mt-1 text-sm text-slate-600">{item.label}</p>
+                                </div>
+                            ))}
+                        </div>
 
-                                {/* Main card */}
-                                <Card className="relative">
-                                    <CardHeader>
-                                        <CardTitle>Top Calculators</CardTitle>
-                                        <CardDescription>
-                                            Top-performing calculators for all your calculation needs.
-                                        </CardDescription>
+                        <div className="rounded-[30px] border border-slate-200/80 bg-white/78 p-5 shadow-[0_24px_70px_-40px_rgba(15,23,42,0.45)] backdrop-blur">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500">
+                                        Featured Calculators
+                                    </p>
+                                    <p className="mt-2 text-sm leading-7 text-slate-600">
+                                        Jump straight to a live tool instead of scrolling the full
+                                        catalog.
+                                    </p>
+                                </div>
 
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p className="text-sm text-muted-foreground">
-                                            Discover a selection of high-quality calculators designed to meet a variety of mathematical and professional needs.
-                                        </p>
-                                    </CardContent>
-                                    <CardFooter className="flex justify-end">
-                                        <Link href={"/calculators"}>
-                                            <Button>Explore</Button>
+                                <Link
+                                    href="/calculators"
+                                    className="inline-flex items-center gap-2 text-sm font-medium text-slate-900"
+                                >
+                                    View all
+                                    <ArrowRight className="h-4 w-4" />
+                                </Link>
+                            </div>
+
+                            <div className="mt-5 flex flex-wrap gap-3">
+                                {featuredCalculators.map((calculator) => {
+                                    const Icon = categoryIconMap[calculator.category];
+
+                                    return (
+                                        <Link
+                                            key={calculator.slug}
+                                            href={calculator.path}
+                                            className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-950"
+                                        >
+                                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700">
+                                                <Icon className="h-4 w-4" />
+                                            </span>
+                                            <span>{calculator.title}</span>
                                         </Link>
-                                    </CardFooter>
-                                </Card>
+                                    );
+                                })}
                             </div>
                         </div>
+                    </div>
 
+                    <div className="space-y-4">
+                        <HeroCalculator />
+
+                        <div className="grid gap-3 sm:grid-cols-3">
+                            {collections.slice(0, 3).map((collection) => {
+                                const Icon = categoryIconMap[collection.key];
+
+                                return (
+                                    <div
+                                        key={collection.key}
+                                        className="rounded-[24px] border border-slate-200/80 bg-white/85 px-4 py-4 shadow-[0_16px_40px_-32px_rgba(15,23,42,0.4)] backdrop-blur"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
+                                                <Icon className="h-4 w-4" />
+                                            </span>
+                                            <div>
+                                                <p className="text-sm font-semibold text-slate-950">
+                                                    {collection.title}
+                                                </p>
+                                                <p className="text-xs text-slate-500">
+                                                    {collection.count} live tools
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
-                <div className="lg:p-4 lg:max-w-[50%] w-full space-y-4">
-                    <div className="bg-muted text-right text-2xl font-mono p-4 rounded border overflow-x-hidden break-words">
-                        {display}
-                    </div>
-
-                    <div className="grid grid-cols-5 gap-2">
-                        {sciButtons.flat().map((label, idx) => (
-                            <Button key={idx} variant="outline" onClick={() => handleSciClick(label)}>
-                                {label}
-                            </Button>
-                        ))}
-                    </div>
-
-                    <div className="grid grid-cols-5 gap-2">
-                        {numButtons.flat().map((label, idx) => (
-                            <Button
-                                key={idx}
-                                variant={["=", "AC"].includes(label) ? "default" : "secondary"}
-                                onClick={() => handleNumClick(label)}
-                            >
-                                {label}
-                            </Button>
-                        ))}
-                    </div>
-                </div>
-            </div>
+            </section>
 
             <AdsenseAd slot={ADSENSE_SLOTS.homeTop} />
 
-
-            <div className="md:mt-20 mt-10">
-                <Services />
+            <div className="mt-14 md:mt-20">
+                <Services collections={collections} />
             </div>
 
-            <div className="container mx-auto md:mt-20 mt-10">
-                <div className="max-w-5xl px-4 mx-auto">
-                    <div className="border rounded-xl">
-                        <div className="p-4 lg:p-8 rounded-xl">
-                            <div className="grid grid-cols-1 sm:grid-cols-3 items-center gap-y-20 gap-x-12">
-                                {/* Stats */}
-                                <div className="relative text-center first:before:hidden before:absolute before:-top-full sm:before:top-1/2 before:start-1/2 sm:before:-start-6 before:w-px before:h-20 before:bg-border before:rotate-[60deg] sm:before:rotate-12 before:transform sm:before:-translate-y-1/2 before:-translate-x-1/2 sm:before:-translate-x-0 before:mt-3.5 sm:before:mt-0">
-                                    <svg
-                                        className="shrink-0 size-6 sm:size-8  mx-auto"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <path d="m11 17 2 2a1 1 0 1 0 3-3" />
-                                        <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4" />
-                                        <path d="m21 3 1 11h-2" />
-                                        <path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3" />
-                                        <path d="M3 4h8" />
-                                    </svg>
-                                    <div className="mt-3 sm:mt-5">
-                                        <h3 className="text-lg sm:text-3xl font-semibold">
-                                            1,000+
-                                        </h3>
-                                        <p className="mt-1 text-sm sm:text-base text-muted-foreground">
-                                            partners
-                                        </p>
-                                    </div>
-                                </div>
-                                {/* End Stats */}
+            <div className="container mx-auto mt-14 px-4 md:mt-20 2xl:max-w-[1400px]">
+                <div className="overflow-hidden rounded-[34px] border border-slate-200/80 bg-[linear-gradient(135deg,#ffffff_0%,#eff6ff_45%,#f8fafc_100%)] p-6 shadow-[0_30px_90px_-55px_rgba(15,23,42,0.45)] md:p-8">
+                    <div className="max-w-2xl">
+                        <p className="text-xs font-semibold uppercase tracking-[0.34em] text-slate-500">
+                            Why {siteConfig.name}
+                        </p>
+                        <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 md:text-5xl">
+                            Built for people who want the answer, not the clutter.
+                        </h2>
+                    </div>
 
-                                {/* Stats */}
-                                <div className="relative text-center first:before:hidden before:absolute before:-top-full sm:before:top-1/2 before:start-1/2 sm:before:-start-6 before:w-px before:h-20 before:bg-border before:rotate-[60deg] sm:before:rotate-12 before:transform sm:before:-translate-y-1/2 before:-translate-x-1/2 sm:before:-translate-x-0 before:mt-3.5 sm:before:mt-0">
-                                    <div className="flex justify-center items-center -space-x-5">
-                                        <Avatar className="relative z-[2] shrink-0 size-8 border-primary border">
-                                            <AvatarImage src="https://images.unsplash.com/photo-1601935111741-ae98b2b230b0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=320&h=320&q=80"></AvatarImage>
-                                        </Avatar>
-                                        <Avatar className="relative z-[1] shrink-0 size-8 border-primary border -mt-7">
-                                            <AvatarImage src="https://images.unsplash.com/photo-1570654639102-bdd95efeca7a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=320&h=320&q=80"></AvatarImage>
-                                        </Avatar>{" "}
-                                        <Avatar className="relative shrink-0 size-8 border-primary border">
-                                            <AvatarImage src="https://images.unsplash.com/photo-1679412330254-90cb240038c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2.5&w=320&h=320&q=80"></AvatarImage>
-                                        </Avatar>
-                                    </div>
-                                    <div className="mt-3 sm:mt-5">
-                                        <h3 className="text-lg sm:text-3xl font-semibold">95%</h3>
-                                        <p className="mt-1 text-sm sm:text-base text-muted-foreground">
-                                            Happy customers
-                                        </p>
-                                    </div>
-                                </div>
-                                {/* End Stats */}
+                    <div className="mt-8 grid gap-4 md:grid-cols-3">
+                        {featureCards.map((card) => {
+                            const Icon = card.icon;
 
-                                {/* Stats */}
-                                <div className="relative text-center first:before:hidden before:absolute before:-top-full sm:before:top-1/2 before:start-1/2 sm:before:-start-6 before:w-px before:h-20 before:bg-border before:rotate-[60deg] sm:before:rotate-12 before:transform sm:before:-translate-y-1/2 before:-translate-x-1/2 sm:before:-translate-x-0 before:mt-3.5 sm:before:mt-0">
-                                    <svg
-                                        className="shrink-0 size-6 sm:size-8 mx-auto"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17" />
-                                        <path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9" />
-                                        <path d="m2 16 6 6" />
-                                        <circle cx="16" cy="9" r="2.9" />
-                                        <circle cx="6" cy="5" r="3" />
-                                    </svg>
-                                    <div className="mt-3 sm:mt-5">
-                                        <h3 className="text-lg sm:text-3xl font-semibold">98%</h3>
-                                        <p className="mt-1 text-sm sm:text-base text-muted-foreground">
-                                            Client Satisfaction
-                                        </p>
-                                    </div>
+                            return (
+                                <div
+                                    key={card.title}
+                                    className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-[0_18px_45px_-35px_rgba(15,23,42,0.35)]"
+                                >
+                                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white">
+                                        <Icon className="h-5 w-5" />
+                                    </span>
+                                    <h3 className="mt-5 text-xl font-semibold text-slate-950">
+                                        {card.title}
+                                    </h3>
+                                    <p className="mt-3 text-sm leading-7 text-slate-600">
+                                        {card.description}
+                                    </p>
                                 </div>
-                                {/* End Stats */}
-                            </div>
-                        </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
 
-            {/* <div className="md:mt-20 mt-10">
-                <PricingSectionCards />
-            </div> */}
-
-
-            <div className="md:mt-20 mt-10">
+            <div className="mt-14 md:mt-20">
                 <BlogSectionSlider />
             </div>
 
             <AdsenseAd slot={ADSENSE_SLOTS.homeBottom} />
 
+            <div className="mt-14 md:mt-20 mb-10">
+                <div className="mx-auto max-w-6xl px-4">
+                    <div className="overflow-hidden rounded-[36px] border border-slate-200/20 bg-[linear-gradient(140deg,#0f172a_0%,#111827_45%,#164e63_100%)] px-6 py-12 text-center shadow-[0_34px_80px_-45px_rgba(8,15,32,0.65)] md:px-10 md:py-16">
+                        <p className="text-xs font-semibold uppercase tracking-[0.36em] text-sky-200">
+                            Start Calculating
+                        </p>
 
-            <div className="bg-primary md:mt-20 mt-10 w-full py-12 md:py-16">
-                <div className="container mx-auto px-4 text-center">
-                    <h2 className="text-primary-foreground text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
-                        Top-Rated Calculators
-                    </h2>
+                        <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-5xl">
+                            Open the tool you need and get an answer in seconds.
+                        </h2>
 
-                    <p className="text-primary-foreground/90 mx-auto mt-3 max-w-2xl text-lg">
-                        Discover our top calculators—designed to meet your needs, provide exceptional accuracy, and assist you in every calculation
-                    </p>
+                        <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-slate-300">
+                            From EMI and mortgage planning to BMI and percentage math,
+                            {` ${siteConfig.name} `}keeps the calculator catalog fast, clear, and
+                            easy to browse.
+                        </p>
 
-                    <Button
-                        asChild
-                        size="lg"
-                        variant="secondary"
-                        className="group mt-8 font-medium"
-                    >
-                        <Link href="/calculators">
-                            See All
-                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        </Link>
-                    </Button>
+                        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                            <Button asChild size="lg" variant="secondary" className="rounded-full px-7">
+                                <Link href="/calculators">
+                                    See All Calculators
+                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                </Link>
+                            </Button>
+                            <Button asChild size="lg" variant="outline" className="rounded-full border-white/30 bg-white/5 px-7 text-white hover:bg-white/10 hover:text-white">
+                                <Link href="/about">Learn More</Link>
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             </div>
-
         </Wrapper>
-    )
+    );
 }
-
-export default Page

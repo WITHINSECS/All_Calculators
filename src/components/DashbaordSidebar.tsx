@@ -1,6 +1,13 @@
 "use client";
 
-import { FilePenLine, Home, LayoutDashboard, Mail, Newspaper } from "lucide-react";
+import {
+    Calculator,
+    FilePenLine,
+    Home,
+    LayoutDashboard,
+    Mail,
+    Newspaper,
+} from "lucide-react";
 import Link from "next/link";
 
 import DashboardLogoutButton from "@/components/DashboardLogoutButton";
@@ -25,6 +32,11 @@ const items = [
         title: "Inquiries",
         url: "inquiries",
         icon: Mail,
+    },
+    {
+        title: "Calculators",
+        url: "calculators",
+        icon: Calculator,
     },
     {
         title: "Create Blog",

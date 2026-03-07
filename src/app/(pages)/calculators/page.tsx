@@ -1,13 +1,24 @@
-import Wrapper from '@/app/Wrapper'
-import CalculatorCard from '@/components/Calculators/CalculatorCard'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { DATA__FINANCE, DATA__HEALTH, DATA__MATH, LIFESTYLE__MATH } from '@/mock/calculators'
-import React from 'react'
+import Wrapper from "@/app/Wrapper";
+import CalculatorCard from "@/components/Calculators/CalculatorCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getVisibleCalculatorGroupsSafe } from "@/lib/calculator-visibility";
+import { calculatorCategoryLabels, calculatorCategoryOrder } from "@/lib/calculator-catalog";
 
-const page = () => {
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const runtime = "nodejs";
+
+export default async function CalculatorsPage() {
+    const calculatorGroups = await getVisibleCalculatorGroupsSafe();
+    const sections = calculatorCategoryOrder.map((category) => ({
+        category,
+        label: calculatorCategoryLabels[category],
+        items: calculatorGroups[category],
+    }));
+    const defaultTab = sections.find((section) => section.items.length > 0)?.category ?? "finance";
+
     return (
         <Wrapper>
-
             <div className="container mx-auto px-4 md:px-6 2xl:max-w-[1400px]">
                 <div className="mx-auto md:mt-16 mt-8 max-w-3xl text-center">
                     <h1 className="text-3xl font-semibold lg:text-4xl">
@@ -20,55 +31,39 @@ const page = () => {
             </div>
 
             <div className="max-w-7xl w-full mx-auto p-5 md:mt-16 my-8 md:mb-20 mb-10 md:px-12 ">
-                <Tabs defaultValue="finance" className="max-w-7xl w-full mx-auto">
+                <Tabs defaultValue={defaultTab} className="max-w-7xl w-full mx-auto">
                     <div className="flex mb-8 items-center justify-center">
-                        <TabsList className=''>
-                            <TabsTrigger value="finance">Finance <span className='md:inline-block hidden'>Calculator</span></TabsTrigger>
-                            <TabsTrigger value="health">Health <span className='md:inline-block hidden'>Calculator</span></TabsTrigger>
-                            <TabsTrigger value="lifestyle">Lifestyle <span className='md:inline-block hidden'>Calculator</span></TabsTrigger>
-                            <TabsTrigger value="math">Math <span className='md:inline-block hidden'>Calculator</span></TabsTrigger>
+                        <TabsList className="">
+                            {sections.map((section) => (
+                                <TabsTrigger
+                                    key={section.category}
+                                    value={section.category}
+                                    disabled={section.items.length === 0}
+                                >
+                                    {section.label}{" "}
+                                    <span className="hidden md:inline-block">Calculator</span>
+                                </TabsTrigger>
+                            ))}
                         </TabsList>
                     </div>
-                    <TabsContent value="finance">
-                        <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-6 grid-cols-1">
-                            {
-                                DATA__FINANCE.map((item, index) => (
-                                    <CalculatorCard key={index} {...item} />
-                                ))
-                            }
-                        </div>
-                    </TabsContent>
-                    <TabsContent value="health">
-                        <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-6 grid-cols-1">
-                            {
-                                DATA__HEALTH.map((item, index) => (
-                                    <CalculatorCard key={index} {...item} />
-                                ))
-                            }
-                        </div>
-                    </TabsContent>
-                    <TabsContent value="lifestyle">
-                        <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-6 grid-cols-1">
-                            {
-                                LIFESTYLE__MATH.map((item, index) => (
-                                    <CalculatorCard key={index} {...item} />
-                                ))
-                            }
-                        </div>
-                    </TabsContent>
-                    <TabsContent value="math">
-                        <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-6 grid-cols-1">
-                            {
-                                DATA__MATH.map((item, index) => (
-                                    <CalculatorCard key={index} {...item} />
-                                ))
-                            }
-                        </div>
-                    </TabsContent>
+                    {sections.map((section) => (
+                        <TabsContent key={section.category} value={section.category}>
+                            {section.items.length > 0 ? (
+                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+                                    {section.items.map((item) => (
+                                        <CalculatorCard key={item.slug} {...item} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="rounded-xl border border-dashed px-6 py-14 text-center text-sm text-muted-foreground">
+                                    No {section.label.toLowerCase()} calculators are enabled right
+                                    now.
+                                </div>
+                            )}
+                        </TabsContent>
+                    ))}
                 </Tabs>
             </div>
         </Wrapper>
-    )
+    );
 }
-
-export default page

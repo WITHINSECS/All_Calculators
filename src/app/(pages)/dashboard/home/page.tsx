@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
-import { Calculator, FilePenLine, Newspaper, TrendingUp } from "lucide-react";
+import {
+    Calculator,
+    FilePenLine,
+    Newspaper,
+    SlidersHorizontal,
+    TrendingUp,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -184,10 +190,10 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold tracking-tight">
-                        Calculator Dashboard
+                        Admin Dashboard
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        Admin-only overview for blog publishing and inquiry activity.
+                        Admin-only overview for blog publishing, calculator visibility, and inquiry activity.
                     </p>
                 </div>
                 <Badge variant="outline" className="text-xs">
@@ -271,9 +277,9 @@ export default function Dashboard() {
 
             <Card className="shadow-sm">
                 <CardHeader>
-                    <CardTitle>Blog Quick Actions</CardTitle>
+                    <CardTitle>Quick Actions</CardTitle>
                     <CardDescription>
-                        Jump straight into writing or managing content.
+                        Jump straight into writing or managing site content.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-3">
@@ -281,6 +287,12 @@ export default function Dashboard() {
                         <Link href="/dashboard/blog">
                             <FilePenLine className="mr-2 h-4 w-4" />
                             Create Blog Post
+                        </Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                        <Link href="/dashboard/calculators">
+                            <SlidersHorizontal className="mr-2 h-4 w-4" />
+                            Manage Calculators
                         </Link>
                     </Button>
                     <Button asChild variant="outline">

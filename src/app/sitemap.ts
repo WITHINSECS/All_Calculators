@@ -3,6 +3,8 @@ import { join } from "node:path";
 import type { MetadataRoute } from "next";
 
 import { getBlogPosts } from "@/lib/blog";
+import { calculatorCatalog } from "@/lib/calculator-catalog";
+import { getVisibleCalculatorCatalogSafe } from "@/lib/calculator-visibility";
 import { siteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +16,10 @@ const excludedTopLevelRoutes = new Set(["dashboard", "login", "signup", "home"])
 function shouldIncludePath(pathname: string) {
     if (pathname === "/") {
         return true;
+    }
+
+    if (pathname.startsWith("/calculators/")) {
+        return false;
     }
 
     const firstSegment = pathname.split("/").filter(Boolean)[0];
@@ -70,6 +76,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             pathname === "/" ? 1 : pathname === "/calculators" || pathname === "/blog" ? 0.9 : 0.7,
     }));
 
+    let calculatorEntries: MetadataRoute.Sitemap = [];
+
+    try {
+        const visibleCalculators = await getVisibleCalculatorCatalogSafe();
+
+        calculatorEntries = visibleCalculators.map((calculator) => ({
+            url: buildAbsoluteUrl(calculator.path),
+            lastModified: now,
+            changeFrequency: "weekly",
+            priority: 0.8,
+        }));
+    } catch (error) {
+        console.error("Failed to include calculator routes in sitemap:", error);
+
+        calculatorEntries = calculatorCatalog.map((calculator) => ({
+            url: buildAbsoluteUrl(calculator.path),
+            lastModified: now,
+            changeFrequency: "weekly",
+            priority: 0.8,
+        }));
+    }
+
     try {
         const blogPosts = await getBlogPosts({ publishedOnly: true });
 
@@ -80,9 +108,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.8,
         }));
 
-        return [...staticEntries, ...blogEntries];
+        return [...staticEntries, ...calculatorEntries, ...blogEntries];
     } catch (error) {
         console.error("Failed to include blog posts in sitemap:", error);
-        return staticEntries;
+        return [...staticEntries, ...calculatorEntries];
     }
 }
