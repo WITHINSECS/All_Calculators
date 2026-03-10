@@ -17,7 +17,6 @@ import HeroCalculator from "@/components/Home/HeroCalculator";
 import Services from "@/components/Home/Services";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ADSENSE_SLOTS } from "@/config/adsense";
 import {
     calculatorCategoryLabels,
     calculatorCategoryOrder,
@@ -237,7 +236,7 @@ export default async function Page() {
                 </div>
             </section>
 
-            <AdsenseAd slot={ADSENSE_SLOTS.homeTop} />
+            <AdsenseAd placement="homeTop" />
 
             <div className="mt-14 md:mt-20">
                 <Services collections={collections} />
@@ -283,7 +282,7 @@ export default async function Page() {
                 <BlogSectionSlider />
             </div>
 
-            <AdsenseAd slot={ADSENSE_SLOTS.homeBottom} />
+            <AdsenseAd placement="homeBottom" />
 
             <div className="mt-14 md:mt-20 mb-10">
                 <div className="mx-auto max-w-6xl px-4">

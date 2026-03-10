@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ADSENSE_SLOTS } from "@/config/adsense";
 import type { BlogPostRecord } from "@/lib/blog-shared";
 
 export default function Page() {
@@ -108,7 +107,7 @@ export default function Page() {
                 </div>
             </div>
 
-            <AdsenseAd slot={ADSENSE_SLOTS.blogTop} />
+            <AdsenseAd placement="blogTop" />
 
             <div className="relative mx-auto my-8 w-full max-w-7xl overflow-hidden md:my-16">
                 <div className="grid grid-cols-1 gap-y-4 px-4 sm:grid-cols-2 lg:px-12 md:grid-cols-3">
@@ -157,8 +156,6 @@ export default function Page() {
                         </div>
                     ))}
 
-                    <AdsenseAd slot={ADSENSE_SLOTS.blogBottom} />
-
                     {posts.length === 0 ? (
                         <div className="col-span-full py-10 text-center text-sm text-muted-foreground">
                             {loading
@@ -168,6 +165,10 @@ export default function Page() {
                                     : "No blog posts available."}
                         </div>
                     ) : null}
+                </div>
+
+                <div className="px-4 pt-8 lg:px-12">
+                    <AdsenseAd placement="blogBottom" />
                 </div>
             </div>
         </Wrapper>

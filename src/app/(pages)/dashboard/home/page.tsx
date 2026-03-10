@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import {
+    BadgeDollarSign,
     Calculator,
     FilePenLine,
     Newspaper,
@@ -293,6 +294,12 @@ export default function Dashboard() {
                         <Link href="/dashboard/calculators">
                             <SlidersHorizontal className="mr-2 h-4 w-4" />
                             Manage Calculators
+                        </Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                        <Link href="/dashboard/adsense">
+                            <BadgeDollarSign className="mr-2 h-4 w-4" />
+                            Manage AdSense
                         </Link>
                     </Button>
                     <Button asChild variant="outline">

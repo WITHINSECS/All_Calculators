@@ -1,6 +1,7 @@
 "use client";
 
 import {
+    BadgeDollarSign,
     Calculator,
     FilePenLine,
     Home,
@@ -37,6 +38,11 @@ const items = [
         title: "Calculators",
         url: "calculators",
         icon: Calculator,
+    },
+    {
+        title: "AdSense",
+        url: "adsense",
+        icon: BadgeDollarSign,
     },
     {
         title: "Create Blog",
