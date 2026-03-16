@@ -9,6 +9,7 @@ import {
     Calculator,
     FilePenLine,
     FileText,
+    Map,
     Newspaper,
     SlidersHorizontal,
     TrendingUp,
@@ -356,6 +357,12 @@ export default function Dashboard() {
                         <Link href="/dashboard/adsense">
                             <BadgeDollarSign className="mr-2 h-4 w-4" />
                             Manage AdSense
+                        </Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                        <Link href="/dashboard/sitemap">
+                            <Map className="mr-2 h-4 w-4" />
+                            Manage Sitemap
                         </Link>
                     </Button>
                     <Button asChild variant="outline">

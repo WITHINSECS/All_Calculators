@@ -274,10 +274,10 @@ export default function RichTextEditor({
                     contentEditable
                     suppressContentEditableWarning
                     className={cn(
-                        "min-h-[280px] rounded-b-lg border px-4 py-4 text-sm leading-7 outline-none",
+                        "min-h-[320px] rounded-b-lg border px-5 py-5 text-base leading-8 outline-none",
                         "[&_blockquote]:border-l-4 [&_blockquote]:border-primary/30 [&_blockquote]:pl-4 [&_blockquote]:italic",
-                        "[&_h2]:mt-6 [&_h2]:text-2xl [&_h2]:font-semibold",
-                        "[&_h3]:mt-5 [&_h3]:text-xl [&_h3]:font-semibold",
+                        "[&_h2]:mt-6 [&_h2]:text-3xl [&_h2]:font-semibold",
+                        "[&_h3]:mt-5 [&_h3]:text-2xl [&_h3]:font-semibold",
                         "[&_a]:text-primary [&_a]:underline",
                         "[&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6",
                         className
@@ -289,3 +289,4 @@ export default function RichTextEditor({
         </div>
     );
 }
+

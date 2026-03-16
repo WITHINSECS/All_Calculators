@@ -8,6 +8,7 @@ import {
     Home,
     LayoutDashboard,
     Mail,
+    Map,
     Newspaper,
 } from "lucide-react";
 import Link from "next/link";
@@ -49,6 +50,11 @@ const items = [
         title: "AdSense",
         url: "adsense",
         icon: BadgeDollarSign,
+    },
+    {
+        title: "Sitemap",
+        url: "sitemap",
+        icon: Map,
     },
     {
         title: "Create Blog",

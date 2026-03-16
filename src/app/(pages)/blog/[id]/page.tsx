@@ -90,13 +90,13 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
                                 <CardTitle className="mb-3 text-2xl">{post.title}</CardTitle>
 
-                                <p className="mb-6 text-base leading-7 text-muted-foreground">
+                                <p className="mb-6 text-lg leading-8 text-muted-foreground">
                                     {post.excerpt}
                                 </p>
 
                                 {post.content ? (
                                     <div
-                                        className="space-y-4 text-base leading-7 text-card-foreground [&_blockquote]:border-l-4 [&_blockquote]:border-primary/30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_b]:font-semibold [&_h2]:mt-6 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:mt-5 [&_h3]:text-xl [&_h3]:font-semibold [&_li]:mb-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-4 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-6"
+                                        className="space-y-5 text-[1.05rem] leading-8 text-card-foreground md:text-lg [&_blockquote]:border-l-4 [&_blockquote]:border-primary/30 [&_blockquote]:pl-5 [&_blockquote]:italic [&_b]:font-semibold [&_h2]:mt-8 [&_h2]:text-3xl [&_h2]:font-semibold [&_h3]:mt-6 [&_h3]:text-2xl [&_h3]:font-semibold [&_li]:mb-3 [&_ol]:list-decimal [&_ol]:pl-7 [&_p]:mb-5 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-7"
                                         dangerouslySetInnerHTML={{
                                             __html: post.content,
                                         }}
