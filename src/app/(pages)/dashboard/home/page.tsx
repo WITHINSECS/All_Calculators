@@ -5,12 +5,14 @@ import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import {
     BadgeDollarSign,
+    ChartColumnBig,
     Calculator,
     FilePenLine,
     FileText,
     Newspaper,
     SlidersHorizontal,
     TrendingUp,
+    Type,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +31,53 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+
+const fontOptions = [
+    "Poppins",
+    "DM Sans",
+    "Outfit",
+    "Plus Jakarta Sans",
+    "Manrope",
+    "Merriweather",
+    "Lora",
+    "Space Grotesk",
+    "Urbanist",
+    "Nunito Sans",
+];
+
+const analyticsPreviewData = [
+    { label: "Mon", visitors: 920 },
+    { label: "Tue", visitors: 1040 },
+    { label: "Wed", visitors: 980 },
+    { label: "Thu", visitors: 1210 },
+    { label: "Fri", visitors: 1180 },
+    { label: "Sat", visitors: 860 },
+    { label: "Sun", visitors: 930 },
+];
+
+const analyticsChartConfig = {
+    visitors: {
+        label: "Visitors",
+        color: "var(--chart-1)",
+    },
+} satisfies ChartConfig;
+
+const trafficSources = [
+    { name: "Organic Search", share: 46 },
+    { name: "Direct", share: 27 },
+    { name: "Social", share: 15 },
+    { name: "Referral", share: 12 },
+];
 
 type DashboardStats = {
     totalInquiries: number;
@@ -131,6 +179,7 @@ export default function Dashboard() {
     const [activity, setActivity] = useState<ActivityPoint[]>([]);
     const [activityLoading, setActivityLoading] = useState(true);
     const [activityError, setActivityError] = useState<string | null>(null);
+    const [selectedFont, setSelectedFont] = useState(fontOptions[0]);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -318,7 +367,170 @@ export default function Dashboard() {
                 </CardContent>
             </Card>
 
-            <InquiriesChart data={activity} loading={activityLoading} />
+            <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+                <div className="space-y-4">
+                    <Card className="shadow-sm">
+                        <CardHeader>
+                            <div className="flex items-center justify-between gap-3">
+                                <div>
+                                    <CardTitle>Website Font</CardTitle>
+                                    <CardDescription>
+                                        Manage the visual tone of your website typography from one
+                                        place.
+                                    </CardDescription>
+                                </div>
+                                <Badge variant="outline">Typography</Badge>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="dashboard-font-select">Choose Font Family</Label>
+                                <Select value={selectedFont} onValueChange={setSelectedFont}>
+                                    <SelectTrigger id="dashboard-font-select" className="w-full">
+                                        <SelectValue placeholder="Select a font" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {fontOptions.map((font) => (
+                                            <SelectItem key={font} value={font}>
+                                                {font}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="rounded-xl border bg-muted/20 p-4">
+                                <div className="mb-3 flex items-center gap-2 text-sm font-medium">
+                                    <Type className="h-4 w-4 text-muted-foreground" />
+                                    Font Preview
+                                </div>
+                                <p className="text-lg font-semibold">{selectedFont}</p>
+                                <h3 className="mt-3 text-2xl font-semibold tracking-tight">
+                                    Build faster with better calculator pages
+                                </h3>
+                                <p className="mt-2 text-sm text-muted-foreground leading-6">
+                                    The selected font will shape headings, interface labels, and
+                                    long form calculator content across the website.
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <InquiriesChart data={activity} loading={activityLoading} />
+                </div>
+
+                <Card className="shadow-sm">
+                    <CardHeader>
+                        <div className="flex items-center justify-between gap-3">
+                            <div>
+                                <CardTitle>Google Analytics</CardTitle>
+                                <CardDescription>
+                                    Track traffic, engagement, and acquisition performance from one
+                                    overview.
+                                </CardDescription>
+                            </div>
+                            <Badge variant="outline">Last 30 Days</Badge>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label htmlFor="ga-measurement-id">Measurement ID</Label>
+                                <Input
+                                    id="ga-measurement-id"
+                                    value="G-3W8K7P4L2N"
+                                    readOnly
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="ga-property-name">Property Name</Label>
+                                <Input
+                                    id="ga-property-name"
+                                    value="Within Secs Main Site"
+                                    readOnly
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-3">
+                            <div className="rounded-xl border bg-muted/20 p-4">
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Traffic
+                                </p>
+                                <p className="mt-3 text-2xl font-semibold">18.4K</p>
+                                <p className="mt-1 text-xs text-emerald-600">+12.8% vs last month</p>
+                            </div>
+
+                            <div className="rounded-xl border bg-muted/20 p-4">
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Engagement
+                                </p>
+                                <p className="mt-3 text-2xl font-semibold">63.4%</p>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Avg. engaged session rate
+                                </p>
+                            </div>
+
+                            <div className="rounded-xl border bg-muted/20 p-4">
+                                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                    Avg. Session
+                                </p>
+                                <p className="mt-3 text-2xl font-semibold">2m 41s</p>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Average engagement duration
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="rounded-xl border bg-muted/20 p-4">
+                            <div className="mb-4 flex items-center gap-2 text-sm font-medium">
+                                <ChartColumnBig className="h-4 w-4 text-muted-foreground" />
+                                Weekly Traffic Trend
+                            </div>
+                            <ChartContainer className="h-[220px] w-full" config={analyticsChartConfig}>
+                                <BarChart accessibilityLayer data={analyticsPreviewData}>
+                                    <CartesianGrid vertical={false} />
+                                    <XAxis
+                                        dataKey="label"
+                                        tickLine={false}
+                                        tickMargin={10}
+                                        axisLine={false}
+                                    />
+                                    <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                                    <Bar dataKey="visitors" fill="var(--color-visitors)" radius={8} />
+                                </BarChart>
+                            </ChartContainer>
+                        </div>
+
+                        <div className="rounded-xl border bg-muted/20 p-4">
+                            <div className="mb-4 flex items-center justify-between gap-3">
+                                <div>
+                                    <p className="text-sm font-medium">Traffic Sources</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Top acquisition channels
+                                    </p>
+                                </div>
+                                <Badge variant="secondary">Acquisition</Badge>
+                            </div>
+
+                            <div className="space-y-4">
+                                {trafficSources.map((source) => (
+                                    <div key={source.name} className="space-y-2">
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span>{source.name}</span>
+                                            <span className="text-muted-foreground">
+                                                {source.share}%
+                                            </span>
+                                        </div>
+                                        <Progress value={source.share} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }
