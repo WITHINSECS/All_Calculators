@@ -1,4 +1,4 @@
-const fallbackSiteUrl = "https://withinsecs.com";
+const fallbackSiteUrl = "https://www.withinsecs.com";
 
 function normalizeSiteUrl(value: string) {
     if (!value) {
