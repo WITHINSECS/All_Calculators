@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Wrapper from "@/app/Wrapper";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -58,7 +56,7 @@ export default function SplitBillCalculator() {
   };
 
   return (
-    <Wrapper>
+    <>
       <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8 max-w-4xl">
         <div className="mb-6">
           <h1 className="text-2xl font-semibold lg:text-4xl text-center">
@@ -198,6 +196,6 @@ export default function SplitBillCalculator() {
           </div>
         </div>
       </div>
-    </Wrapper>
+    </>
   );
 }

@@ -17,9 +17,7 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-} from "recharts";
-import Wrapper from "@/app/Wrapper";
-
+} from "recharts";
 export default function HRAExemptionCalculator() {
   const [basicSalary, setBasicSalary] = useState<string>("");
   const [dearnessAllowance, setDearnessAllowance] = useState<string>("");
@@ -117,7 +115,7 @@ export default function HRAExemptionCalculator() {
     };
 
   return (
-    <Wrapper>
+    <>
       <div className="container max-w-7xl mx-auto p-5 lg:px-12 md:my-14 my-8">
         <div className="mx-auto max-w-3xl text-center mb-8">
           <h1 className="text-2xl font-semibold lg:text-4xl">
@@ -253,6 +251,6 @@ export default function HRAExemptionCalculator() {
           </div>
         </div>
       </div>
-    </Wrapper>
+    </>
   );
 }

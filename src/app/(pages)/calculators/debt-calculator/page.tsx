@@ -5,9 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import Wrapper from "@/app/Wrapper";
-
+import { Button } from "@/components/ui/button";
 const COLORS = ["#0D74FF", "#FF5733", "#FFC300", "#28A745"];
 
 const DebtCalculator = () => {
@@ -32,7 +30,7 @@ const DebtCalculator = () => {
   const monthlySteal = minPayment ? parseFloat(minPayment) : 0;
 
   return (
-    <Wrapper>
+    <>
       <div className="mx-auto md:mt-16 p-5 mt-8 max-w-3xl text-center">
         <h1 className="text-2xl font-semibold lg:text-4xl">
           Debt Calculator
@@ -152,7 +150,7 @@ const DebtCalculator = () => {
           </div>
         )}
       </div>
-    </Wrapper>
+    </>
   );
 };
 

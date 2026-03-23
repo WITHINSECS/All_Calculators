@@ -1,6 +1,4 @@
-"use client";
-import Wrapper from '@/app/Wrapper';
-import React, { useState, useEffect } from "react";
+"use client";import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, Tooltip, Label as RechartsLabel } from "recharts";
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -96,7 +94,7 @@ const DebtCalculator = () => {
     };
 
     return (
-        <Wrapper>
+        <>
             <div className="mx-auto md:mt-16 p-5 mt-8 max-w-3xl text-center">
                 <h1 className="text-2xl font-semibold lg:text-4xl">
                     Debt Repayment Calculator
@@ -211,7 +209,7 @@ const DebtCalculator = () => {
                     </div>
                 </div>
             </div>
-        </Wrapper>
+        </>
     );
 };
 

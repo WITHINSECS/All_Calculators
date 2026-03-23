@@ -10,9 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import Wrapper from "@/app/Wrapper";
-import {
+import { Label } from "@/components/ui/label";import {
   PieChart,
   Pie,
   Cell,
@@ -125,7 +123,7 @@ export default function LBMCalculator() {
   };
 
   return (
-    <Wrapper>
+    <>
       <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8">
         <div className="mx-auto max-w-3xl text-center mb-8">
           <h1 className="text-2xl font-semibold lg:text-4xl">
@@ -269,6 +267,6 @@ export default function LBMCalculator() {
           )}
         </div>
       </div>
-    </Wrapper>
+    </>
   );
 }

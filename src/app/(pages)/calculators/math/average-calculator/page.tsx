@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import Wrapper from "@/app/Wrapper";
-
+import { Label } from "@/components/ui/label";
 export default function AverageCalculator() {
   const [numbers, setNumbers] = useState<string>("");
   const [average, setAverage] = useState<number | null>(null);
@@ -75,7 +73,7 @@ export default function AverageCalculator() {
       : null;
 
   return (
-    <Wrapper>
+    <>
       <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8 max-w-2xl">
         <div className="mx-auto text-center mb-8">
           <h1 className="text-2xl font-semibold lg:text-4xl">Average Calculator</h1>
@@ -122,6 +120,6 @@ export default function AverageCalculator() {
           )}
         </div>
       </div>
-    </Wrapper>
+    </>
   );
 }

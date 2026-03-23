@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 
-import Wrapper from "@/app/Wrapper";
 import CalculatorCard from "@/components/Calculators/CalculatorCard";
+import ServerManagedCalculatorContent from "@/components/Calculators/ServerManagedCalculatorContent";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getVisibleCalculatorGroupsSafe } from "@/lib/calculator-visibility";
 import { calculatorCategoryLabels, calculatorCategoryOrder } from "@/lib/calculator-catalog";
+import { getCachedCalculatorPageContentSafe } from "@/lib/calculator-page-content-cache";
 import { getCalculatorPageMetadata } from "@/lib/calculator-metadata";
+import { getVisibleCalculatorGroupsSafe } from "@/lib/calculator-visibility";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -16,24 +17,27 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CalculatorsPage() {
-    const calculatorGroups = await getVisibleCalculatorGroupsSafe();
+    const [calculatorGroups, managedPage] = await Promise.all([
+        getVisibleCalculatorGroupsSafe(),
+        getCachedCalculatorPageContentSafe("calculators"),
+    ]);
     const sections = calculatorCategoryOrder.map((category) => ({
         category,
         label: calculatorCategoryLabels[category],
         items: calculatorGroups[category],
     }));
     const defaultTab = sections.find((section) => section.items.length > 0)?.category ?? "finance";
+    const heading = managedPage.pageHeading || "All Calculators";
+    const intro =
+        managedPage.pageIntro ||
+        "Explore our comprehensive range of calculators designed to assist you with various financial, health, lifestyle, and mathematical needs.";
 
     return (
-        <Wrapper>
+        <>
             <div className="container mx-auto px-4 md:px-6 2xl:max-w-[1400px]">
-                <div className="mx-auto md:mt-16 mt-8 max-w-3xl text-center">
-                    <h1 className="text-3xl font-semibold lg:text-4xl">
-                        All Calculators
-                    </h1>
-                    <p className="text-muted-foreground mt-4 text-xl">
-                        Explore our comprehensive range of calculators designed to assist you with various financial, health, lifestyle, and mathematical needs.
-                    </p>
+                <div className="mx-auto mt-8 max-w-3xl text-center md:mt-16">
+                    <h1 className="text-3xl font-semibold lg:text-4xl">{heading}</h1>
+                    <p className="text-muted-foreground mt-4 text-xl">{intro}</p>
                 </div>
             </div>
 
@@ -71,6 +75,8 @@ export default async function CalculatorsPage() {
                     ))}
                 </Tabs>
             </div>
-        </Wrapper>
+
+            <ServerManagedCalculatorContent item={managedPage} />
+        </>
     );
 }

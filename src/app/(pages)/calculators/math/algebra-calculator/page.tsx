@@ -3,9 +3,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import Wrapper from "@/app/Wrapper";
-import * as math from "mathjs";
+import { Label } from "@/components/ui/label";import * as math from "mathjs";
 
 const AlgebraCalculator = () => {
     const [expression, setExpression] = useState("");
@@ -51,7 +49,7 @@ const AlgebraCalculator = () => {
     };
 
     return (
-        <Wrapper>
+        <>
             <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8">
                 <div className="mx-auto max-w-3xl text-center mb-8">
                     <h1 className="text-2xl font-semibold lg:text-4xl">Algebra Calculator</h1>
@@ -100,7 +98,7 @@ const AlgebraCalculator = () => {
                     </ul>
                 </div>
             </div>
-        </Wrapper>
+        </>
     );
 };
 

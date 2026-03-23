@@ -74,7 +74,7 @@ export async function PATCH(request: NextRequest) {
             faqItems: body?.faqItems,
         });
 
-        revalidateTag("calculator-page-metadata", "max");
+        revalidateTag("calculator-page-content", "max");
         revalidatePath(item.path);
 
         if (item.path !== "/calculators") {
@@ -93,6 +93,7 @@ export async function PATCH(request: NextRequest) {
         return getErrorResponse(error, "Failed to update calculator page content.");
     }
 }
+
 
 
 

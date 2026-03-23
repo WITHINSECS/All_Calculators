@@ -5,9 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
-import Wrapper from '@/app/Wrapper';
-
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 interface FitnessInput {
   age: number | null;
   gender: string;
@@ -67,7 +65,7 @@ export default function FitnessCalculator() {
   };
 
   return (
-    <Wrapper>
+    <>
       <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8">
         <div className="mx-auto max-w-3xl text-center mb-8">
           <h1 className="text-2xl font-semibold lg:text-4xl">Fitness Age Calculator</h1>
@@ -145,6 +143,6 @@ export default function FitnessCalculator() {
           )}
         </div>
       </div>
-    </Wrapper>
+    </>
   );
 }

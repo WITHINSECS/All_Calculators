@@ -4,9 +4,6 @@ import React from "react";
 import { usePathname } from "next/navigation";
 import { ToastContainer } from "react-toastify";
 
-import ManagedCalculatorContent from "@/components/Calculators/ManagedCalculatorContent";
-import ManagedCalculatorHeroOverrides from "@/components/Calculators/ManagedCalculatorHeroOverrides";
-import ManagedCalculatorSeoOverrides from "@/components/Calculators/ManagedCalculatorSeoOverrides";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import AdsenseAd from "@/components/AdsenseAd";
@@ -31,8 +28,6 @@ const Wrapper: React.FC<WrapperProps> = ({ children, className }) => {
         : isBlogPostRoute
           ? "blogPostBottom"
           : null;
-    const calculatorSlug =
-        pathname === "/calculators" ? "calculators" : pathname.replace(/^\/calculators\//, "");
 
     return (
         <div>
@@ -45,18 +40,7 @@ const Wrapper: React.FC<WrapperProps> = ({ children, className }) => {
                     </div>
                 ) : null}
 
-                {isCalculatorRoute ? (
-                    <>
-                        <ManagedCalculatorSeoOverrides slug={calculatorSlug} />
-                        <ManagedCalculatorHeroOverrides slug={calculatorSlug} />
-                    </>
-                ) : null}
-
                 <div data-page-content-root>{children}</div>
-
-                {isCalculatorRoute ? (
-                    <ManagedCalculatorContent slug={calculatorSlug} />
-                ) : null}
 
                 {bottomPlacement ? (
                     <div className="container mx-auto px-4 pb-10 pt-2 md:px-6 2xl:max-w-[1400px]">

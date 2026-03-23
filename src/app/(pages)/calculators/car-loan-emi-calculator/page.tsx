@@ -1,6 +1,4 @@
-"use client";
-import Wrapper from "@/app/Wrapper";
-import { useState } from "react";
+"use client";import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -127,7 +125,7 @@ export default function Page() {
     : [];
 
   return (
-    <Wrapper>
+    <>
       <div className="mx-auto md:mt-16 p-5 mt-8 max-w-3xl text-center">
         <h1 className="text-2xl font-semibold lg:text-4xl">Car Loan EMI Calculator</h1>
         <p className="text-muted-foreground mt-4 text-xl">
@@ -298,6 +296,6 @@ export default function Page() {
           </CardContent>
         </Card>
       </div>
-    </Wrapper>
+    </>
   );
 }

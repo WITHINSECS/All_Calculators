@@ -2,9 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import Wrapper from "@/app/Wrapper";
-import {
+import { Label } from "@/components/ui/label";import {
     ResponsiveContainer,
     BarChart,
     Bar,
@@ -140,7 +138,7 @@ export default function MedianCalculator() {
     };
 
     return (
-        <Wrapper>
+        <>
             <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8 max-w-3xl">
                 <div className="mx-auto text-center mb-8">
                     <h1 className="text-2xl font-semibold lg:text-4xl">Median Calculator</h1>
@@ -224,6 +222,6 @@ export default function MedianCalculator() {
                     )}
                 </div>
             </div>
-        </Wrapper>
+        </>
     );
 }

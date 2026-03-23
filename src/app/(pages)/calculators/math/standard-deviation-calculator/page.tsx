@@ -1,8 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Wrapper from "@/app/Wrapper";
-import { Button } from "@/components/ui/button";
+import { useMemo, useState } from "react";import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -109,7 +107,7 @@ export default function StandardDeviationCalculator() {
   }, [show, values.length, kind, confidence, stats]);
 
   return (
-    <Wrapper>
+    <>
       <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8 max-w-3xl">
         <div className="mx-auto text-center mb-8">
           <h1 className="text-2xl font-semibold lg:text-4xl">
@@ -238,6 +236,6 @@ export default function StandardDeviationCalculator() {
           )}
         </div>
       </div>
-    </Wrapper>
+    </>
   );
 }

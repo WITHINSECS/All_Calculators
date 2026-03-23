@@ -1,6 +1,4 @@
-"use client";
-import Wrapper from "@/app/Wrapper";
-import { JSX, useMemo, useState } from "react";
+"use client";import { JSX, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -154,7 +152,7 @@ export default function OpportunityCostCalculator(): JSX.Element {
   );
 
   return (
-    <Wrapper>
+    <>
       <div className="mx-auto md:mt-16 p-5 mt-8 max-w-4xl">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-semibold lg:text-4xl">
@@ -395,7 +393,7 @@ export default function OpportunityCostCalculator(): JSX.Element {
           </Card>
         </div>
       </div>
-    </Wrapper>
+    </>
   );
 }
 

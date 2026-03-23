@@ -5,9 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import Wrapper from "@/app/Wrapper";
-
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 export default function GratuityCalculator() {
     const [salary, setSalary] = useState<number>(0);
     const [years, setYears] = useState<number>(5);
@@ -50,7 +48,7 @@ export default function GratuityCalculator() {
     ];
 
     return (
-        <Wrapper>
+        <>
             <div className="container max-w-7xl mx-auto p-5 lg:px-12 md:my-14 my-8">
                 <div className="mx-auto max-w-3xl text-center mb-8">
                     <h1 className="text-2xl font-semibold lg:text-4xl">
@@ -166,6 +164,6 @@ export default function GratuityCalculator() {
                     )}
                 </div>
             </div>
-        </Wrapper>
+        </>
     );
 }

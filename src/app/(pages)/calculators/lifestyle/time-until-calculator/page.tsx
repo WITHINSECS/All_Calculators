@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Wrapper from "@/app/Wrapper";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MdAccessTime } from "react-icons/md"; // Add a clock icon for visual flair
@@ -64,7 +62,7 @@ export default function TimeUntilCalculator() {
   };
 
   return (
-    <Wrapper>
+    <>
       <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8 max-w-4xl">
         <div className="mb-6">
           <h1 className="text-2xl font-semibold lg:text-4xl text-center">Time Until Calculator</h1>
@@ -149,6 +147,6 @@ export default function TimeUntilCalculator() {
           </Button>
         </div>
       </div>
-    </Wrapper>
+    </>
   );
 }

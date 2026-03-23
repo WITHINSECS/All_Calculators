@@ -6,9 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { PieChart, Pie, Cell } from "recharts";
-import Wrapper from "@/app/Wrapper";
-import { toast } from "react-toastify";
+import { PieChart, Pie, Cell } from "recharts";import { toast } from "react-toastify";
 
 // Define the colors for the lines and pie chart
 const COLORS = ["#0D74FF", "#FF5733"]; // Blue for employee contribution, Green for employer contribution
@@ -89,7 +87,7 @@ const RetirementCalculator = () => {
   };
 
   return (
-    <Wrapper>
+    <>
       <div className="mx-auto md:mt-16 p-5 mt-8 max-w-3xl text-center">
         <h1 className="text-2xl font-semibold lg:text-4xl">401(k) Retirement Calculator</h1>
         <p className="text-muted-foreground mt-4 text-xl">
@@ -299,7 +297,7 @@ const RetirementCalculator = () => {
           </div>
         </div>
       </div>
-    </Wrapper>
+    </>
   );
 };
 

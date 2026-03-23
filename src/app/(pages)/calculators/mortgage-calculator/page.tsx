@@ -13,9 +13,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import Wrapper from "@/app/Wrapper";
-
+} from "@/components/ui/table";
 const COLORS = ["#0D74FF", "#FF5733", "#2D94A0", "#FFB900"];
 
 const Page = () => {
@@ -125,7 +123,7 @@ const Page = () => {
   };
 
   return (
-    <Wrapper>
+    <>
       <div className="mx-auto md:mt-16 p-5 mt-8 max-w-3xl text-center">
         <h1 className="text-2xl font-semibold lg:text-4xl">
           Mortgage Calculator
@@ -342,7 +340,7 @@ const Page = () => {
           </div>
         </div>
       </div>
-    </Wrapper>
+    </>
   );
 };
 

@@ -1,6 +1,4 @@
-"use client";
-import Wrapper from "@/app/Wrapper";
-import { JSX, useMemo, useState } from "react";
+"use client";import { JSX, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -134,7 +132,7 @@ export default function CommissionCalculator(): JSX.Element {
     }, [results]);
 
     return (
-        <Wrapper>
+        <>
             <div className="mx-auto md:mt-16 p-5 mt-8 max-w-4xl">
                 <div className="text-center mb-6">
                     <h1 className="text-2xl font-semibold lg:text-4xl">Commission Calculator</h1>
@@ -258,7 +256,7 @@ export default function CommissionCalculator(): JSX.Element {
                     </CardContent>
                 </Card>
             </div>
-        </Wrapper>
+        </>
     );
 }
 

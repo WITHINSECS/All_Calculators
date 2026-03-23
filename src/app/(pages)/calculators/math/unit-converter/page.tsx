@@ -3,9 +3,7 @@ import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import Wrapper from "@/app/Wrapper";
-
+import { Button } from "@/components/ui/button";
 const units: Record<string, number> = {
     Meter: 1,
     Kilometer: 0.001,
@@ -35,7 +33,7 @@ const UnitConverter = () => {
     };
 
     return (
-        <Wrapper>
+        <>
             <div className="mx-auto md:mt-16 p-5 mt-8 max-w-3xl text-center">
                 <h1 className="text-2xl font-semibold lg:text-4xl">Unit Converter</h1>
                 <p className="text-muted-foreground mt-4 text-xl">
@@ -95,7 +93,7 @@ const UnitConverter = () => {
                     </div>
                 )}
             </div>
-        </Wrapper>
+        </>
     );
 };
 

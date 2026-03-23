@@ -1,6 +1,4 @@
-"use client"
-import Wrapper from '@/app/Wrapper'
-import { useState, useMemo } from "react"
+"use client"import { useState, useMemo } from "react"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
@@ -141,7 +139,7 @@ const Page = () => {
     }
 
     return (
-        <Wrapper>
+        <>
             <div className="mx-auto md:mt-16 p-5 mt-8 max-w-3xl text-center">
                 <h1 className="text-2xl font-semibold lg:text-4xl">
                     Monthly Home Loan EMI Calculator
@@ -321,7 +319,7 @@ const Page = () => {
                     </div>
                 </div>
             </div>
-        </Wrapper>
+        </>
     )
 }
 

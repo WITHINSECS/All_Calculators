@@ -15,9 +15,7 @@ import {
     Cell,
     ResponsiveContainer,
     Tooltip,
-} from "recharts";
-import Wrapper from "@/app/Wrapper";
-
+} from "recharts";
 interface MortgageInput {
     annualIncome: number;
     monthlyDebts: number;
@@ -154,7 +152,7 @@ export default function Page() {
     };
 
     return (
-        <Wrapper>
+        <>
             <div className="container  mx-auto p-5 lg:px-12 md:my-14 my-8">
                 <div className="mx-auto max-w-3xl text-center mb-8">
                     <h1 className="text-2xl font-semibold lg:text-4xl">
@@ -384,6 +382,6 @@ export default function Page() {
                     </Card>
                 )}
             </div>
-        </Wrapper>
+        </>
     );
 }

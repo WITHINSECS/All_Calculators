@@ -33,9 +33,7 @@ import {
   TableHead,
   TableBody,
   TableCell,
-} from "@/components/ui/table";
-import Wrapper from "@/app/Wrapper";
-
+} from "@/components/ui/table";
 // Frequencies
 const frequencies = {
   monthly: 12,
@@ -230,7 +228,7 @@ export default function InvestmentCalculator() {
   };
 
   return (
-    <Wrapper>
+    <>
       <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8">
         <div className="mx-auto max-w-3xl text-center mb-8">
           <h1 className="text-2xl font-semibold lg:text-4xl">
@@ -465,6 +463,6 @@ export default function InvestmentCalculator() {
           </CardContent>
         </Card>
       </div>
-    </Wrapper>
+    </>
   );
 }

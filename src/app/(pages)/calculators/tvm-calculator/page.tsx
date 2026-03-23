@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; 
 import { PieChart, Pie, Cell, Tooltip as PieTooltip, ResponsiveContainer } from "recharts";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import Wrapper from "@/app/Wrapper";
-
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 // Pie chart colors
 const PIE_COLORS = ["#0D74FF", "#FF5733"];
 
@@ -92,7 +90,7 @@ export default function TVMCalculator() {
   };
 
   return (
-    <Wrapper>
+    <>
       <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8">
         <div className="mx-auto max-w-3xl text-center mb-8">
           <h1 className="text-2xl font-semibold lg:text-4xl">TVM Calculator</h1>
@@ -274,7 +272,7 @@ export default function TVMCalculator() {
           )}
         </div>
       </div>
-    </Wrapper>
+    </>
   );
 }
   

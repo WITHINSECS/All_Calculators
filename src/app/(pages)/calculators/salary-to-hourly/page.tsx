@@ -5,9 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import Wrapper from '@/app/Wrapper';
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 
 interface PieData {
@@ -59,7 +57,7 @@ const SalaryToHourlyCalculator = () => {
   };
 
   return (
-    <Wrapper>
+    <>
       <div className="container max-w-7xl mx-auto p-5 lg:px-12 md:my-14 my-8">
         <div className="mx-auto max-w-3xl text-center mb-8">
           <h1 className="text-2xl font-semibold lg:text-4xl">
@@ -175,7 +173,7 @@ const SalaryToHourlyCalculator = () => {
           </div>
         </div>
       </div>
-    </Wrapper>
+    </>
   );
 };
 

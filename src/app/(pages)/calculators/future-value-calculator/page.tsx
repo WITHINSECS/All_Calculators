@@ -1,6 +1,4 @@
-"use client";
-import Wrapper from "@/app/Wrapper";
-import { useMemo, useState } from "react";
+"use client";import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -128,7 +126,7 @@ export default function FutureValueCalculator() {
     }, [result, pvInput, pmtInput, periodsInput]);
 
     return (
-        <Wrapper>
+        <>
             <div className="mx-auto md:mt-16 p-5 mt-8 max-w-4xl text-center">
                 <h1 className="text-2xl font-semibold lg:text-4xl">Future Value Calculator</h1>
                 <p className="text-muted-foreground mt-4 text-lg">Compute the future value of a starting amount with periodic deposits. Clean shadcn UI + beautiful chart.</p>
@@ -292,6 +290,6 @@ export default function FutureValueCalculator() {
                     </CardContent>
                 </Card>
             </div>
-        </Wrapper>
+        </>
     );
 }

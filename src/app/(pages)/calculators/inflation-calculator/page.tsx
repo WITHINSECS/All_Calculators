@@ -9,9 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import Wrapper from '@/app/Wrapper';
-import { toast } from "react-toastify";
+import { Label } from "@/components/ui/label";import { toast } from "react-toastify";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -57,7 +55,7 @@ export default function InflationCalculator() {
     ];
 
     return (
-        <Wrapper>
+        <>
             <div className="container mx-auto p-5 lg:px-12 md:my-14 my-8">
                 <div className="mx-auto max-w-3xl text-center mb-8">
                     <h1 className="text-2xl font-semibold lg:text-4xl">Inflation Calculator</h1>
@@ -172,6 +170,6 @@ export default function InflationCalculator() {
                     </div>
                 )}
             </div>
-        </Wrapper>
+        </>
     );
 }

@@ -1,6 +1,4 @@
-"use client";
-import Wrapper from "@/app/Wrapper";
-import { useMemo, useState } from "react";
+"use client";import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -170,7 +168,7 @@ export default function DepreciationCalculator() {
     }, [schedule]);
 
     return (
-        <Wrapper>
+        <>
             <div className="mx-auto md:mt-16 p-5 mt-8 max-w-4xl text-center">
                 <h1 className="text-2xl font-semibold lg:text-4xl">Depreciation Calculator</h1>
                 <p className="text-muted-foreground mt-4 text-lg">Beautiful shadcn UI with charts and a detailed schedule.</p>
@@ -369,7 +367,7 @@ export default function DepreciationCalculator() {
                     </CardContent>
                 </Card>
             </div>
-        </Wrapper>
+        </>
     );
 }
 

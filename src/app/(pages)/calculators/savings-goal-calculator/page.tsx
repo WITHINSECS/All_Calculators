@@ -7,9 +7,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import Wrapper from "@/app/Wrapper";
-
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 // Frequency options for investment
 const frequencies = {
   monthly: 12,
@@ -107,7 +105,7 @@ export default function SavingsCalculator() {
   };
 
   return (
-    <Wrapper>
+    <>
       <div className="container max-w-7xl mx-auto p-5 lg:px-12 md:my-14 my-8">
         <div className="mx-auto max-w-3xl text-center mb-8">
           <h1 className="text-2xl font-semibold lg:text-4xl">Savings Goal Calculator</h1>
@@ -246,6 +244,6 @@ export default function SavingsCalculator() {
           )}
         </div>
       </div>
-    </Wrapper>
+    </>
   );
 }

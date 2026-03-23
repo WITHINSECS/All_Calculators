@@ -1,7 +1,9 @@
+import Wrapper from "@/app/Wrapper";
+
 export default function CalculatorsLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    return children;
+    return <Wrapper>{children}</Wrapper>;
 }
