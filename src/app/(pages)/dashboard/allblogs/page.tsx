@@ -12,7 +12,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     Table,
     TableBody,
@@ -40,18 +39,20 @@ export default async function AllBlogsPage() {
     }
 
     return (
-        <div className="flex w-full flex-col gap-6 p-6">
+        <div className="flex w-full flex-col gap-6 p-4 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-semibold tracking-tight">All Blogs</h1>
+                    <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
+                        All Blogs
+                    </h1>
                     <p className="text-sm text-muted-foreground">
                         Review published posts, update drafts, and remove old content.
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                     <Badge variant="outline">Total: {posts.length}</Badge>
-                    <Button asChild>
+                    <Button asChild className="w-full sm:w-auto">
                         <Link href="/dashboard/blog">
                             <Plus className="mr-2 h-4 w-4" />
                             Create Post
@@ -74,115 +75,202 @@ export default async function AllBlogsPage() {
 
                 <CardContent>
                     {errorMessage ? (
-                        <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+                        <div className="rounded-lg overflow-x-auto w-full border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
                             {errorMessage}
                         </div>
                     ) : null}
 
-                    <ScrollArea className="h-[520px] w-full">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Post</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Details</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
+                    <div className="space-y-4 md:hidden">
+                        {posts.map((post) => (
+                            <div
+                                key={post.id}
+                                className="rounded-xl border border-border/80 bg-card p-4 shadow-sm"
+                            >
+                                <div className="flex items-start gap-3">
+                                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md border bg-muted">
+                                        <Image
+                                            src={post.imageUrl}
+                                            alt={post.title}
+                                            fill
+                                            className="object-cover"
+                                            sizes="56px"
+                                        />
+                                    </div>
 
-                            <TableBody>
-                                {posts.map((post) => (
-                                    <TableRow key={post.id}>
-                                        <TableCell className="align-top">
-                                            <div className="flex items-start gap-3">
-                                                <div className="relative h-14 w-14 overflow-hidden rounded-md border bg-muted">
-                                                    <Image
-                                                        src={post.imageUrl}
-                                                        alt={post.title}
-                                                        fill
-                                                        className="object-cover"
-                                                        sizes="56px"
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-1">
-                                                    <p className="line-clamp-1 text-sm font-medium">
-                                                        {post.title}
-                                                    </p>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        /blog/{post.slug}
-                                                    </p>
-                                                    <p className="line-clamp-2 max-w-md text-xs text-muted-foreground">
-                                                        {post.excerpt}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </TableCell>
-
-                                        <TableCell className="align-top">
+                                    <div className="min-w-0 flex-1 space-y-1">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <p className="line-clamp-2 text-sm font-medium">
+                                                {post.title}
+                                            </p>
                                             {post.isPublished ? (
                                                 <Badge>Published</Badge>
                                             ) : (
                                                 <Badge variant="secondary">Draft</Badge>
                                             )}
-                                        </TableCell>
+                                        </div>
+                                        <p className="truncate text-xs text-muted-foreground">
+                                            /blog/{post.slug}
+                                        </p>
+                                        <p className="line-clamp-3 text-xs text-muted-foreground">
+                                            {post.excerpt}
+                                        </p>
+                                    </div>
+                                </div>
 
-                                        <TableCell className="align-top">
-                                            <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-                                                <span className="inline-flex items-center gap-1">
-                                                    <Tag className="h-3 w-3" />
-                                                    {post.category}
-                                                </span>
-                                                <span className="inline-flex items-center gap-1">
-                                                    <CalendarIcon className="h-3 w-3" />
-                                                    {post.date}
-                                                </span>
-                                                <span>
-                                                    Updated{" "}
-                                                    {post.updatedAt
-                                                        ? new Date(post.updatedAt).toLocaleDateString("en-US", {
-                                                            day: "2-digit",
-                                                            month: "short",
-                                                            year: "numeric",
-                                                        })
-                                                        : "-"}
-                                                </span>
-                                            </div>
-                                        </TableCell>
+                                <div className="mt-4 flex flex-col gap-2 text-xs text-muted-foreground">
+                                    <span className="inline-flex items-center gap-1">
+                                        <Tag className="h-3 w-3" />
+                                        {post.category}
+                                    </span>
+                                    <span className="inline-flex items-center gap-1">
+                                        <CalendarIcon className="h-3 w-3" />
+                                        {post.date}
+                                    </span>
+                                    <span>
+                                        Updated{" "}
+                                        {post.updatedAt
+                                            ? new Date(post.updatedAt).toLocaleDateString("en-US", {
+                                                day: "2-digit",
+                                                month: "short",
+                                                year: "numeric",
+                                            })
+                                            : "-"}
+                                    </span>
+                                </div>
 
-                                        <TableCell className="align-top text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <Button asChild size="sm" variant="outline">
-                                                    <Link href={`/blog/${post.slug}`}>
-                                                        <Eye className="mr-2 h-4 w-4" />
-                                                        Preview
-                                                    </Link>
-                                                </Button>
-                                                <Button asChild size="sm" variant="outline">
-                                                    <Link href={`/dashboard/blog/${post.id}/edit`}>
-                                                        <Pencil className="mr-2 h-4 w-4" />
-                                                        Edit
-                                                    </Link>
-                                                </Button>
-                                                <DeleteBlogButton blogId={post.id} />
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                                    <Button asChild size="sm" variant="outline" className="w-full">
+                                        <Link href={`/blog/${post.slug}`}>
+                                            <Eye className="mr-2 h-4 w-4" />
+                                            Preview
+                                        </Link>
+                                    </Button>
+                                    <Button asChild size="sm" variant="outline" className="w-full">
+                                        <Link href={`/dashboard/blog/${post.id}/edit`}>
+                                            <Pencil className="mr-2 h-4 w-4" />
+                                            Edit
+                                        </Link>
+                                    </Button>
+                                    <DeleteBlogButton blogId={post.id} />
+                                </div>
+                            </div>
+                        ))}
 
-                                {posts.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell
-                                            colSpan={4}
-                                            className="py-12 text-center text-sm text-muted-foreground"
-                                        >
-                                            No blog posts yet.
-                                        </TableCell>
-                                    </TableRow>
-                                ) : null}
-                            </TableBody>
-                        </Table>
-                    </ScrollArea>
+                        {posts.length === 0 ? (
+                            <div className="rounded-xl border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">
+                                No blog posts yet.
+                            </div>
+                        ) : null}
+                    </div>
+
+                    <div className="hidden w-full md:block">
+                        <div className="max-h-[520px] w-full overflow-y-auto">
+                            <Table className="table-fixed">
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="w-[46%]">Post</TableHead>
+                                            <TableHead className="w-[12%]">Status</TableHead>
+                                            <TableHead className="w-[18%]">Details</TableHead>
+                                            <TableHead className="w-[24%] text-right">
+                                                Actions
+                                            </TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+
+                                    <TableBody>
+                                        {posts.map((post) => (
+                                            <TableRow key={post.id}>
+                                                <TableCell className="align-top whitespace-normal">
+                                                    <div className="flex min-w-0 items-start gap-3">
+                                                        <div className="relative h-14 w-14 overflow-hidden rounded-md border bg-muted">
+                                                            <Image
+                                                                src={post.imageUrl}
+                                                                alt={post.title}
+                                                                fill
+                                                                className="object-cover"
+                                                                sizes="56px"
+                                                            />
+                                                        </div>
+
+                                                        <div className="min-w-0 space-y-1">
+                                                            <p className="line-clamp-1 text-sm font-medium">
+                                                                {post.title}
+                                                            </p>
+                                                            <p className="text-xs text-muted-foreground">
+                                                                /blog/{post.slug}
+                                                            </p>
+                                                            <p className="line-clamp-2 text-xs text-muted-foreground">
+                                                                {post.excerpt}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+
+                                                <TableCell className="align-top whitespace-normal">
+                                                    {post.isPublished ? (
+                                                        <Badge>Published</Badge>
+                                                    ) : (
+                                                        <Badge variant="secondary">Draft</Badge>
+                                                    )}
+                                                </TableCell>
+
+                                                <TableCell className="align-top whitespace-normal">
+                                                    <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                                                        <span className="inline-flex items-center gap-1">
+                                                            <Tag className="h-3 w-3" />
+                                                            {post.category}
+                                                        </span>
+                                                        <span className="inline-flex items-center gap-1">
+                                                            <CalendarIcon className="h-3 w-3" />
+                                                            {post.date}
+                                                        </span>
+                                                        <span>
+                                                            Updated{" "}
+                                                            {post.updatedAt
+                                                                ? new Date(post.updatedAt).toLocaleDateString("en-US", {
+                                                                    day: "2-digit",
+                                                                    month: "short",
+                                                                    year: "numeric",
+                                                                })
+                                                                : "-"}
+                                                        </span>
+                                                    </div>
+                                                </TableCell>
+
+                                                <TableCell className="align-top whitespace-normal text-right">
+                                                    <div className="flex flex-col justify-end gap-2">
+                                                        <Button asChild size="sm" variant="outline">
+                                                            <Link href={`/blog/${post.slug}`}>
+                                                                <Eye className="mr-2 h-4 w-4" />
+                                                                Preview
+                                                            </Link>
+                                                        </Button>
+                                                        <Button asChild size="sm" variant="outline">
+                                                            <Link href={`/dashboard/blog/${post.id}/edit`}>
+                                                                <Pencil className="mr-2 h-4 w-4" />
+                                                                Edit
+                                                            </Link>
+                                                        </Button>
+                                                        <DeleteBlogButton blogId={post.id} />
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+
+                                        {posts.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell
+                                                    colSpan={4}
+                                                    className="py-12 text-center text-sm text-muted-foreground"
+                                                >
+                                                    No blog posts yet.
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : null}
+                                    </TableBody>
+                                </Table>
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
         </div>
